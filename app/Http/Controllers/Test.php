@@ -1,21 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Http\Request;
+use App\Http\Services\ChannelService;
 class Test extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
+
     //
-    public function test(array $params){
-        print_r($params);
+    public function test(Request $request,ChannelService $channel){
+        $channel->test();
         echo 'test controller';
     }
 }

@@ -32,10 +32,10 @@ class SwooleServer extends Command{
         	#$fd = $request['fd'];
             #echo 123;
             #print_r($request);
-           # $_SERVER = $this->parseRequest($request);
-            print_r($request);
-            print_r($_SERVER);
-            return;
+            $_SERVER = $this->parseRequest($request);
+            if(!empty($request->post)){
+                $_POST = $request->post;
+            }
         	$request_method = $request->server['request_method'];
         	$params = [];
             $controller = 'Main';
@@ -50,7 +50,7 @@ class SwooleServer extends Command{
 //            }
             $controllerName = "\\App\\Http\\Controllers\\{$controller}";
             $this->app = $this->getApp();
-
+            $this->app->response = $response;
             #echo $controllerName;
             $this->app->run();
 //            $request = \Laravel\Lumen\Http\Request::capture();
@@ -97,13 +97,27 @@ class SwooleServer extends Command{
             $controller = 'Channel';
             $action = 'getCompaigns';
             #$params['params'] = $urls;
-            $params = [];
-            $params['channel_id'] = 'facebook';
-            $params['account_id'] = '2119471031652037';
-            echo "/{$controller}/{$action}";
-            $cli->post("/{$controller}/{$action}",$params);
+            $p = [];
+            $p['controller'] = 'Channel';
+            $p['action'] = 'getCampaigns';
+            $p['params'] = [
+                'channel_id' => 'Facebook',
+                'account_id' => 'act_1634320873332648',
+            ];
+            $params[] = $p;
+            $p = [];
+            $p['controller'] = 'Channel';
+            $p['action'] = 'getCampaigns';
+            $p['params'] = [
+                'channel_id' => 'Facebook',
+                'account_id' => 'act_1634320869999315',
+            ];
+            $params[] = $p;
+            #echo "/{$controller}/{$action}";
+            $cli->post("/multi",$params);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
+            print_r($result);
             echo PHP_EOL;
             echo 'exec time : ';
             echo (microtime(true) - $startTime);
@@ -127,6 +141,9 @@ class SwooleServer extends Command{
             \Illuminate\Contracts\Console\Kernel::class,
             \App\Console\Kernel::class
         );
+        $app->bind('App\Repositories\Interfaces\Channel',function(){
+            return new \App\Repositories\Interfaces\Channel();
+        });
         $app->router->group([
             'namespace' => '\App\Http\Controllers',
         ], function ($router) use ($base_dir) {

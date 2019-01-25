@@ -1,4 +1,5 @@
 <?php
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application
@@ -9,7 +10,6 @@
 | is ready to receive HTTP / Console requests from the environment.
 |
 */
-#$_SERVER['REQUEST_METHOD'] = 'POST';
 $app = require __DIR__.'/../bootstrap/app.php';
 
 /*

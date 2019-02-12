@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
-use App\Http\Services as Services;
-use App\Repositories\Interfaces as Interfaces;
+use App\Services as Services;
 class Channel extends Controller
 {
     private $response;
     private $channelService;
-    public function __construct(Interfaces\Channel $ServicesChannel)
+    public function __construct(Services\Channel $ServicesChannel)
     {
-        $this->channel = $ServicesChannel;
+        $this->channelService = $ServicesChannel;
     }
-    public function getCampaigns(Array $params){
+    public function getAdAccountList(){
+        $this->channelService->getAdAccountListByClient($this->getClient());
+        echo 'aaa';
+    }
+    public function getCampaigns(Request $request){
+        $params = $request->all();
         $channel_id = $params['channel_id'];
-        $result = $this->channel->find($channel_id)->getCampaigns($params);
-        return $this->result($result);
+        $user = $this->getLoginUser();
+        $client_id = 1;
+        #$result = $this->channelService->adAccount()->getListByClient($client);
+        #return $this->result($result);
     }
 }

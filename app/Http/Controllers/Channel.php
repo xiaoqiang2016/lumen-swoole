@@ -1,19 +1,26 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Services\Interfaces as ServicesInterfaces;
+use Illuminate\Http\Request;
+use App\Services as Services;
 class Channel extends Controller
 {
     private $response;
     private $channelService;
-    public function __construct(ServicesInterfaces\Channel $ServicesChannel)
+    public function __construct(Services\Channel $ServicesChannel)
     {
-        $this->channel = $ServicesChannel;
+        $this->channelService = $ServicesChannel;
     }
-    public function getCampaignList(Array $params){
-        $param = ['channel_id'=>$params['channel_id'],'account_id'=>$params['account_id']];
-        #$param['refresh'] = 1;
-        $result = $this->channel->getCampaignList($param);
-        return $this->result($result);
+    public function getAdAccountList(){
+        $this->channelService->getAdAccountListByClient($this->getClient());
+        echo 'aaa';
+    }
+    public function getCampaigns(Request $request){
+        $params = $request->all();
+        $channel_id = $params['channel_id'];
+        $user = $this->getLoginUser();
+        $client_id = 1;
+        #$result = $this->channelService->adAccount()->getListByClient($client);
+        #return $this->result($result);
     }
 }

@@ -1,14 +1,22 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Controller as BaseController;
+use App\Http\Services\UserService;
+use App\Models\Client;
 
 class Controller extends BaseController
 {
     private $response;
-    public function setResponse($response){
-        $this->response = $response;
+    private $userService;
+    public $request;
+    public function setRequest(Request $request){
+        $access_token = $request->cookie(env('USER_LOGIN_KEY'));
+        if($access_token){
+            
+        }
+        $this->request = $request;
     }
     public function result($result=[]){
         if(is_array($result)){
@@ -18,5 +26,10 @@ class Controller extends BaseController
             return $this->response->end($result);
         }
         return $result;
+    }
+    public function getClient(){
+        $client = new Client();
+        $client->id = 1;
+        return $client;
     }
 }

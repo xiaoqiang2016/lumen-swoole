@@ -17,9 +17,7 @@ $router->get('/', function () use ($router) {
 $router->get('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controller='default',$action='_404') use ($router) {
     $request =  Request::capture();
     $controller = ucwords(strtolower($controller));
-    $params = $request->all();
-    dd($_SERVER);
-    exit;
+    $params = $request->all(); 
     unset($params['s']);//会附带额外的s参数，unset掉
     //数据验证
     $valideClassName = "App\\Http\\Requests\\{$controller}\\{$action}";
@@ -34,6 +32,7 @@ $router->get('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controller
     //执行逻辑
     $controllerName = 'App\\Http\\Controllers\\'.$controller;
     $controller  = $router->app->make($controllerName);
+    $controller->setRequest($request);
     $result = $controller->$action($request);
     print_r($result);
 });
@@ -47,8 +46,9 @@ $router->post('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controlle
 
     $controller  = $router->app->make($controllerName);
     if($router->app->response){
-        $controller->setResponse($router->app->response);
+        #$controller->setResponse($router->app->response);
     }
+    $controller->setRequest($request);
     $result = $controller->$action($request);
 
 });

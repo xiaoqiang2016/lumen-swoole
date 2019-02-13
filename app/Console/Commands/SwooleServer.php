@@ -17,8 +17,11 @@ class SwooleServer extends Command{
     }
     public function handle()
     {
-        echo "SwooleServer!\n";
-
+        echo "************************\n";
+        echo "*                      *\n";
+        echo "*     SwooleServer     *\n";
+        echo "*                      *\n";
+        echo "************************\n";
         $httpServer = new \Swoole\Http\Server("0.0.0.0", $this->serverConf['httpPort']);
         $httpServer->set(array(
             'worker_num' => 4,    //worker process num
@@ -85,10 +88,26 @@ class SwooleServer extends Command{
     }
     private function test(){
         $startTime = microtime(true);
+        go(function() use ($startTime){
+            $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
+            $cli->set([ 'timeout' => 10]);
+            $cli->post("/Channel/getAdAccountList",[]);
+            echo PHP_EOL.'Result:'.PHP_EOL;
+            $result = $cli->body;
+            print_r($result);
+            echo PHP_EOL;
+            echo 'exec time : ';
+            echo (microtime(true) - $startTime);
+            $cli->close();
+        });
+    }
+    private function test2(){
+        $startTime = microtime(true);
         $token = 'CAAUibl40bIcBAJkRAVZBTk8NkN4U36hrmRpUE4uyR3txrmzmKTybxRSSZBBMz3VNDZABKtXbbbZAqiGUFUz6pmJ0ZA2jbBLrioPEoz4sm1FYjmakfeOKfZCQOnzIZCOyqIZBTaXJaRWC8b0kb1v2lrVUHye9m7uq8F9dCOTJZBuz1Lq61HZCmhsypslk1ZA0aRqjT8ZD';
         $urls = [];
         $url = 'https://graph.facebook.com/v3.0/act_259047808269458/ads?access_token=CAAUibl40bIcBAJkRAVZBTk8NkN4U36hrmRpUE4uyR3txrmzmKTybxRSSZBBMz3VNDZABKtXbbbZAqiGUFUz6pmJ0ZA2jbBLrioPEoz4sm1FYjmakfeOKfZCQOnzIZCOyqIZBTaXJaRWC8b0kb1v2lrVUHye9m7uq8F9dCOTJZBuz1Lq61HZCmhsypslk1ZA0aRqjT8ZD&pretty=0&fields=id%2Cname%2Cstatus%2Caccount_id%2Ccampaign_id%2Cadset_id&limit=25&after=MjM4NDMwMzUzNzAwMjAxOTYZD';
         for($i=0;$i<50;$i++) $urls[] = $url;
+          
         go(function() use ($startTime,$urls){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', 9501);
             #$cli = new \Swoole\Coroutine\Http\Client('lumen-swoole.levy.com', 80);

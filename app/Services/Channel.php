@@ -1,34 +1,25 @@
 <?php
 
 namespace App\Services;
-use App\Repositories\Interfaces as RepositoriesInterfaces;
-class Channel implements Interfaces\Channel {
-    private $channel;
-    public function __construct(RepositoriesInterfaces\Channel $RepositoriesChannel)
-    {
-        $this->channel = $RepositoriesChannel;
+use Swoole;
+use app\Models\Client;
+class Channel{
+	public function getData($id=0){
+		$data = [
+			1 => 'Facebook',
+			3 => 'Google',
+		];
+		if($id) return $data[$id];
+		return $data;
+	}
+	public function getAdAccountListByClient(Client $client){
+		echo $client->id;
+		
+	}
+    public function login(){
+        echo 'login';
     }
-
-    public function getCampaignList(Array $params){
-        $channel_id = $params['channel_id'];
-        $account_id = $params['account_id'];
-        $channel = $this->channel->find($channel_id);
-
-        $refresh = @$params['refresh'] ?: 0;
-        if(!$refresh){
-            $result = $channel->getCampaignList(['account_id'=>$account_id]);
-            print_r($result);
-            if($result){
-               return $result;
-            }else{
-                $refresh = 1;
-            }
-        }
-        if($refresh){
-            $pullData = $channel->pullCampaignList(['account_id'=>$account_id]);
-            $channel->saveCampaignList($pullData);
-            #print_r($pullData);
-            return;
-        }
+    public function test(){
+        echo 'test';
     }
 }

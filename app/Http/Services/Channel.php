@@ -4,12 +4,23 @@ namespace App\Http\Services;
 use Swoole;
 use App\Repositories\Interfaces as Interfaces;
 class Channel{
-    public function __construct(Interfaces\Channel $ServicesChannel)
+    private $channel = [
+        1 => ['name' => 'Facebook'],
+        3 => ['name' => 'Google'],
+    ];
+    public function __construct()
     {
-        $this->channelService = $ServicesChannel;
     }
-    public function getCompaigns($params){
+    public function test(){
+        echo 123;
+    }
+    public function find($channel_id){
+    }
+    /*
+     * 根据ClientID获取广告账户列表
+     */ 
+    public function getAdAccountListByClient($client_id){
 
-        $this->channelService->find('Facebook')->getCampaigns('2119471031652037');
+        #$this->channelService->find('Facebook')->getCampaigns('2119471031652037');
     }
 }

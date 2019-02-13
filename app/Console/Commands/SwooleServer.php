@@ -95,11 +95,11 @@ class SwooleServer extends Command{
             $cli->set([ 'timeout' => 10]);
             $params = [];
             $controller = 'Channel';
-            $action = 'getCompaigns';
+            $action = 'getCompaignList';
             #$params['params'] = $urls;
             $p = [];
             $p['controller'] = 'Channel';
-            $p['action'] = 'getCampaigns';
+            $p['action'] = 'getCampaignList';
             $p['params'] = [
                 'channel_id' => 'Facebook',
                 'account_id' => 'act_1634320873332648',
@@ -107,7 +107,7 @@ class SwooleServer extends Command{
             $params[] = $p;
             $p = [];
             $p['controller'] = 'Channel';
-            $p['action'] = 'getCampaigns';
+            $p['action'] = 'getCampaignList';
             $p['params'] = [
                 'channel_id' => 'Facebook',
                 'account_id' => 'act_1634320869999315',
@@ -143,6 +143,9 @@ class SwooleServer extends Command{
         );
         $app->bind('App\Repositories\Interfaces\Channel',function(){
             return new \App\Repositories\Interfaces\Channel();
+        });
+        $app->bind('App\Services\Interfaces\Channel',function() use ($app){
+            return $app->make('\App\Services\Channel');
         });
         $app->router->group([
             'namespace' => '\App\Http\Controllers',

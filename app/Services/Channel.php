@@ -2,19 +2,86 @@
 
 namespace App\Services;
 use Swoole;
-use app\Models\Client;
+use App\Models;
 class Channel{
-	public function getData($id=0){
+    public $ids = [];
+	public function getInstance($ids=[]){
+	    $result = [];
+	    if($ids == []) $ids = $this->ids;
 		$data = [
 			1 => 'Facebook',
 			3 => 'Google',
 		];
-		if($id) return $data[$id];
-		return $data;
+		if($ids){
+		    foreach($data as $k=>$v) if(in_array($k,$ids)) $result[$k] = $v;
+        }else{
+		    $result = $data;
+        }
+        $channels = [];
+        if($result) foreach($result as $k=>$v){
+            $channels[$k] = app()->make("App\\Services\\Channels\\{$v}");
+        }
+		return $channels;
 	}
-	public function getAdAccountListByClient(Client $client){
-		echo $client->id;
-		
+	#更新用户全部数据
+	public function syncAllByUser(Models\User $user){
+	    $user = Models\User::find(1006631);
+	    #$this->syncAdAccountByUser($user);
+        #$this->syncAdCampaignByUser($user);
+        #$this->syncAdSetByUser($user);
+        #$this->syncAdAdByUser($user);
+        $this->syncAdAdInsightsByUser($user);
+    }
+    #
+    public function syncAdAccountByUser(Models\User $user){
+
+	    $clients = $user->getClients();
+        if($clients) foreach($clients as $client){
+            $this->syncLocalAdAccountByClient($client);
+        }
+        #同步远端账号
+        $this->syncRemoteAdAccountByUser($user);
+    }
+    #同步广告系列
+    public function syncAdCampaignByUser(Models\User $user){
+        $channels = $this->getInstance([1]);
+        if($channels) foreach($channels as $channel){
+            $channel->syncAdCampaignByUser($user);
+        }
+    }
+    #同步广告组
+    public function syncAdSetByUser(Models\User $user){
+        $channels = $this->getInstance([1]);
+        if($channels) foreach($channels as $channel){
+            $channel->syncAdSetByUser($user);
+        }
+    }
+    #同步广告Ad
+    public function syncAdAdByUser(Models\User $user){
+        $channels = $this->getInstance([1]);
+        if($channels) foreach($channels as $channel){
+            $channel->syncAdAdByUser($user);
+        }
+    }
+    #同步广告消耗
+    public function syncAdAdInsightsByUser(Models\User $user){
+        $channels = $this->getInstance([1]);
+        if($channels) foreach($channels as $channel){
+            $channel->syncAdAdInsightsByUser($user);
+        }
+    }
+    #同步本地client广告账号
+    public function syncLocalAdAccountByClient(Models\Client $client){
+
+        Models\AdAccount::syncFromStorageByClient($client);
+    }
+    #
+    #同步远程账号
+	public function syncRemoteAdAccountByUser(Models\User $user){
+        $channels = $this->getInstance([1]);
+        if($channels) foreach($channels as $channel){
+            $channel->syncAdAccountByUser($user);
+        }
 	}
     public function login(){
         echo 'login';

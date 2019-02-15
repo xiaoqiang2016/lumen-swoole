@@ -9,7 +9,9 @@
         "googleads/googleads-php-lib": "^39.0",
         "laravel/lumen-framework": "5.7.*",
         "swlib/saber": "^1.0",
-        "vlucas/phpdotenv": "~2.2"
+        "vlucas/phpdotenv": "~2.2",
+        "predis/predis": "~1.0",
+        "illuminate/redis" : "5.4.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

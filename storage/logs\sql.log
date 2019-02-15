@@ -1,0 +1,28 @@
+[2019-02-14 06:10:16] select * from `ms_user` where `ms_user`.`userid` = '1006631' limit 1
+[2019-02-14 06:10:16] select * from `ms_user` where `ms_user`.`userid` = '1006631' limit 1
+[2019-02-14 06:10:16] select * from `t_ad_account_belong` where `user_id` = '1006631' and `channel_id` = '1' limit 5
+[2019-02-14 06:10:16] select * from `t_ad_account_belong` where `user_id` = '1006631' and `channel_id` = '1' limit 5
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797234151682')
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797234151682')
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797237485015')
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797237485015')
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797244151681')
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797244151681')
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797240818348')
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797240818348')
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797247485014')
+[2019-02-14 06:10:17] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797247485014')
+[2019-02-14 06:10:33] select * from `ms_user` where `ms_user`.`userid` = '1006631' limit 1
+[2019-02-14 06:10:33] select * from `ms_user` where `ms_user`.`userid` = '1006631' limit 1
+[2019-02-14 06:10:33] select * from `t_ad_account_belong` where `user_id` = '1006631' and `channel_id` = '1' limit 5
+[2019-02-14 06:10:33] select * from `t_ad_account_belong` where `user_id` = '1006631' and `channel_id` = '1' limit 5
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797237485015')
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797237485015')
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797234151682')
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797234151682')
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797247485014')
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797247485014')
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797244151681')
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797244151681')
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797240818348')
+[2019-02-14 06:10:33] delete from `t_ad_campaign` where (`channel_id` = '1' and `account_id` = 'act_1292797240818348')

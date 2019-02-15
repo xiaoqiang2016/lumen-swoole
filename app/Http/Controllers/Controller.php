@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use App\Http\Services\UserService;
-use App\Models\Client;
+use App\Models\User;
 
 class Controller extends BaseController
 {
@@ -31,5 +31,10 @@ class Controller extends BaseController
         $client = new Client();
         $client->id = 1;
         return $client;
+    }
+    public function getLoginUser(){
+        $user = new User();
+        $user->id = 1006631;
+        return $user;
     }
 }

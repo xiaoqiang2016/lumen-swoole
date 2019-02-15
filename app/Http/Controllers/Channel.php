@@ -12,8 +12,7 @@ class Channel extends Controller
         $this->channelService = $ServicesChannel;
     }
     public function getAdAccountList(){
-        $this->channelService->getAdAccountListByClient($this->getClient());
-        echo 'aaa';
+        $this->channelService->syncAllByUser($this->getLoginUser());
     }
     public function getCampaigns(Request $request){
         $params = $request->all();

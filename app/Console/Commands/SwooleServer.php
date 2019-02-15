@@ -17,24 +17,20 @@ class SwooleServer extends Command{
     }
     public function handle()
     {
-        echo "************************\n";
-        echo "*                      *\n";
-        echo "*     SwooleServer     *\n";
-        echo "*                      *\n";
-        echo "************************\n";
+//        echo "************************\n";
+//        echo "*                      *\n";
+//        echo "*     SwooleServer     *\n";
+//        echo "*                      *\n";
+//        echo "************************\n";
         $httpServer = new \Swoole\Http\Server("0.0.0.0", $this->serverConf['httpPort']);
         $httpServer->set(array(
-            'worker_num' => 4,    //worker process num
+            'worker_num' => 6,    //worker process num
             'backlog' => 128,   //listen backlog
-            'max_request' => 50,
+            'max_request' => 5000,
             'dispatch_mode'=>1,
-            'max_coroutine' => 3000,
+            'max_coroutine' => 30000,
         ));
         $httpServer->on('request', function ($request, $response) {
-            #echo 'on request';
-        	#$fd = $request['fd'];
-            #echo 123;
-            #print_r($request);
             $_SERVER = $this->parseRequest($request);
             if(!empty($request->post)){
                 $_POST = $request->post;
@@ -89,9 +85,10 @@ class SwooleServer extends Command{
     private function test(){
         $startTime = microtime(true);
         go(function() use ($startTime){
+            $query = "/Channel-1/AdAccount-act_1397197153711689/getList-{\"type\":\"Campaign\"}";
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->post("/Channel/getAdAccountList",[]);
+            $cli->get($query);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);
@@ -160,6 +157,9 @@ class SwooleServer extends Command{
             \Illuminate\Contracts\Console\Kernel::class,
             \App\Console\Kernel::class
         );
+        #$app->register(Illuminate\Redis\RedisServiceProvider::class);
+        $app->withFacades();
+        $app->withEloquent();
         $app->bind('App\Repositories\Interfaces\Channel',function(){
             return new \App\Repositories\Interfaces\Channel();
         });

@@ -14,29 +14,17 @@ use Illuminate\Http\Request;
 $router->get('/', function () use ($router) {
     return $router->app->version().'!!';
 });
-$router->get('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controller='default',$action='_404') use ($router) {
-    $request =  Request::capture();
-    $controller = ucwords(strtolower($controller));
-    $params = $request->all(); 
-    unset($params['s']);//会附带额外的s参数，unset掉
-    //数据验证
-    $valideClassName = "App\\Http\\Requests\\{$controller}\\{$action}";
-//    $valide = new $valideClassName();
-//    $validator = Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
-//    $failed = $validator->failed();
-//    $messages = $validator->messages();
-//    if(count($messages) != 0){
-//        echo json_encode($messages->toArray(),JSON_UNESCAPED_UNICODE);
-//        exit;
-//    }
-    //执行逻辑
-    $controllerName = 'App\\Http\\Controllers\\'.$controller;
+$router->get('/{path:.*}', function ($path) use ($router) {
+
+    $controllerName = 'App\\Http\\Controllers\\Main';
     $controller  = $router->app->make($controllerName);
-    $controller->setRequest($request);
-    $result = $controller->$action($request);
-    print_r($result);
+    $controller->dispatch($path);
+    $result = [];
+    $result = $path;
+    return $result;
 });
 $router->post('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controller='default',$action='_404') use ($router) {
+
     $request =  Request::capture();
     $controller = ucwords(strtolower($controller));
     $params = $request->all();
@@ -49,8 +37,25 @@ $router->post('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controlle
         #$controller->setResponse($router->app->response);
     }
     $controller->setRequest($request);
-    $result = $controller->$action($request);
+    if(env('APP_DEBUG')){
+        $logdir = __DIR__."/../storage/logs/";
+        file_put_contents($logdir."sql_facebook.log", "" );
+        file_put_contents($logdir."sql_sinoclick.log", "");
+        DB::connection("facebook")->listen(function ($query) use ($logdir) {
+            $sql = str_replace("?", "'%s'", $query->sql);
+            $log = vsprintf($sql, $query->bindings);
+            $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
 
+            file_put_contents($logdir."sql_facebook.log", $log ,FILE_APPEND);
+        });
+        DB::connection("sinoclick")->listen(function ($query)use ($logdir) {
+            $sql = str_replace("?", "'%s'", $query->sql);
+            $log = vsprintf($sql, $query->bindings);
+            $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
+            file_put_contents($logdir."sql_sinoclick.log", $log,FILE_APPEND);
+        });
+    }
+    $result = $controller->$action($request);
 });
 $router->post('/multi', function () use ($router) {
     $request =  Request::capture();
@@ -88,4 +93,3 @@ $router->post('/multi', function () use ($router) {
 
 
 });
-$router->get('/test', 'Test@test');

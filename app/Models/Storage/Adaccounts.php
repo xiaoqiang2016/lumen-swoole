@@ -1,7 +1,8 @@
 <?php
 namespace App\Models\Storage;
 
-class AdCampaign extends Model{
+
+class Adaccounts extends Model{
     protected $table = 'adaccounts';
 
 }

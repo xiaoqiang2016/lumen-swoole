@@ -28,7 +28,7 @@ class SwooleServer extends Command{
             'backlog' => 128,   //listen backlog
             'max_request' => 5000,
             'dispatch_mode'=>1,
-            'max_coroutine' => 30000,
+            'max_coroutine' => 9999999,
         ));
         $httpServer->on('request', function ($request, $response) {
             $_SERVER = $this->parseRequest($request);
@@ -51,6 +51,7 @@ class SwooleServer extends Command{
             $this->app = $this->getApp();
             $this->app->response = $response;
             #echo $controllerName;
+            \App\Common\Helper::runTimeStart();
             $this->app->run();
 //            $request = \Laravel\Lumen\Http\Request::capture();
 //            $controller = $this->app->make($controllerName);
@@ -85,10 +86,9 @@ class SwooleServer extends Command{
     private function test(){
         $startTime = microtime(true);
         go(function() use ($startTime){
-            $query = "/Channel-1/AdAccount-act_1397197153711689/getList-{\"type\":\"Campaign\"}";
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get($query);
+            $cli->post("/Channel/getAdAccountList",[]);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);
@@ -157,7 +157,7 @@ class SwooleServer extends Command{
             \Illuminate\Contracts\Console\Kernel::class,
             \App\Console\Kernel::class
         );
-        #$app->register(Illuminate\Redis\RedisServiceProvider::class);
+         $app->register(\Illuminate\Redis\RedisServiceProvider::class);
         $app->withFacades();
         $app->withEloquent();
         $app->bind('App\Repositories\Interfaces\Channel',function(){

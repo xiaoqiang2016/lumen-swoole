@@ -44,7 +44,7 @@ class AdAccount extends Model{
                 $belongData[] = $_belongData;
                 unset($d['client_id'],$d['token_id'],$d['user_id']);
             }
-            $belongModel->addAll($belongData);
+            $belongModel->insertAll($belongData);
             #本表Exists
             $exists = $this->whereIn('id',$adaccount_ids)->get(['id']);
             if($exists){
@@ -54,7 +54,7 @@ class AdAccount extends Model{
                 }
             }
             if($data){
-                $this->addAll($data);
+                $this->insertAll($data);
             }
         }
         return;

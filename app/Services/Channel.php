@@ -26,10 +26,17 @@ class Channel{
 	#更新用户全部数据
 	public function syncAllByUser(Models\User $user){
 	    $user = Models\User::find(1006631);
-	    #$this->syncAdAccountByUser($user);
-        #$this->syncAdCampaignByUser($user);
-        #$this->syncAdSetByUser($user);
-        #$this->syncAdAdByUser($user);
+        #\App\Common\Helper::runTime();
+	    $this->syncAdAccountByUser($user);#0.2
+        #\App\Common\Helper::runTime();
+	    #return;
+        $this->syncAdCampaignByUser($user);#8s 24268
+
+        #$this->syncAdSetByUser($user);#12s 25k
+
+        #$this->syncAdAdByUser($user);#8s 28k
+        \App\Common\Helper::runTime();
+        return;
         $this->syncAdAdInsightsByUser($user);
     }
     #
@@ -37,7 +44,7 @@ class Channel{
 
 	    $clients = $user->getClients();
         if($clients) foreach($clients as $client){
-            $this->syncLocalAdAccountByClient($client);
+            #$this->syncLocalAdAccountByClient($client);
         }
         #同步远端账号
         $this->syncRemoteAdAccountByUser($user);

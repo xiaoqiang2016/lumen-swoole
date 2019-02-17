@@ -22,6 +22,7 @@ class CreateAdAccount extends Migration
             $table->tinyInteger('channel_id')->nullable(false)->default(0)->comment("渠道ID。1=Facebook,3=Google");
             $table->dateTime('sync_at')->nullable(true)->comment("数据同步时间。");
             $table->dateTime('created_time')->nullable(true)->comment("账户创建时间。");
+            $table->string('disable_reason',50)->nullable('')->comment("账户被禁用原因。");
             $table->decimal('balance',20,4)->nullable(true)->comment("余额。");
             $table->primary('id');
             $table->timestamps();

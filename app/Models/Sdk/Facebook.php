@@ -25,7 +25,7 @@ class Facebook{
     }
 
     public function getAccountList(){
-        $fields = 'fields=adaccounts.limit(1000){name,id,amount_spent,spend_cap,account_status,currency,owner,created_time,balance}';
+        $fields = 'fields=adaccounts.limit(1000){name,id,amount_spent,spend_cap,account_status,currency,disable_reason,created_time,balance}';
         $response = $this->get('me?'.$fields);
         $data = $response['adaccounts']['data']??[];
         return $data;

@@ -14,15 +14,15 @@ use Illuminate\Http\Request;
 $router->get('/', function () use ($router) {
     return $router->app->version().'!!';
 });
-$router->get('/{path:.*}', function ($path) use ($router) {
-
-    $controllerName = 'App\\Http\\Controllers\\Main';
-    $controller  = $router->app->make($controllerName);
-    $controller->dispatch($path);
-    $result = [];
-    $result = $path;
-    return $result;
-});
+//$router->get('/{path:.*}', function ($path) use ($router) {
+//
+//    $controllerName = 'App\\Http\\Controllers\\Main';
+//    $controller  = $router->app->make($controllerName);
+//    $controller->dispatch($path);
+//    $result = [];
+//    $result = $path;
+//    return $result;
+//});
 $router->post('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controller='default',$action='_404') use ($router) {
 
     $request =  Request::capture();

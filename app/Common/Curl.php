@@ -13,8 +13,6 @@ class Curl{
     }
 
     static function send($url,$method='GET',$params=[]){
-        $url = 'https://www.baidu.com';
-        echo $url.PHP_EOL;
         $urlData = parse_url($url);
         $urlData['query'] = isset($urlData['query']) ? "?".$urlData['query'] : '';
         $urlData['path'] = isset($urlData['path']) ? $urlData['path'] : '/';

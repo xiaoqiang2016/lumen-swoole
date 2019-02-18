@@ -27,17 +27,24 @@ class Channel{
 	public function syncAllByUser(Models\User $user){
 	    $user = Models\User::find(1006631);
         #\App\Common\Helper::runTime();
-	    $this->syncAdAccountByUser($user);#0.2
+	    #$this->syncAdAccountByUser($user);#0.2
         #\App\Common\Helper::runTime();
 	    #return;
-        $this->syncAdCampaignByUser($user);#8s 24268
+        #$this->syncAdCampaignByUser($user);#8s 24268
 
         #$this->syncAdSetByUser($user);#12s 25k
 
         #$this->syncAdAdByUser($user);#8s 28k
+        $this->AdDiagnoseByUser();
         \App\Common\Helper::runTime();
         return;
         $this->syncAdAdInsightsByUser($user);
+    }
+    public function AdDiagnoseByUser(Models\User $user){
+        $channels = $this->getInstance([1]);
+        if($channels) foreach($channels as $channel){
+            $channel->adDiagnoseByUser($user);
+        }
     }
     #
     public function syncAdAccountByUser(Models\User $user){
@@ -96,4 +103,5 @@ class Channel{
     public function test(){
         echo 'test';
     }
+    
 }

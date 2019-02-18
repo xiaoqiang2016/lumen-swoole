@@ -19,7 +19,7 @@ class Channel{
         }
         $channels = [];
         if($result) foreach($result as $k=>$v){
-            $channels[$k] = app()->make("App\\Services\\Channels\\{$v}");
+            $channels[$k] = app()->make("App\\Channels\\{$v}\\Main");
         }
 		return $channels;
 	}

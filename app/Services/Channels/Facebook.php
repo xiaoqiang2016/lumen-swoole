@@ -333,4 +333,13 @@ class Facebook extends Channel{
         #print_r($adAccounts->toArray());
         return;
     }
+    public function adDiagnoseByUser(Models\User $user){
+        $adAccounts = $user->getAdAccountBelongsByChannel($this->id);
+        $adAccountIds = array_column($adAccounts->toArray(),"account_id");
+        $adDiagnose = new App\Services\AdDiagnose\Dispatcher();
+        $adDiagnose->handle(['ad_account_ids'=>$adAccountIds]);
+        #print_r($adAccountIds);
+        #print_r($adAccounts->getAdAccountIds());
+        return;
+    }
 }

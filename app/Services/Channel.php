@@ -36,9 +36,16 @@ class Channel{
 
         #$this->syncAdAdByUser($user);#8s 28k
         #$this->syncFacebookPageByUser($user);
+        $this->adDiagnoseByUser($user);
         \App\Common\Helper::runTime();
         return;
         $this->syncAdAdInsightsByUser($user);
+    }
+    public function adDiagnoseByUser(Models\User $user){
+        $channels = $this->getInstance([1]);
+        if($channels) foreach($channels as $channel){
+            $channel->adDiagnoseByUser($user);
+        }
     }
     #
     public function syncAdAccountByUser(Models\User $user){

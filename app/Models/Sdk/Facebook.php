@@ -91,4 +91,12 @@ class Facebook{
     private function parseQuery($query){
         return $query;
     }
+    public function getPagesByAdAccountID($account_id){
+        $fields = "promote_pages.limit(9999){id,is_published,name}";
+        $query = "{$account_id}?fields={$fields}";
+        #echo $query.PHP_EOL;
+        $response = $this->get($query);
+        $result = $response['promote_pages']['data']??[];
+        return $result;
+    }
 }

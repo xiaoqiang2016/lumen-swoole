@@ -19,7 +19,7 @@ class Channel{
         }
         $channels = [];
         if($result) foreach($result as $k=>$v){
-            $channels[$k] = app()->make("App\\Channels\\{$v}\\Main");
+            $channels[$k] = app()->make("App\\Services\\Channels\\{$v}");
         }
 		return $channels;
 	}
@@ -35,12 +35,13 @@ class Channel{
         #$this->syncAdSetByUser($user);#12s 25k
 
         #$this->syncAdAdByUser($user);#8s 28k
-        $this->AdDiagnoseByUser();
+        $this->syncFacebookPageByUser($user);
+        $this->adDiagnoseByUser($user);
         \App\Common\Helper::runTime();
         return;
         $this->syncAdAdInsightsByUser($user);
     }
-    public function AdDiagnoseByUser(Models\User $user){
+    public function adDiagnoseByUser(Models\User $user){
         $channels = $this->getInstance([1]);
         if($channels) foreach($channels as $channel){
             $channel->adDiagnoseByUser($user);
@@ -75,6 +76,13 @@ class Channel{
         $channels = $this->getInstance([1]);
         if($channels) foreach($channels as $channel){
             $channel->syncAdAdByUser($user);
+        }
+    }
+    #同步Facebook主页
+    public function syncFacebookPageByUser(Models\User $user){
+        $channels = $this->getInstance([1]);
+        if($channels) foreach($channels as $channel){
+            $channel->syncFacebookPageByUser($user);
         }
     }
     #同步广告消耗

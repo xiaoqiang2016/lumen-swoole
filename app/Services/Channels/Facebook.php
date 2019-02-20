@@ -236,6 +236,54 @@ class Facebook extends Channel{
         }
         return $tokens;
     }
+    public function syncFacebookPageByUser(Models\User $user){
+        $adAccounts = $user->getAdAccountBelongsByChannel($this->id);
+
+
+
+        $tokens = $this->getTokensByAdAccount($adAccounts);
+        $chan = new co\Channel(1);
+        $starttime = microtime(true);
+        $ii = 0;
+        $taskCount = count($adAccounts);
+        foreach($adAccounts as $adAccount){
+            $ads = $adAccount->getAdAds();
+            $sdk = $this->getSdk($tokens[$adAccount->token_id??0]);
+            go(function() use($adAccount,$sdk,$ii,$chan){
+                $sdkDatas = $sdk->getPagesByAdAccountID($adAccount->account_id);
+                $result = [];
+                if($sdkDatas) foreach($sdkDatas as $sdkData){
+                    $_result = [];
+                    $_result['page_id'] = $sdkData['id'];
+                    $_result['status'] = $sdkData['is_published']?1:0;
+                    $_result['name'] = $sdkData['name'];
+                    $_result['account_id'] = $adAccount->account_id;
+                    $result[] = $_result;
+                }
+                $chan->push(['index'=>$ii,'result'=>$result]);
+            });
+            $ii++;
+        }
+        $result = [];
+        $index = 0;
+        while(1){
+            $data = $chan->pop();
+            #$result[$data['index']] = $data['result'];
+            $result = array_merge($data['result'],$result);
+            echo $index."/".$taskCount;
+            echo PHP_EOL;
+            $index++;
+            #print_r($data);
+            #echo PHP_EOL;
+            if($index == $taskCount && $result = array_filter($result)){
+                #print_r($result);
+                $account_ids = array_column($adAccounts->toArray(),'account_id');
+                (new \App\Models\FacebookPage())->syncData(['account_id'=>$account_ids],$result);
+            }
+        }
+        #print_r($adAccounts->toArray());
+        return;
+    }
     public function syncAdAdInsightsByUser(Models\User $user){
         $adAccounts = $user->getAdAccountBelongsByChannel($this->id);
         $account_ids = array_column($adAccounts->toArray(),'id');
@@ -283,6 +331,15 @@ class Facebook extends Channel{
             }
         }
         #print_r($adAccounts->toArray());
+        return;
+    }
+    public function adDiagnoseByUser(Models\User $user){
+        $adAccounts = $user->getAdAccountBelongsByChannel($this->id);
+        $adAccountIds = array_column($adAccounts->toArray(),"account_id");
+        $adDiagnose = new \App\Services\AdDiagnose\Dispatcher();
+        $adDiagnose->handle(['ad_account_ids'=>$adAccountIds]);
+        #print_r($adAccountIds);
+        #print_r($adAccounts->getAdAccountIds());
         return;
     }
 }

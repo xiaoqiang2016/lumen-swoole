@@ -17,6 +17,8 @@ class Dispatcher
             foreach($router as $r){
                 $className = "\\App\\Services\\AdDiagnose\\".$group."\\".$r['class'];
                 $class = new $className($params);
+                $class->group = $group;
+                $class->handle = $r['class'];
                 $class->match();
             }
         }

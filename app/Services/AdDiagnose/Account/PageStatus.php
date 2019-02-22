@@ -3,24 +3,25 @@
 namespace App\Services\AdDiagnose\Account;
 use Swoole;
 use App\Models;
-class PageStatis extends Base
+class PageStatus extends Base
 {
     public $name = "主页状态";
     public $description = "";
     public function handle(){
         $ad_account_ids = $this->getParam('ad_account_ids');
-        $r = Models\AdAccount::whereIn('id',$ad_account_ids)->get(['id','remote_status']);
+        $pages = Models\FacebookPage::whereIn('account_id',$ad_account_ids)->get(['page_id','name','status','account_id']);
         $result = [];
-        foreach($r as $_r){
+        if($pages) foreach($pages as $page){
             $_result = [];
-            $_result['account_id'] = $_r['id'];
-            $_result['status'] = $_r['remote_status'] == 1 ? 'success' : strtolower($disable[$_r['remote_status']]);
+            $_result['account_id'] = $page['account_id'];
+            $_result['status'] = $page['status'] == 1 ? 'success' : 'no_publish';
 
             if($_result['status'] == 'success'){
-                $_result['desc'] = "您的广告账号状态正常。";
+                $_result['desc'] = "[{$page['name']}:{$page['page_id']}]主页状态正常。";
             }else{
-                $_result['desc'] = "您的广告账号因[".$disable_reason[$disable[$_r['remote_status']]]."]被关闭。";
+                $_result['desc'] = "[{$page['name']}:{$page['page_id']}]主页未发布或被禁用。";
             }
+            $_result['addno'] = ['page_id'=>$page['page_id']];
             $result[] = $_result;
         }
         return $result;

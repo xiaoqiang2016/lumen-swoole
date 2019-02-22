@@ -4,8 +4,52 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "fe4b76790e504ebf67d362e3869a0aa3",
+    "content-hash": "415cf86e834b89355151bd21b88de301",
     "packages": [
+        {
+            "name": "abram/laravel-odbc",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/andreossido/laravel-odbc.git",
+                "reference": "bbaa2bed6be95a0891d9a4ef9aad9392c8e869b5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/andreossido/laravel-odbc/zipball/bbaa2bed6be95a0891d9a4ef9aad9392c8e869b5",
+                "reference": "bbaa2bed6be95a0891d9a4ef9aad9392c8e869b5",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://dl.laravel-china.org/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "illuminate/database": "~5.1",
+                "illuminate/support": "~5.1",
+                "php": "^5.3.3 || >=7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Andrea Abram",
+                    "email": "andreossido@gmail.com",
+                    "homepage": "https://github.com/andreossido",
+                    "role": "Developer"
+                }
+            ],
+            "description": "ODBC integration for Laravel framework ",
+            "homepage": "https://github.com/andreossido/laravel-odbc",
+            "time": "2018-05-14T14:56:25+00:00"
+        },
         {
             "name": "doctrine/inflector",
             "version": "v1.3.0",
@@ -5502,7 +5546,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "abram/laravel-odbc": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

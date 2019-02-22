@@ -148,17 +148,35 @@ class Facebook extends Channel{
         }
         return $result;
     }
+    //根据广告账号ID同步分类
+    public function syncAdAdCategoryByAccountIds(array $ad_account_ids){
+        if(!$ad_account_ids) return;
+        foreach($ad_account_ids as &$v) $v = "'".str_replace("act_","",$v)."'";
+        $verticaDB = \App\Common\Helper::getVerticaConn();
+        $sql = "select ad_id as id,category1_cn,category2_cn,category3_cn from msdw.dim_fb_ad where account_id IN (".implode(",",$ad_account_ids).") and category1_cn != ''  ;";
+
+        $result = $verticaDB->select($sql);
+        (new \App\Models\AdAd())->updateAll($result);
+        #print_r($result);
+    }
     public function syncAdAdByUser(Models\User $user){
         $result = [];
         $adAccounts = $user->getAdAccountBelongsByChannel($this->id);
 
+        //同步分类
+        $adAccountIds = array_column($adAccounts->toArray(),'account_id');
+
+//        return;
+//
+//        print_r($result);
+//        echo 1;
+//        return;
 
         if($adAccounts) {
             $tokens = $this->getTokensByAdAccount($adAccounts);
             $chan = new co\Channel(1);
             $r = [];
             $i = 0;
-            co::set(['max_coroutine' => 8191]);
             $requests = [];
             $taskCount = count($adAccounts);
            # $taskCount = 3;
@@ -167,7 +185,6 @@ class Facebook extends Channel{
 //                $r[] = $adAccount->account_id;
 //
 //                $requests[] = ['uri' => 'https://graph.facebook.com/v3.2/'.$adAccount->account_id.'?fields=ads.limit(999999)%7Bname%2Cdaily_budget%2Ccreated_time%2Ceffective_status%2Cid%2Ccampaign_id%2Cadset_id%7D&access_token=EAAHE0mTSloIBAIjVmFt3NEbmLz1GvIYE5MUhdQqPaK1QJeRvu8whGPJp8DJWTDjTuWuw3gsZAZCBc1zZARE8KPeFfATHopP299Tm31J1aLmHZCJneShLqRgok6TxMG8rUh2lkB9red2RdmWqX6bPNCgJ52ndNlDHnsZCUgoWRnQZDZD'];
-//
 //
 //                continue;
                 go(function() use ($adAccount,&$tokens,$i,$chan){
@@ -205,22 +222,23 @@ class Facebook extends Channel{
             $dataLength = 0;
             $insertData = [];
             while(1){
-
                 $data = $chan->pop();
                 $insertData = array_merge($insertData,$data['data']);
                 $result[$data['index']] = $data;
                 #echo count($result)."/".count($adAccounts);
                 #echo PHP_EOL;
                 $dataLength += $data['dataLength'];
-                echo $dataLength."|".$data['dataLength']."|".$data['adaccount_id']."|{$data['runtime']}|".PHP_EOL;
+                #echo $dataLength."|".$data['dataLength']."|".$data['adaccount_id']."|{$data['runtime']}|".PHP_EOL;
                 if(count($result) == $taskCount){
                     #(new Models\AdAd())->delete();
-                    $syncData = ['account_id'=>array_filter(array_column($adAccounts->toArray(),'account_id'))];
+                    $syncData = ['channel_id'=>$this->id,'account_id'=>array_filter(array_column($adAccounts->toArray(),'account_id'))];
                     (new Models\AdAd())->syncData($syncData,$insertData);
-                    echo \App\Common\Helper::runTime();
+                    #echo \App\Common\Helper::runTime();
+                    $this->syncAdAdCategoryByAccountIds($adAccountIds);
                     break;
                 }
             }
+
         }
     }
     private function getTokensByAdAccount($adAccounts){

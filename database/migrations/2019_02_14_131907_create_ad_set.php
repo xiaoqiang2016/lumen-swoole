@@ -22,6 +22,7 @@ class CreateAdSet extends Migration
             $table->string("account_id",255)->nullable(false)->default('')->comment("广告账户ID。");
             $table->string("campaign_id",255)->nullable(false)->default('')->comment("广告系列ID。");
             $table->string("name",255)->nullable(false)->default('')->comment("名称。");
+            $table->string("objective",50)->nullable(false)->default('')->comment("营销目标");
             //PAUSED = 暂停
             $table->string("status",50)->nullable(false)->default('')->comment("当前状态。");
             $table->decimal("budget",20,4)->nullable(false)->default(0)->comment("预算");

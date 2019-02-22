@@ -6,19 +6,27 @@ use App\Models;
 class Dispatcher
 {
     private $routers = [
-        'Account' => [
-            ['class'=>'Status'],
+//        'Account' => [
+//            ['handle'=>'Status'],
+//            ['handle'=>'PageStatus'],
+//
+//        ],
+//        'Campaign' => [
+//            ['handle'=>'ObjectiveNum'],
+//        ]
+//        ,
+        'Ad' => [
+            ['handle'=>'CtrLow'],
         ],
-        #'Campaign'
     ];
     //调度器
     public function handle(array $params){
         foreach($this->routers as $group=>$router){
             foreach($router as $r){
-                $className = "\\App\\Services\\AdDiagnose\\".$group."\\".$r['class'];
+                $className = "\\App\\Services\\AdDiagnose\\".$group."\\".$r['handle'];
                 $class = new $className($params);
                 $class->group = $group;
-                $class->handle = $r['class'];
+                $class->handle = $r['handle'];
                 $class->match();
             }
         }

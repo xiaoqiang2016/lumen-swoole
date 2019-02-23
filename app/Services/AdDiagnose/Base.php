@@ -13,7 +13,14 @@ class Base
         $this->params = $params;
     }
     public function getParam($key){
-        return $this->params[$key];
+
+        if($key == 'ad_account_ids_number'){
+            $result = $this->params['ad_account_ids'];
+            foreach($result as &$v) $v = str_replace("act_","",$v);
+        }else{
+            $result = $this->params[$key];
+        }
+        return $result;
     }
     public function match(){
         $result = $this->handle();

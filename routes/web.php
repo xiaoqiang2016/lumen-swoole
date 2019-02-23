@@ -54,6 +54,12 @@ $router->post('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controlle
             $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
             file_put_contents($logdir."sql_sinoclick.log", $log,FILE_APPEND);
         });
+        DB::connection("msdw")->listen(function ($query)use ($logdir) {
+            $sql = str_replace("?", "'%s'", $query->sql);
+            $log = vsprintf($sql, $query->bindings);
+            $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
+            file_put_contents($logdir."sql_msdw.log", $log,FILE_APPEND);
+        });
     }
     $result = $controller->$action($request);
 });

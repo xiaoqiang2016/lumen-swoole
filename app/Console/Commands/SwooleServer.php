@@ -157,7 +157,8 @@ class SwooleServer extends Command{
             \Illuminate\Contracts\Console\Kernel::class,
             \App\Console\Kernel::class
         );
-         $app->register(\Illuminate\Redis\RedisServiceProvider::class);
+        $app->register(\Illuminate\Redis\RedisServiceProvider::class);
+        $app->register(\Abram\Odbc\ODBCServiceProvider::class);
         $app->withFacades();
         $app->withEloquent();
         $app->bind('App\Repositories\Interfaces\Channel',function(){

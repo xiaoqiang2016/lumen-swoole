@@ -13,7 +13,14 @@ class Base
         $this->params = $params;
     }
     public function getParam($key){
-        return $this->params[$key];
+
+        if($key == 'ad_account_ids_number'){
+            $result = $this->params['ad_account_ids'];
+            foreach($result as &$v) $v = str_replace("act_","",$v);
+        }else{
+            $result = $this->params[$key];
+        }
+        return $result;
     }
     public function match(){
         $result = $this->handle();
@@ -22,7 +29,8 @@ class Base
             $syncData['account_id'] = $this->getParam('ad_account_ids');
             $syncData['group'] = $this->group;
             $syncData['handle'] = $this->handle;
-            #$syncData['name'] = $this->name;
+            $syncData['name'] = $this->name;
+            foreach($result as &$r) $r['addno'] = json_encode(isset($r['addno']) ? $r['addno'] : []);
             (new \App\Models\AdDianose())->syncData($syncData,$result);
         }
         #$fail = $this->getFail();

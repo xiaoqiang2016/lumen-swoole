@@ -23,6 +23,7 @@ class CreateAdAd extends Migration
             $table->string("campaign_id",255)->nullable(false)->default('')->comment("广告系列ID。");
             $table->string("set_id",255)->nullable(false)->default('')->comment("广告组ID。");
             $table->string("name",255)->nullable(false)->default('')->comment("名称。");
+            $table->string("objective",50)->nullable(false)->default('')->comment("营销目标");
             //PAUSED = 暂停
             $table->string("status",50)->nullable(false)->default('')->comment("当前状态。");
             $table->dateTime("created_time")->nullable(true)->default(null)->comment("创建时间。");

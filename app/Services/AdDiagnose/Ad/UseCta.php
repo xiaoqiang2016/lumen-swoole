@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Services\AdDiagnose\Ad;
 use Swoole;
 use App\Models;
@@ -15,7 +14,6 @@ class UseCta extends Base
         $result = [];
         if($data) foreach($data->toArray() as $v){
             $_result = [];
-            $_resu
             $_result['campaign_id'] = $v['campaign_id'];
             $_result['set_id'] = $v['set_id'];
             $_result['ad_id'] = $v['ad_id'];
@@ -25,8 +23,5 @@ class UseCta extends Base
             $result[] = $_result;
         }
         return $result;
-    }
-    public function getDescription(){
-
     }
 }

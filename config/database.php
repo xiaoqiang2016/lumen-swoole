@@ -68,7 +68,6 @@ return [
             'engine' => env('DB_SINOCLICK_ENGINE', null),
             'timezone' => env('DB_SINOCLICK_TIMEZONE', '+00:00'),
         ],
-
         'facebook' => [
             'driver' => 'mysql',
             'host' => env('DB_FACEBOOK_HOST', '127.0.0.1'),

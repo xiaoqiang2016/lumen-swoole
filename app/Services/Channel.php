@@ -33,7 +33,6 @@ class Channel{
         #$this->syncAdCampaignByUser($user);#8s 24268
 
         #$this->syncAdSetByUser($user);#12s 25k
-
         #$this->syncAdAdByUser($user);#8s 28k
         #$this->syncFacebookPageByUser($user);
         $this->adDiagnoseByUser($user);

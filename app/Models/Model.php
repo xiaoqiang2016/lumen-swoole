@@ -13,7 +13,6 @@ class Model extends \Illuminate\Database\Eloquent\Model{
         return $this->insertAll($data);
     }
     public function insertAll($data){
-        $tableName = $this->table;
         $sliceNum = 500;
         for($i=0;$i<count($data);$i+=$sliceNum){
             $v = array_slice($data,$i,$sliceNum);

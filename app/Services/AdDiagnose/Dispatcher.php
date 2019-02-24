@@ -6,19 +6,25 @@ use App\Models;
 class Dispatcher
 {
     private $routers = [
-//        'Account' => [
-//            ['handle'=>'Status'],
-//            ['handle'=>'PageStatus'],
-//
-//        ],
-//        'Campaign' => [
-//            ['handle'=>'ObjectiveNum'],
-//        ]
-//        ,
+        'Account' => [
+            #['handle'=>'Status'],
+            #['handle'=>'PageStatus'],
+            #['handle'=>'ObjectiveNum'],
+
+        ],
+        'Campaign' => [
+
+        ]
+        ,
         'Ad' => [
             #['handle'=>'CtrLow'],
-            ['handle'=>'UseCta'],
+            #['handle'=>'UseCta'],
+
         ],
+        'Set' => [
+            #['handle'=>'LinkClicksDailyBudget'],
+            #['handle'=>'ConversionsDailyBudget'],
+        ]
     ];
     //调度器
     public function handle(array $params){

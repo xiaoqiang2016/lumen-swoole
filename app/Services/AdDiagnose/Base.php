@@ -30,7 +30,7 @@ class Base
             $syncData['group'] = $this->group;
             $syncData['handle'] = $this->handle;
             $syncData['name'] = $this->name;
-            foreach($result as &$r) $r['addno'] = json_encode(isset($r['addno']) ? $r['addno'] : []);
+            foreach($result as &$r) $r['addno'] = json_encode(isset($r['addno']) ? $r['addno'] : [],JSON_UNESCAPED_UNICODE);
             (new \App\Models\AdDianose())->syncData($syncData,$result);
         }
         #$fail = $this->getFail();

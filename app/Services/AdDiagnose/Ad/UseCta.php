@@ -19,7 +19,7 @@ class UseCta extends Base
             $_result['ad_id'] = $v['ad_id'];
             $_result['status'] = 'not';
             $_result['desc'] = "[{$v['ad_name']}]未使用行动号召。";
-            $_result['addno'] = ['ad_name'=>$v['ad_name']];
+            $_result['addno'] = ['ad_name'=>$v['ad_name'],'ad_id'=>$v['ad_id']];
             $result[] = $_result;
         }
         return $result;

@@ -10,6 +10,7 @@ class CtrLow extends Base
     public $description = "";
     public $connection = 'msdw';
     public function handle(){
+        $category_key = 'ctr';
         $ad_account_ids = $this->getParam('ad_account_ids');
         $ctrs = (new Models\Msdw\FactFbAdinsightsCountry())->getCtrByAdAccountId($ad_account_ids);
         $ad_ids = array_column($ctrs,'ad_id');
@@ -23,14 +24,20 @@ class CtrLow extends Base
         if(!$categoryData) return;
         $wstr = [];
         foreach($categoryData as $cd){
-
+            $_wstr = [];
             for($i=1;$i<=3;$i++){
-
+                $value = $cd["category{$i}_cn"] ? "'".$cd["category{$i}_cn"]."'" : 'NULL';
+                $op = $value == 'NULL' ? 'is' : '=';
+                $_wstr[] = "category_level_{$i} {$op} {$value}";
             }
-            $wstr[] = "(category_level_1 ".($cd['category1_cn'])."= 'APP' AND category_level_2 is NULL AND category_level_3 is NULL)";
+            $wstr[] = "(".implode(" AND ",$_wstr).")";
         }
-        $sql = "SELECT ctr FROM {$aias->getTable()} WHERE ".implode(" OR ",$wstr)." ";
+        $sql = "SELECT category1_cn,category2_cn,category3_cn,{$category_key} FROM {$aias->getTable()} WHERE ".implode(" OR ",$wstr)." ";
+        $r = $aias->getDB()->select($sql);
+        $r = json_decode(json_encode($r));
+        $category_value = $r[$category_key];
         echo $sql;
+        print_r($category_value);
         return;
         print_r($categoryData);
         #print_r($ad_ids);

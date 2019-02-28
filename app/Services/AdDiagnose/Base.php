@@ -31,7 +31,7 @@ class Base
             $syncData['handle'] = $this->handle;
             $syncData['name'] = $this->name;
             foreach($result as &$r) $r['addno'] = json_encode(isset($r['addno']) ? $r['addno'] : [],JSON_UNESCAPED_UNICODE);
-            (new \App\Models\AdDianose())->syncData($syncData,$result);
+            (new \App\Models\AdDiagnose())->syncData($syncData,$result);
         }
         #$fail = $this->getFail();
         #print_r(instanceof $success);

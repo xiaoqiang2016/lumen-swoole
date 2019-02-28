@@ -4,16 +4,16 @@ namespace App\Services\AdDiagnose\Ad;
 use Swoole;
 use App\Models;
 use App\Common\Helper;
-class CtrLow extends Base
+class CpmHigh extends Base
 {
-    public $name = "CTR较低";
+    public $name = "CPM较高";
     public $description = "";
     public $connection = 'msdw';
     public function handle(){
-        $category_key = 'ctr';
+        $category_key = 'cpm';
         $per = '20';
         $ad_account_ids = $this->getParam('ad_account_ids');
-        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCtrByAdAccountId($ad_account_ids);
+        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCpmByAdAccountId($ad_account_ids);
 
         $ad_ids = array_column($datas,'ad_id');
         $categorys = (new Models\Msdw\DimFbAd())->getCategoryByAdIds($ad_ids);
@@ -59,21 +59,25 @@ class CtrLow extends Base
             #print_r($data);
             foreach($diagnoseData as $diagnose){
                 if($diagnose['category1_cn'] == $data['category1_cn'] && $diagnose['category2_cn'] == $data['category2_cn'] && $diagnose['category3_cn'] == $data['category3_cn']){
-                    if($diagnose[$category_key] * (1-$per/100) > $data[$category_key]){
+                    $data[$category_key] = sprintf("%.2f",$data[$category_key]);
+                    $diagnose[$category_key] = sprintf("%.2f",$diagnose[$category_key]);
+                    $_per = $data[$category_key] == 0 ? 0 : ($data[$category_key]-$diagnose[$category_key]) / $diagnose[$category_key];
+                    $_per *= 100;
+                    if($_per > $per){
                         $r = [];
                         $r['account_id'] = $data['account_id'];
                         $r['campaign_id'] = $data['campaign_id'];
                         $r['ad_id'] = $data['ad_id'];
                         $r['addno'] = [
-                            'category_value' => sprintf("%.2f",$diagnose[$category_key]*100),
-                            'low_per' => sprintf("%.2f",(1 - $data[$category_key]/$diagnose[$category_key] ) * 100),
-                            'value' => sprintf("%.2f",$data[$category_key]*100),
+                            'category_value' => sprintf("%.2f",$diagnose[$category_key]),
+                            'high_per' => sprintf("%.2f",$_per),
+                            'value' => sprintf("%.2f",$data[$category_key]),
                             'category1_cn' => $data['category1_cn'],
                             'category2_cn' => $data['category2_cn'],
                             'category3_cn' => $data['category3_cn'],
                         ];
-                        $r['status'] = 'low';
-                        $r['desc'] = "低于行业标准".($r['addno']['low_per'])."%";
+                        $r['status'] = 'high';
+                        $r['desc'] = "高于行业标准".($r['addno']['high_per'])."%";
                         $result[] = $r;
                     }
                 }
@@ -81,9 +85,6 @@ class CtrLow extends Base
         }
         #print_r($ad_ids);
         return $result;
-
-    }
-    public function getDescription(){
 
     }
 }

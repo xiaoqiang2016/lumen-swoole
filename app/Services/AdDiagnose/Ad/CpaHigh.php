@@ -4,16 +4,32 @@ namespace App\Services\AdDiagnose\Ad;
 use Swoole;
 use App\Models;
 use App\Common\Helper;
-class CtrLow extends Base
+class CpaHigh extends Base
 {
-    public $name = "CTR较低";
+    public $name = "CPA较高";
     public $description = "";
     public $connection = 'msdw';
     public function handle(){
-        $category_key = 'ctr';
+        $category_key = 'cpm';
         $per = '20';
         $ad_account_ids = $this->getParam('ad_account_ids');
-        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCtrByAdAccountId($ad_account_ids);
+        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCpaByAdAccountId($ad_account_ids);
+        $cpaMap = [];
+        $capMap['MOBILE_APP_ENGAGEMENT'] = 'cpa_link_click';
+        $capMap['CONVERSIONS'] = 'cpa_purchase';
+        $capMap['EVENT_RESPONSES'] = 'cpa_event_responses';
+        $capMap['POST_ENGAGEMENT'] = 'cpa_post_engagement';
+        $capMap['LINK_CLICKS'] = 'cpa_link_click';
+        $capMap['PAGE_LIKES'] = 'cpa_like';
+        $capMap['VIDEO_VIEWS'] = 'cpa_video_views';
+        $capMap['MOBILE_APP_INSTALLS'] = 'cpa_install';
+        $capMap['BRAND_AWARENESS'] = 'cpa_estimated_ad_recallers';
+        $capMap['REACH'] = 'cpa_reach';
+        $capMap['APP_INSTALLS'] = 'cpa_install';
+        $capMap['LEAD_GENERATION'] = 'cpa_lead';
+        $capMap['PRODUCT_CATALOG_SALES'] = 'cpa_purchase';
+        $capMap['TRAFFIC'] = 'cpc';
+
 
         $ad_ids = array_column($datas,'ad_id');
         $categorys = (new Models\Msdw\DimFbAd())->getCategoryByAdIds($ad_ids);
@@ -47,6 +63,7 @@ class CtrLow extends Base
             }
             $wstr[] = "(".implode(" AND ",$_wstr).")";
         }
+        $category_key = implode(",",$capMap);
         $sql = "SELECT category_level_1 as category1_cn,category_level_2 as category2_cn,category_level_3 as category3_cn,{$category_key} FROM {$aias->getTable()} WHERE ".implode(" OR ",$wstr)." ";
         $diagnoseData = $aias->getDB()->select($sql);
         $diagnoseData = json_decode(json_encode($diagnoseData),true);
@@ -59,31 +76,43 @@ class CtrLow extends Base
             #print_r($data);
             foreach($diagnoseData as $diagnose){
                 if($diagnose['category1_cn'] == $data['category1_cn'] && $diagnose['category2_cn'] == $data['category2_cn'] && $diagnose['category3_cn'] == $data['category3_cn']){
-                    if($diagnose[$category_key] * (1-$per/100) > $data[$category_key]){
-                        $r = [];
-                        $r['account_id'] = $data['account_id'];
-                        $r['campaign_id'] = $data['campaign_id'];
-                        $r['ad_id'] = $data['ad_id'];
-                        $r['addno'] = [
-                            'category_value' => sprintf("%.2f",$diagnose[$category_key]*100),
-                            'low_per' => sprintf("%.2f",(1 - $data[$category_key]/$diagnose[$category_key] ) * 100),
-                            'value' => sprintf("%.2f",$data[$category_key]*100),
-                            'category1_cn' => $data['category1_cn'],
-                            'category2_cn' => $data['category2_cn'],
-                            'category3_cn' => $data['category3_cn'],
-                        ];
-                        $r['status'] = 'low';
-                        $r['desc'] = "低于行业标准".($r['addno']['low_per'])."%";
-                        $result[] = $r;
+                    $bKey = $capMap[$data['objective']];
+                    $value = $data['cpa'];
+                    $r = [];
+                    $r['account_id'] = $data['account_id'];
+                    $r['campaign_id'] = $data['campaign_id'];
+                    $r['ad_id'] = $data['ad_id'];
+                    $r['addno'] = [
+                        'category_value' => sprintf("%.2f",$diagnose[$bKey]),
+                        #'category_value' => $diagnose[$bKey],
+                        'high_per' => 0,
+                        'value' => sprintf("%.2f",$value),
+                        #'value' => $value,
+                        'category1_cn' => $data['category1_cn'],
+                        'category2_cn' => $data['category2_cn'],
+                        'category3_cn' => $data['category3_cn'],
+                        'objective' => $data['objective'],
+                        'bKey' => $bKey,
+                    ];
+
+                    if($data['cpa'] == 0){
+                        $r['status'] = 'zero';
+                        $r['desc'] = "CPA为零";
+                    }else{
+                        $_per = ($data['cpa']-$diagnose[$bKey]) / $diagnose[$bKey] * 100;
+                        if($_per > $per) {
+                            $r['addno']['high_per'] = sprintf("%.2f",$_per);
+                            $r['status'] = 'high';
+                            $r['desc'] = "高于行业标准".($r['addno']['high_per'])."%";
+                        }else{
+                            continue;
+                        }
                     }
+                    if($r) $result[] = $r;
                 }
             }
         }
-        #print_r($ad_ids);
         return $result;
-
-    }
-    public function getDescription(){
 
     }
 }

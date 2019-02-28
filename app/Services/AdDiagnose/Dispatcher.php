@@ -17,7 +17,9 @@ class Dispatcher
         ]
         ,
         'Ad' => [
-            ['handle'=>'CtrLow'],
+            #['handle'=>'CtrLow'],
+            #['handle'=>'CpmHigh'],
+            ['handle'=>'CpaHigh'],
             #['handle'=>'UseCta'],
 
         ],

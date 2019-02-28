@@ -1,7 +1,6 @@
 <?php
 
 require_once __DIR__.'/../vendor/autoload.php';
-
 try {
     (new Dotenv\Dotenv(dirname(__DIR__)))->load();
 } catch (Dotenv\Exception\InvalidPathException $e) {
@@ -92,7 +91,7 @@ $app->singleton(
 | can respond to, as well as the controllers that may handle them.
 |
 */
-
+$app->register(\SwaggerLume\ServiceProvider::class);
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {

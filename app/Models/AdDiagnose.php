@@ -1,8 +1,8 @@
 <?php
 namespace App\Models;
 
-class AdDianose extends Model{
-    protected $table = 't_ad_dianose';
+class AdDiagnose extends Model{
+    protected $table = 't_ad_diagnose';
     protected $guarded = [];
     public $incrementing = false;
 

@@ -10,7 +10,7 @@ class SwooleServer extends Command{
     private $serverConf = [
     	'httpPort' => 9501,
     ];
-    private $app;
+    private $app = false;
     public function __construct()
     {
         parent::__construct();
@@ -22,6 +22,7 @@ class SwooleServer extends Command{
 //        echo "*     SwooleServer     *\n";
 //        echo "*                      *\n";
 //        echo "************************\n";
+        $this->initApp();
         $httpServer = new \Swoole\Http\Server("0.0.0.0", $this->serverConf['httpPort']);
         $httpServer->set(array(
             'worker_num' => 6,    //worker process num
@@ -47,12 +48,17 @@ class SwooleServer extends Command{
 //                $params = $post_data['params'];
 //                unset($params['controller'],$params['action']);
 //            }
-            $controllerName = "\\App\\Http\\Controllers\\{$controller}";
-            $this->app = $this->getApp();
-            $this->app->response = $response;
+            app()->response = $response;
             #echo $controllerName;
-            \App\Common\Helper::runTimeStart();
-            $this->app->run();
+            #\App\Common\Helper::runTimeStart();
+            try{
+                app()->run();
+            }catch (Exception $e){
+
+            }
+
+
+            return;
 //            $request = \Laravel\Lumen\Http\Request::capture();
 //            $controller = $this->app->make($controllerName);
 //            $controller->setResponse($response);
@@ -62,13 +68,8 @@ class SwooleServer extends Command{
     		#$response->end("<h1>Hello Swoole. #".rand(1000, 9999)."</h1>");
 		});
         $httpServer->on('start', function () {
-            $this->test();
+            //$this->test();
         });
-//        go(function(){
-//            echo '111';
-//            Co::sleep(1);
-//
-//        });
 		$httpServer->start();
 
 
@@ -88,7 +89,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->post("/Channel/getAdAccountList",[]);
+            $cli->get("/Channel/getAdAccountList");
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);
@@ -98,53 +99,40 @@ class SwooleServer extends Command{
             $cli->close();
         });
     }
-    private function test2(){
-        $startTime = microtime(true);
-        $token = 'CAAUibl40bIcBAJkRAVZBTk8NkN4U36hrmRpUE4uyR3txrmzmKTybxRSSZBBMz3VNDZABKtXbbbZAqiGUFUz6pmJ0ZA2jbBLrioPEoz4sm1FYjmakfeOKfZCQOnzIZCOyqIZBTaXJaRWC8b0kb1v2lrVUHye9m7uq8F9dCOTJZBuz1Lq61HZCmhsypslk1ZA0aRqjT8ZD';
-        $urls = [];
-        $url = 'https://graph.facebook.com/v3.0/act_259047808269458/ads?access_token=CAAUibl40bIcBAJkRAVZBTk8NkN4U36hrmRpUE4uyR3txrmzmKTybxRSSZBBMz3VNDZABKtXbbbZAqiGUFUz6pmJ0ZA2jbBLrioPEoz4sm1FYjmakfeOKfZCQOnzIZCOyqIZBTaXJaRWC8b0kb1v2lrVUHye9m7uq8F9dCOTJZBuz1Lq61HZCmhsypslk1ZA0aRqjT8ZD&pretty=0&fields=id%2Cname%2Cstatus%2Caccount_id%2Ccampaign_id%2Cadset_id&limit=25&after=MjM4NDMwMzUzNzAwMjAxOTYZD';
-        for($i=0;$i<50;$i++) $urls[] = $url;
-          
-        go(function() use ($startTime,$urls){
-            $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', 9501);
-            #$cli = new \Swoole\Coroutine\Http\Client('lumen-swoole.levy.com', 80);
-            $cli->set([ 'timeout' => 10]);
-            $params = [];
-            $controller = 'Channel';
-            $action = 'getCompaignList';
-            #$params['params'] = $urls;
-            $p = [];
-            $p['controller'] = 'Channel';
-            $p['action'] = 'getCampaignList';
-            $p['params'] = [
-                'channel_id' => 'Facebook',
-                'account_id' => 'act_1634320873332648',
-            ];
-            $params[] = $p;
-            $p = [];
-            $p['controller'] = 'Channel';
-            $p['action'] = 'getCampaignList';
-            $p['params'] = [
-                'channel_id' => 'Facebook',
-                'account_id' => 'act_1634320869999315',
-            ];
-            $params[] = $p;
-            #echo "/{$controller}/{$action}";
-            $cli->post("/multi",$params);
-            echo PHP_EOL.'Result:'.PHP_EOL;
-            $result = $cli->body;
-            print_r($result);
-            echo PHP_EOL;
-            echo 'exec time : ';
-            echo (microtime(true) - $startTime);
-            $cli->close();
-        });
+    private function initApp(){
+        return app();
+        $base_dir = dirname(dirname(dirname(__DIR__)));
+        $app = new \Laravel\Lumen\Application(
+            $base_dir
+        );
+//        $app->singleton(
+//            \Illuminate\Contracts\Debug\ExceptionHandler::class,
+//            \App\Exceptions\Handler(1)
+//        );
 
+//        $app->singleton(
+//            \Illuminate\Contracts\Console\Kernel::class,
+//            \App\Console\Kernel::class
+//        );
+        $app->register(\Illuminate\Redis\RedisServiceProvider::class);
+        $app->register(\Abram\Odbc\ODBCServiceProvider::class);
+        $app->withFacades();
+        $app->withEloquent();
+        $app->bind('App\Repositories\Interfaces\Channel',function(){
+            return new \App\Repositories\Interfaces\Channel();
+        });
+        $app->bind('App\Services\Interfaces\Channel',function() use ($app){
+            return $app->make('\App\Services\Channel');
+        });
+        $app->router->group([
+            'namespace' => '\App\Http\Controllers',
+        ], function ($router) use ($base_dir) {
+            require $base_dir.'/routes/web.php';
+        });
+        $this->app = $app;
     }
     private function getApp(){
         $base_dir = dirname(dirname(dirname(__DIR__)));
-        #$_SERVER['REQUEST_METHOD'] = 'GET';
-        #$_SERVER['REQUEST_URI'] = 'test1';
         $app = new \Laravel\Lumen\Application(
             $base_dir
         );
@@ -172,6 +160,7 @@ class SwooleServer extends Command{
         ], function ($router) use ($base_dir) {
             require $base_dir.'/routes/web.php';
         });
-        return $app;
+        $this->app = $app;
+        return $this->app;
     }
 }

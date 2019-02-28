@@ -11,18 +11,65 @@
 |
 */
 use Illuminate\Http\Request;
-$router->get('/', function () use ($router) {
-    return $router->app->version().'!!';
+$router->get('{path:.*}', function ($path) use ($router) {
+    $pathData = explode("/",$path);
+    #$pathData[0] = 'asdasd';
+    $controllerName = 'App\\Http\\Controllers\\'.$pathData[0];
+    if(class_exists($controllerName)){
+        $request =  Request::capture();
+        $controller = $router->app->make($controllerName);
+        $action = $pathData[1];
+        $controller->setRequest($request);
+        $result = $controller->$action($request);
+        app()->response->end($result);
+    }
+    return;
 });
-//$router->get('/{path:.*}', function ($path) use ($router) {
-//
-//    $controllerName = 'App\\Http\\Controllers\\Main';
-//    $controller  = $router->app->make($controllerName);
-//    $controller->dispatch($path);
-//    $result = [];
-//    $result = $path;
-//    return $result;
-//});
+$router->get('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controller='default',$action='_404') use ($router) {
+
+    $request =  Request::capture();
+    $controller = ucwords(strtolower($controller));
+    $params = $request->all();
+    unset($params['s']);//会附带额外的s参数，unset掉
+    //执行逻辑
+    $controllerName = 'App\\Http\\Controllers\\'.$controller;
+
+    $controller  = $router->app->make($controllerName);
+
+    $controller->setRequest($request);
+    $result = $controller->$action($request);
+    if(env('APP_DEBUG')){
+        $logdir = __DIR__."/../storage/logs/";
+        file_put_contents($logdir."sql_facebook.log", "" );
+        file_put_contents($logdir."sql_sinoclick.log", "");
+        DB::connection("facebook")->listen(function ($query) use ($logdir) {
+            $sql = str_replace("?", "'%s'", $query->sql);
+            $log = vsprintf($sql, $query->bindings);
+            $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
+
+            file_put_contents($logdir."sql_facebook.log", $log ,FILE_APPEND);
+        });
+        DB::connection("sinoclick")->listen(function ($query)use ($logdir) {
+            $sql = str_replace("?", "'%s'", $query->sql);
+            $log = vsprintf($sql, $query->bindings);
+            $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
+            file_put_contents($logdir."sql_sinoclick.log", $log,FILE_APPEND);
+        });
+        DB::connection("msdw")->listen(function ($query)use ($logdir) {
+            $sql = str_replace("?", "'%s'", $query->sql);
+            $log = vsprintf($sql, $query->bindings);
+            $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
+            file_put_contents($logdir."sql_msdw.log", $log,FILE_APPEND);
+        });
+    }
+
+    print_r($result);
+    if($router->app->response){
+        $router->app->response->end($result);
+        return;
+        #$controller->setResponse($router->app->response);
+    }
+});
 $router->post('/{controller:[A-Za-z]+}/{action:[A-Za-z]+}', function ($controller='default',$action='_404') use ($router) {
 
     $request =  Request::capture();

@@ -6,7 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateAdDiagnose extends Migration
 {
-    private $table = 't_ad_dianose';
+    private $table = 't_ad_diagnose';
     /**
      * Run the migrations.
      *

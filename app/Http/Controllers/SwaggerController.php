@@ -12,19 +12,16 @@ use OpenApi\Annotations\Server;
  *
  * @Info(
  *     version="1.0.0",
- *     title="演示服务",
- *     description="这是演示服务，该文档提供了演示swagger api的功能",
- *     @Contact(
- *         email="mylxsw@aicode.cc",
- *         name="mylxsw"
- *     )
+ *     title="Sino Click",
+ *     description="Sino Click 后端API。",
  * )
+ * @Host "local-sinoapi.meetsocial.cn"
  * @PathItem(
  *  path="test"
  * )
  * @Server(
- *     url="http://localhost",
- *     description="开发环境",
+ *     url="http://127.0.0.1:9501",
+ *     description="本地环境",
  * )
  *
  * @Schema(
@@ -34,12 +31,27 @@ use OpenApi\Annotations\Server;
  *     title="响应实体",
  *     @Property(
  *         property="code",
- *         type="string",
+ *         type="integer",
  *         description="响应代码"
  *     ),
- *     @Property(property="message", type="string", description="响应结果提示")
+ *     @Property(
+ *         property="message",
+ *         type="string",
+ *         description="响应结果提示"
+ *     ),
+ *     @Property(
+ *         property="result",
+ *         type="string",
+ *         description="响应结果"
+ *     )
  * )
  *
+ * @OA\SecurityScheme(
+ *     type="apiKey",
+ *     in="header",
+ *     securityScheme="acess_token",
+ *     name="acess_token"
+ * )
  *
  * @package App\Http\Controllers
  */

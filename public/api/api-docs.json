@@ -1,0 +1,40 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "演示服务",
+        "description": "这是演示服务，该文档提供了演示swagger api的功能",
+        "contact": {
+            "name": "mylxsw",
+            "email": "mylxsw@aicode.cc"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost",
+            "description": "开发环境"
+        }
+    ],
+    "paths": {
+        "test": {}
+    },
+    "components": {
+        "schemas": {
+            "ApiResponse": {
+                "title": "响应实体",
+                "description": "响应实体，响应结果统一使用该结构",
+                "properties": {
+                    "code": {
+                        "description": "响应代码",
+                        "type": "string"
+                    },
+                    "message": {
+                        "description": "响应结果提示",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    }
+}

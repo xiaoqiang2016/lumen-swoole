@@ -23,7 +23,7 @@ return [
         | Route for accessing parsed swagger annotations.
         |--------------------------------------------------------------------------
          */
-        'docs' => '/docs',
+        #'docs' => '/docs',
 
         /*
         |--------------------------------------------------------------------------
@@ -58,14 +58,14 @@ return [
         | Absolute path to location where parsed swagger annotations will be stored
         |--------------------------------------------------------------------------
          */
-        'docs' => storage_path('api-docs'),
+        'docs' => base_path('public/api/'),
 
         /*
         |--------------------------------------------------------------------------
         | File name of the generated json documentation file
         |--------------------------------------------------------------------------
         */
-        'docs_json' => 'api-docs.json',
+        'docs_json' => 'api-docs1.json',
 
         /*
         |--------------------------------------------------------------------------

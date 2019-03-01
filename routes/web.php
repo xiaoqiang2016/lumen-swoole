@@ -12,6 +12,7 @@
 */
 use Illuminate\Http\Request;
 $router->get('{path:.*}', function ($path) use ($router) {
+    if(\App\Common\Response::sendFile($path)) return;
     $pathData = explode("/",$path);
     #$pathData[0] = 'asdasd';
     $controllerName = 'App\\Http\\Controllers\\'.$pathData[0];

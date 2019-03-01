@@ -1,0 +1,82 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Sino Click",
+        "description": "Sino Click 后端API。",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:9501",
+            "description": "本地环境"
+        }
+    ],
+    "paths": {
+        "test": {},
+        "/User/login": {
+            "post": {
+                "tags": [
+                    "用户"
+                ],
+                "summary": "登陆",
+                "description": "用户登陆接口.",
+                "operationId": "createUser",
+                "requestBody": {
+                    "description": "Input data format",
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "loginName": {
+                                        "description": "登录名",
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "description": "登陆密码",
+                                        "type": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "default": {
+                        "description": "successful operation"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ApiResponse": {
+                "title": "响应实体",
+                "description": "响应实体，响应结果统一使用该结构",
+                "properties": {
+                    "code": {
+                        "description": "响应代码",
+                        "type": "integer"
+                    },
+                    "message": {
+                        "description": "响应结果提示",
+                        "type": "string"
+                    },
+                    "result": {
+                        "description": "响应结果",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "acess_token": {
+                "type": "apiKey",
+                "name": "acess_token",
+                "in": "header"
+            }
+        }
+    }
+}

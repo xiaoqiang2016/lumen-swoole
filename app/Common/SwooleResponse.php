@@ -4,8 +4,12 @@ namespace App\Common;
 use Swoole\Coroutine\Http\Client;
 use Swoole\Coroutine as co;
 use \Illuminate\Support\Facades\Redis;
-class Response{
-    static public function sendFile(string $path){
+class SwooleResponse{
+    private $response;
+    public function __construct($response){
+        $this->response = $response;
+    }
+    public function sendFile(string $path){
         $fileIndex = ['index.html'];
         $homeDir = "/public";
         $basePath = base_path().$homeDir;
@@ -14,14 +18,23 @@ class Response{
             $file = $file."/".$fileIndex[0];
         }
         if(is_file($file)){
-            app()->response->header('Content-Type', self::getMime($file));
-            app()->response->sendfile($file);
+            $this->response->header('Content-Type', self::getMime($file));
+            $this->response->sendfile($file);
             return true;
         }
         return false;
     }
-    static public function sendJson($response){
-        echo 'sendJson';
+    public function sendJson($response){
+        
+        switch(gettype($response)){
+            case 'object':
+                $response = $response->toArray();
+            break;
+            default:
+            break;
+        }
+        $response = json_encode($response,JSON_UNESCAPED_UNICODE);
+        $this->response->end($response);
         return;
     }
     static public function getMime($file){

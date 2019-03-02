@@ -8,7 +8,7 @@ class SwooleServer extends Command{
     protected $description = 'Swoole Server.';
 
     private $serverConf = [
-    	'httpPort' => 9501,
+    	'httpPort' => 9502,
     ];
     private $app = false;
     public function __construct()
@@ -31,15 +31,42 @@ class SwooleServer extends Command{
             'dispatch_mode'=>1,
             'max_coroutine' => 9999999,
         ));
+        app()->test = 1;
         $httpServer->on('request', function ($request, $response) {
-            $_SERVER = $this->parseRequest($request);
-            if(!empty($request->post)){
-                $_POST = $request->post;
+            $path_info = $request->server['path_info'];
+            $swooleResponse = new \App\Common\SwooleResponse($response);
+            if($swooleResponse->sendFile($path_info)) return;
+            //解析传参
+            $params = [];
+            $request->server['request_method'] == 'POST' && $requestData = $request->post;
+            if($request->server['request_method'] == 'GET'){
+                if($quertString = $request->server['query_string']??false){
+                    parse_str($quertString,$params);
+                }
             }
+            $_pathData = array_filter(explode("/",$path_info));
+            $pathData = [];
+            if($_pathData) foreach($_pathData as $v) $pathData[] = $v;
+            $controllerName = $pathData[0]??false;
+            $actionName = $pathData[1]??false;
+            //数据验证
+            $valideClassName = "App\\Http\\Requests\\{$controllerName}\\{$actionName}";
+            if(class_exists($valideClassName) && $actionName){
+                $valide = new $valideClassName();
+                $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
+	            $failed = $validator->failed();
+                $messages = $validator->messages();
+	            if(count($messages) != 0){
+                    $swooleResponse->sendJson($messages);
+		            return;
+	            } 
+            }
+            $httpCode = 404;
+            $response->status($httpCode);
+            if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;
+            $response->end($httpCode);
+            return;
         	$request_method = $request->server['request_method'];
-        	$params = [];
-            $controller = 'Main';
-            $action = 'index';
 //            if($request_method == 'POST'){
 //                $post_data = $request->post;
 //
@@ -51,21 +78,9 @@ class SwooleServer extends Command{
             app()->response = $response;
             #echo $controllerName;
             #\App\Common\Helper::runTimeStart();
-            try{
-                app()->run();
-            }catch (Exception $e){
-
-            }
-
-
+            echo '111';
+            app()->run();
             return;
-//            $request = \Laravel\Lumen\Http\Request::capture();
-//            $controller = $this->app->make($controllerName);
-//            $controller->setResponse($response);
-//            $controller->$action($params);
-            #$response->end("123");
-            #sleep(1);
-    		#$response->end("<h1>Hello Swoole. #".rand(1000, 9999)."</h1>");
 		});
         $httpServer->on('start', function () {
             //$this->test();
@@ -76,12 +91,15 @@ class SwooleServer extends Command{
 		#$this->test();
     }
     private function parseRequest($request){
-        $result = $_SERVER;
-        $result['REQUEST_METHOD'] = $request->server['request_method'];
-        $result['REQUEST_URI'] = $request->server['request_uri'];
-        if($result['REQUEST_METHOD'] == 'POST'){
-            $result['_POST'] = $request->post;
+        $requestData = [];
+        $request->server['request_method'] == 'POST' && $requestData = $request->post;
+        if($request->server['request_method'] == 'GET'){
+            if($quertString = $request->server['query_string']??false){
+                parse_str($quertString,$requestData);
+            }
         }
+        $result['method'] = $request->server['request_method'];
+        $result['data'] = $requestData;
         return $result;
     }
     private function test(){

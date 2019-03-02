@@ -14,15 +14,34 @@ use Illuminate\Http\Request;
 $router->get('{path:.*}', function ($path) use ($router) {
     if(\App\Common\Response::sendFile($path)) return;
     $pathData = explode("/",$path);
-    #$pathData[0] = 'asdasd';
-    $controllerName = 'App\\Http\\Controllers\\'.$pathData[0];
+    $controllerName = $pathData[0];
+    $actionName = $pathData[1];
+    
+    //数据验证
+    $valideClassName = "App\\Http\\Requests\\{$controllerName}\\{$actionName}";
+    if(class_exists($controllerName)){
+        $valide = new $valideClassName();
+        $validator = Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
+	    $failed = $validator->failed();
+	    $messages = $validator->messages();
+	    if(count($messages) != 0){
+            \App\Common\Response::sendJson($messages);
+		    #echo json_encode($messages->toArray(),JSON_UNESCAPED_UNICODE);
+		    return;
+	    } 
+    }
+    //执行逻辑
+    $controllerName = 'App\\Http\\Controllers\\'.$controllerName;
     if(class_exists($controllerName)){
         $request =  Request::capture();
         $controller = $router->app->make($controllerName);
-        $action = $pathData[1];
+        
         $controller->setRequest($request);
-        $result = $controller->$action($request);
-        app()->response->end($result);
+        $result = $controller->$actionName($request);
+        if($result !== false){
+            app()->response->end($result);
+        }
+        #
     }
     return;
 });

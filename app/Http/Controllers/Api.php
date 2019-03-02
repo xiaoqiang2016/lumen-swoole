@@ -12,6 +12,7 @@ class Api extends Controller
         Generator::generateDocs();
         $file = realpath(config('swagger-lume.paths.docs'))."/api-docs.json";
         \App\Common\Response::sendFile("api/json/api-docs.json");
+        return false;
         #config(['test'=>123]);
         #echo config('test');
         #echo 1;

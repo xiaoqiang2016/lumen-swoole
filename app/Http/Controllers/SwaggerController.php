@@ -49,8 +49,8 @@ use OpenApi\Annotations\Server;
  * @OA\SecurityScheme(
  *     type="apiKey",
  *     in="header",
- *     securityScheme="acess_token",
- *     name="acess_token"
+ *     securityScheme="access_token",
+ *     name="access_token"
  * )
  *
  * @package App\Http\Controllers

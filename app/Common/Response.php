@@ -6,7 +6,6 @@ use Swoole\Coroutine as co;
 use \Illuminate\Support\Facades\Redis;
 class Response{
     static public function sendFile(string $path){
-
         $fileIndex = ['index.html'];
         $homeDir = "/public";
         $basePath = base_path().$homeDir;
@@ -20,7 +19,10 @@ class Response{
             return true;
         }
         return false;
-
+    }
+    static public function sendJson($response){
+        echo 'sendJson';
+        return;
     }
     static public function getMime($file){
         $mime = [

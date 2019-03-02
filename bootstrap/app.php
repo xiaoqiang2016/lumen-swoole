@@ -24,7 +24,7 @@ $app = new Laravel\Lumen\Application(
 
 // $app->withFacades();
 
-$app->withEloquent();
+#$app->withEloquent();
 
 /*
 |--------------------------------------------------------------------------
@@ -92,6 +92,9 @@ $app->singleton(
 |
 */
 $app->register(\SwaggerLume\ServiceProvider::class);
+$app->register(\Abram\Odbc\ODBCServiceProvider::class);//ODBC驱动
+$app->withFacades();
+$app->withEloquent();
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {

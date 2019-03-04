@@ -57,7 +57,10 @@ class SwooleServer extends Command{
 	            $failed = $validator->failed();
                 $messages = $validator->messages();
 	            if(count($messages) != 0){
-                    $swooleResponse->sendJson($messages);
+                    $result = [];
+                    $result['error'] = ['code'=>'FORM_VALIDATE_FAIL','message'=>$messages->toArray()];
+                    $result['result'] = [];
+                    $swooleResponse->sendJson($result);
 		            return;
 	            } 
             }

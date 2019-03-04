@@ -25,14 +25,13 @@ class SwooleResponse{
         return false;
     }
     public function sendJson($response){
-        
-        switch(gettype($response)){
-            case 'object':
-                $response = $response->toArray();
-            break;
-            default:
-            break;
-        }
+        // switch(gettype($response)){
+        //     case 'object':
+        //         $response = $response->toArray();
+        //     break;
+        //     default:
+        //     break;
+        // }
         $response = json_encode($response,JSON_UNESCAPED_UNICODE);
         $this->response->end($response);
         return;

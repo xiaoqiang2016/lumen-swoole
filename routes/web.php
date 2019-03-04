@@ -24,7 +24,10 @@ $router->get('{path:.*}', function ($path) use ($router) {
 	    $failed = $validator->failed();
         $messages = $validator->messages();
 	    if(count($messages) != 0){
-            \App\Common\Response::sendJson($messages);
+            $result = [];
+            $result['error'] = ['code'=>'FORM_VALIDATE_FAIL','result'=>$message->toArray()];
+            $result['result'] = [];
+            \App\Common\Response::sendJson($result);
 		    #echo json_encode($messages->toArray(),JSON_UNESCAPED_UNICODE);
 		    return;
 	    } 

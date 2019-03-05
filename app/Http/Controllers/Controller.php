@@ -28,20 +28,24 @@ class Controller extends BaseController
      * @Schema(
      *     schema="ApiResponse",
      *     type="object",
-     *     description="响应实体，响应结果统一使用该结构",
+     *     description="响应实体，响应结果统一使用该结构1",
      *     title="响应实体",
      *     @Property(
-     *         property="code",
-     *         type="string",
+     *         property="error",
+     *         type="object",
      *         description="响应代码"
      *     ),
-     *     @Property(property="message", type="string", description="响应结果提示")
+     *     @Property(
+     *         property="result",
+     *         type="string",
+     *         description="响应结果提示"
+     *     )
      * )
      *
      *
      * @package App\Http\Controllers
      */
-    private $response;
+    public $response;
     private $userService;
     public $request;
     public function setRequest(Request $request){
@@ -50,6 +54,15 @@ class Controller extends BaseController
             
         }
         $this->request = $request;
+    }
+    public function setResponse($response){
+        $this->response = $response;
+    }
+    public function setParams($params){
+        $this->params = $params;
+    }
+    public function getParams(){
+        return $this->params;
     }
     public function result($result=[]){
         if(is_array($result)){

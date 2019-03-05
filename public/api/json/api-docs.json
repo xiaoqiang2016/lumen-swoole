@@ -21,26 +21,25 @@
                 "summary": "登陆",
                 "description": "用户登陆接口.",
                 "operationId": "createUser",
-                "requestBody": {
-                    "description": "Input data format",
-                    "content": {
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "properties": {
-                                    "loginName": {
-                                        "description": "登录名",
-                                        "type": "string"
-                                    },
-                                    "password": {
-                                        "description": "登陆密码",
-                                        "type": "password"
-                                    }
-                                },
-                                "type": "object"
-                            }
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "The user name for login",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "description": "The password for login in clear text",
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
                     "default": {
                         "description": "successful operation"
@@ -55,9 +54,19 @@
                 "title": "响应实体",
                 "description": "响应实体，响应结果统一使用该结构",
                 "properties": {
-                    "code": {
+                    "error": {
                         "description": "响应代码",
-                        "type": "integer"
+                        "properties": {
+                            "code": {
+                                "description": "错误源",
+                                "type": "string"
+                            },
+                            "message": {
+                                "description": "响应结果提示",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
                     },
                     "message": {
                         "description": "响应结果提示",
@@ -66,6 +75,21 @@
                     "result": {
                         "description": "响应结果",
                         "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "error": {
+                "title": "错误结构",
+                "description": "错误结构",
+                "properties": {
+                    "code": {
+                        "description": "错误码",
+                        "type": "string"
+                    },
+                    "message": {
+                        "description": "错误信息",
+                        "type": "object|string"
                     }
                 },
                 "type": "object"

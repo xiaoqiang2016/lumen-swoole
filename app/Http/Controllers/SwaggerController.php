@@ -30,9 +30,19 @@ use OpenApi\Annotations\Server;
  *     description="响应实体，响应结果统一使用该结构",
  *     title="响应实体",
  *     @Property(
- *         property="code",
- *         type="integer",
- *         description="响应代码"
+ *         property="error",
+ *         type="object",
+ *         description="响应代码",
+ *         @Property(
+ *              property="code",
+ *              type="string",
+ *              description="错误源"
+ *         ),
+ *         @Property(
+ *              property="message",
+ *              type="string",
+ *              description="响应结果提示"
+ *         )
  *     ),
  *     @Property(
  *         property="message",
@@ -45,7 +55,23 @@ use OpenApi\Annotations\Server;
  *         description="响应结果"
  *     )
  * )
+ * @Schema(
+ *     schema="error",
+ *     type="object",
+ *     description="错误结构",
+ *     title="错误结构",
+ *     @Property(
+ *         property="code",
+ *         type="string",
+ *         description="错误码",
+ *     ),
+ *     @Property(
+ *         property="message",
+ *         type="object|string",
+ *         description="错误信息",
+ *     ),
  *
+ * )
  * @OA\SecurityScheme(
  *     type="apiKey",
  *     in="header",

@@ -4,7 +4,7 @@ use Illuminate\Console\Command;
 use Co;
 #use Swoole;
 class SwooleServer extends Command{
-	protected $signature = 'SwooleServer';
+	protected $signature = 'http {action}';
     protected $description = 'Swoole Server.';
 
     private $serverConf = [
@@ -17,11 +17,12 @@ class SwooleServer extends Command{
     }
     public function handle()
     {
-//        echo "************************\n";
-//        echo "*                      *\n";
-//        echo "*     SwooleServer     *\n";
-//        echo "*                      *\n";
-//        echo "************************\n";
+        $action = $this->argument('action');
+        if($action == 'start'){
+            $this->start();
+        }
+    }
+    public function start(){
         $this->initApp();
         $httpServer = new \Swoole\Http\Server("0.0.0.0", $this->serverConf['httpPort']);
         $httpServer->set(array(
@@ -31,8 +32,31 @@ class SwooleServer extends Command{
             'dispatch_mode'=>1,
             'max_coroutine' => 9999999,
         ));
-        app()->test = 1;
         $httpServer->on('request', function ($request, $response) {
+            if(env('APP_DEBUG')){
+                $logdir = realpath(__DIR__."/../../../storage/logs/")."/";
+                file_put_contents($logdir."sql_facebook.log", "" );
+                file_put_contents($logdir."sql_sinoclick.log", "");
+                \DB::connection("facebook")->listen(function ($query) use ($logdir) {
+
+                    $sql = str_replace("?", "'%s'", $query->sql);
+                    $log = vsprintf($sql, $query->bindings);
+                    $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
+                    file_put_contents($logdir."sql_facebook.log", $log ,FILE_APPEND);
+                });
+                \DB::connection("sinoclick")->listen(function ($query)use ($logdir) {
+                    $sql = str_replace("?", "'%s'", $query->sql);
+                    $log = vsprintf($sql, $query->bindings);
+                    $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
+                    file_put_contents($logdir."sql_sinoclick.log", $log,FILE_APPEND);
+                });
+                \DB::connection("msdw")->listen(function ($query)use ($logdir) {
+                    $sql = str_replace("?", "'%s'", $query->sql);
+                    $log = vsprintf($sql, $query->bindings);
+                    $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
+                    file_put_contents($logdir."sql_msdw.log", $log,FILE_APPEND);
+                });
+            }
             $path_info = $request->server['path_info'];
             $swooleResponse = new \App\Common\SwooleResponse($response);
             if($swooleResponse->sendFile($path_info)) return;
@@ -54,63 +78,46 @@ class SwooleServer extends Command{
             if(class_exists($valideClassName) && $actionName){
                 $valide = new $valideClassName();
                 $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
-	            $failed = $validator->failed();
+                $failed = $validator->failed();
                 $messages = $validator->messages();
-	            if(count($messages) != 0){
+                if(count($messages) != 0){
                     $result = [];
                     $result['error'] = ['code'=>'FORM_VALIDATE_FAIL','message'=>$messages->toArray()];
                     $result['result'] = [];
                     $swooleResponse->sendJson($result);
-		            return;
-	            } 
+                    return;
+                }
+            }
+            //Result
+            $controllerName = 'App\\Http\\Controllers\\'.$controllerName;
+            if(class_exists($controllerName)){
+                #$request =  Request::capture();
+                $controller = app()->make($controllerName);
+                $controller->setResponse($swooleResponse);
+                $controller->setParams($params);
+                $result = $controller->$actionName($request);
+                if($result !== false){
+                    $response->end($result);
+                }
+                return;
             }
             $httpCode = 404;
             $response->status($httpCode);
             if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;
             $response->end($httpCode);
             return;
-        	$request_method = $request->server['request_method'];
-//            if($request_method == 'POST'){
-//                $post_data = $request->post;
-//
-//                $controller = $post_data['controller'];
-//                $action = $post_data['action'];
-//                $params = $post_data['params'];
-//                unset($params['controller'],$params['action']);
-//            }
-            app()->response = $response;
-            #echo $controllerName;
-            #\App\Common\Helper::runTimeStart();
-            echo '111';
-            app()->run();
-            return;
-		});
-        $httpServer->on('start', function () {
-            //$this->test();
         });
-		$httpServer->start();
-
-
-		#$this->test();
-    }
-    private function parseRequest($request){
-        $requestData = [];
-        $request->server['request_method'] == 'POST' && $requestData = $request->post;
-        if($request->server['request_method'] == 'GET'){
-            if($quertString = $request->server['query_string']??false){
-                parse_str($quertString,$requestData);
-            }
-        }
-        $result['method'] = $request->server['request_method'];
-        $result['data'] = $requestData;
-        return $result;
+        $httpServer->on('start', function () {
+            $this->test();
+        });
+        $httpServer->start();
     }
     private function test(){
         $startTime = microtime(true);
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get("/Channel/getAdAccountList");
+            $cli->get("/Channel/syncAllByUser");
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

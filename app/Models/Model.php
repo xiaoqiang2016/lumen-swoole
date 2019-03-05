@@ -5,6 +5,7 @@ use Log;
 class Model extends \Illuminate\Database\Eloquent\Model{
     protected $connection = 'sinoclick';
     protected $guarded = [];
+    protected $fieldConvert;
     public function getDB(){
         $db = app('db')->connection($this->connection);
         return $db;

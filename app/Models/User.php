@@ -3,15 +3,11 @@ namespace App\Models;
 
 
 class User extends Model{
-    protected $table = 'ms_user';
+    protected $table = 'sc_user';
     protected $connection = 'facebook';
-    protected $primaryKey = 'userid';
-    protected $casts = [
-        'id' => 'user_id',
-    ];
+    protected $primaryKey = 'id';
     public function getClients(){
-        $fields = ['ClientID as id'];
-        return Client::where('ClientID',$this->client_id)->get($fields);
+        return Client::where('user_id',$this->id)->get();
     }
     public function getTokens(){
         $r = UserToken::where('user_id',$this->getID())->get();
@@ -27,6 +23,6 @@ class User extends Model{
         return $this->hasMany('App\Models\Client','ClientID','client_id');
     }
     public function getID(){
-        return $this->userid;
+        return $this->id;
     }
 }

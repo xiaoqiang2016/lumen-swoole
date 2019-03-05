@@ -25,7 +25,7 @@ class Channel{
 	}
 	#更新用户全部数据
 	public function syncAllByUser(Models\User $user){
-	    $user = Models\User::find(1006631);
+	    $user = Models\User::find($user->id);
         #\App\Common\Helper::runTime();
 	    #$this->syncAdAccountByUser($user);#0.2
         #\App\Common\Helper::runTime();
@@ -36,7 +36,7 @@ class Channel{
         #$this->syncAdAdByUser($user);#8s 28k
         #$this->syncFacebookPageByUser($user);
         $this->adDiagnoseByUser($user);
-        \App\Common\Helper::runTime();
+        #\App\Common\Helper::runTime();
         return;
         $this->syncAdAdInsightsByUser($user);
     }
@@ -51,7 +51,7 @@ class Channel{
 
 	    $clients = $user->getClients();
         if($clients) foreach($clients as $client){
-            #$this->syncLocalAdAccountByClient($client);
+            $this->syncLocalAdAccountByClient($client);
         }
         #同步远端账号
         $this->syncRemoteAdAccountByUser($user);
@@ -93,7 +93,6 @@ class Channel{
     }
     #同步本地client广告账号
     public function syncLocalAdAccountByClient(Models\Client $client){
-
         Models\AdAccount::syncFromStorageByClient($client);
     }
     #

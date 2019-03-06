@@ -12,19 +12,22 @@ class Dispatcher
             #['handle'=>'ObjectiveNum'],
         ],
         'Campaign' => [
-
+            #['handle'=>'AbTesting'],
+            #['handle'=>'UseCbo'],
         ]
         ,
         'Ad' => [
             #['handle'=>'CtrLow'],
             #['handle'=>'CpmHigh'],
-            ['handle'=>'CpaHigh'],
+            #['handle'=>'CpaHigh'],
             #['handle'=>'UseCta'],
 
         ],
         'Set' => [
-            #['handle'=>'LinkClicksDailyBudget'],
+            #['handle'=>'LinkClickBidAmount'],
+            #['handle'=>'ConversionsBidAmount'],
             #['handle'=>'ConversionsDailyBudget'],
+            #['handle'=>'PlatformsPosition']
         ]
     ];
     //调度器

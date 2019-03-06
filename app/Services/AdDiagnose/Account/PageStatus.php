@@ -9,7 +9,7 @@ class PageStatus extends Base
     public $description = "";
     public function handle(){
         $ad_account_ids = $this->getParam('ad_account_ids');
-        $pages = Models\FacebookPage::whereIn('account_id',$ad_account_ids)->get(['page_id','name','status','account_id']);
+        $pages = Models\FacebookPage::whereIn('account_id',$ad_account_ids)->where('status','!=',1)->get(['page_id','name','status','account_id']);
         $result = [];
         if($pages) foreach($pages as $page){
             $_result = [];

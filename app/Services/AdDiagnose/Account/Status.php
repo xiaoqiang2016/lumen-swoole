@@ -33,18 +33,19 @@ class Status extends Base
             'UNUSED_ACCOUNT' => '未使用的账户',
         ];
         $ad_account_ids = $this->getParam('ad_account_ids');
-        $r = Models\AdAccount::whereIn('id',$ad_account_ids)->get(['id','remote_status']);
+        $r = Models\AdAccount::whereIn('id',$ad_account_ids)->where('remote_status','!=',1)->get(['id','remote_status']);
         $result = [];
         foreach($r as $_r){
             $_result = [];
             $_result['account_id'] = $_r['id'];
-            $_result['status'] = $_r['remote_status'] == 1 ? 'success' : strtolower($disable[$_r['remote_status']]);
+            $_result['status'] = 'fail';
 
             if($_result['status'] == 'success'){
                 $_result['desc'] = "您的广告账号状态正常。";
             }else{
                 $_result['desc'] = "您的广告账号因[".$disable_reason[$disable[$_r['remote_status']]]."]被关闭。";
             }
+            $_result['addno'] = ['status'=>$_r['remote_status'],'disable_reason'=>$disable_reason[$disable[$_r['remote_status']]]];
             $result[] = $_result;
         }
         return $result;

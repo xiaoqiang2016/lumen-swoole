@@ -16,7 +16,7 @@ class Base
 
         if($key == 'ad_account_ids_number'){
             $result = $this->params['ad_account_ids'];
-            foreach($result as &$v) $v = str_replace("act_","",$v);
+            foreach($result as &$v) $v = "'".str_replace("act_","",$v)."'";
         }else{
             $result = $this->params[$key];
         }
@@ -24,15 +24,15 @@ class Base
     }
     public function match(){
         $result = $this->handle();
+        $syncData = [];
+        $syncData['account_id'] = $this->getParam('ad_account_ids');
+        $syncData['group'] = $this->group;
+        $syncData['handle'] = $this->handle;
+        $syncData['name'] = $this->name;
         if($result){
-            $syncData = [];
-            $syncData['account_id'] = $this->getParam('ad_account_ids');
-            $syncData['group'] = $this->group;
-            $syncData['handle'] = $this->handle;
-            $syncData['name'] = $this->name;
             foreach($result as &$r) $r['addno'] = json_encode(isset($r['addno']) ? $r['addno'] : [],JSON_UNESCAPED_UNICODE);
-            (new \App\Models\AdDiagnose())->syncData($syncData,$result);
         }
+        (new \App\Models\AdDiagnose())->syncData($syncData,$result);
         #$fail = $this->getFail();
         #print_r(instanceof $success);
         #echo 'match';

@@ -61,6 +61,7 @@ class CpmHigh extends Base
                 if($diagnose['category1_cn'] == $data['category1_cn'] && $diagnose['category2_cn'] == $data['category2_cn'] && $diagnose['category3_cn'] == $data['category3_cn']){
                     $data[$category_key] = sprintf("%.2f",$data[$category_key]);
                     $diagnose[$category_key] = sprintf("%.2f",$diagnose[$category_key]);
+                    #echo $data[$category_key]."|".$diagnose[$category_key].PHP_EOL;
                     $_per = $data[$category_key] == 0 ? 0 : ($data[$category_key]-$diagnose[$category_key]) / $diagnose[$category_key];
                     $_per *= 100;
                     if($_per > $per){

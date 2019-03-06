@@ -7,6 +7,11 @@ class Channel{
     public $ids = [];
 	public function getInstance($ids=[]){
 	    $result = [];
+	    $single = 0;
+	    if(!is_array($ids)){
+            $single = $ids;
+	        $ids = [$ids];
+        }
 	    if($ids == []) $ids = $this->ids;
 		$data = [
 			1 => 'Facebook',
@@ -20,6 +25,9 @@ class Channel{
         $channels = [];
         if($result) foreach($result as $k=>$v){
             $channels[$k] = app()->make("App\\Services\\Channels\\{$v}");
+        }
+        if($single){
+            return $channels[$single];
         }
 		return $channels;
 	}

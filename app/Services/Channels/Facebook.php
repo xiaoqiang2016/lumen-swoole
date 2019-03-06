@@ -256,13 +256,11 @@ class Facebook extends Channel{
     }
     public function syncFacebookPageByUser(Models\User $user){
         $adAccounts = $user->getAdAccountBelongsByChannel($this->id);
-
-
-
         $tokens = $this->getTokensByAdAccount($adAccounts);
         $chan = new co\Channel(1);
         $starttime = microtime(true);
         $ii = 0;
+
         $taskCount = count($adAccounts);
         foreach($adAccounts as $adAccount){
             $ads = $adAccount->getAdAds();
@@ -272,6 +270,7 @@ class Facebook extends Channel{
                 $result = [];
                 if($sdkDatas) foreach($sdkDatas as $sdkData){
                     $_result = [];
+                    #$_result['id'] = $sdkData['id'];
                     $_result['page_id'] = $sdkData['id'];
                     $_result['status'] = $sdkData['is_published']?1:0;
                     $_result['name'] = $sdkData['name'];
@@ -280,6 +279,7 @@ class Facebook extends Channel{
                 }
                 $chan->push(['index'=>$ii,'result'=>$result]);
             });
+            echo 1;
             $ii++;
         }
         $result = [];
@@ -295,6 +295,7 @@ class Facebook extends Channel{
             #echo PHP_EOL;
             if($index == $taskCount && $result = array_filter($result)){
                 #print_r($result);
+                echo microtime(true) - $starttime;
                 $account_ids = array_column($adAccounts->toArray(),'account_id');
                 (new \App\Models\FacebookPage())->syncData(['account_id'=>$account_ids],$result);
             }
@@ -359,5 +360,23 @@ class Facebook extends Channel{
         #print_r($adAccountIds);
         #print_r($adAccounts->getAdAccountIds());
         return;
+    }
+    /*
+     * $params = [
+     *    'ad_id' => '',
+     *    'insights' => [],
+     * ]
+     */
+    public function adInsightsDiagnose($params=[]){
+        //获取分类
+        $ad_ids = array_column($params,'ad_id');
+        print_r($ad_ids);
+        $catagorys = (new \App\Models\Msdw\DimFbAd())->getCategoryByAdIds($ad_ids);
+        $catagoryMap = [];
+        foreach($catagorys as $catagory){
+            $catagoryMap[$catagory['category1_cn']."_".$catagory['category2_cn']."_".$catagory['category3_cn']] = $catagory;
+        }
+        $AdIndustryAverageStatsData = (new Models\AdIndustryAverageStats())->getInsights($catagoryMap,['cpm','ctr']);
+        print_r($AdIndustryAverageStatsData);
     }
 }

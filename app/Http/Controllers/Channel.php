@@ -22,4 +22,11 @@ class Channel extends Controller
         #$result = $this->channelService->adAccount()->getListByClient($client);
         #return $this->result($result);
     }
+    //广告数据诊断
+    public function adInsightsDiagnose(){
+        $params = [];
+        $params[] = ['ad_id'=>'23843251176640547','insights'=>['ctr'=>'5.239453','cpm'=>'5.239453']];
+        $params[] = ['ad_id'=>'23843251176620547','insights'=>['ctr'=>'5.239453','cpm'=>'5.239453']];
+        $this->channelService->getInstance(1)->adInsightsDiagnose($params);
+    }
 }

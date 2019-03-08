@@ -12,11 +12,10 @@ class UseCbo extends Base
     public function handle(){
         $result = [];
         $obj = new \App\Models\Msdw\DimFbAdset();
-        $objective = "CONVERSIONS";
-        $budget = "30";//$10
         $map = [];
 
-        $map[] = "t.account_id IN (".implode(",",$this->getParam("ad_account_ids_number")).")";
+        $ad_account_id = $this->getParam("ad_account_id_number");
+        $map[] = "t.account_id = {$ad_account_id}";
         $map[] = "campaign.status = 'ACTIVE'";
         $map[] = "t.spend_cap <> ''";
         $map[] = "(t.bid_strategy = 'False' OR t.bid_strategy = '')";
@@ -37,5 +36,19 @@ class UseCbo extends Base
             }
         }
         return $result;
+    }
+    public function count(){
+        $obj = new \App\Models\Msdw\DimFbAdset();
+        $ad_account_id = $this->getParam("ad_account_id_number");
+        $map[] = "t.account_id = {$ad_account_id}";
+        $map[] = "campaign.status = 'ACTIVE'";
+        $map[] = "t.spend_cap <> ''";
+        $map[] = "(t.bid_strategy = 'False' OR t.bid_strategy = '')";
+        $sql = "SELECT count(1) as count
+                FROM facebookods.fb_campaign t
+                INNER JOIN msdw.dim_fb_campaign campaign ON campaign.campaign_id = t.campaign_id
+                WHERE ".implode(" AND ",$map)." ;";
+        $datas = $obj->getDB()->select($sql);
+        return $datas[0]['count'];
     }
 }

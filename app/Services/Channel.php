@@ -38,9 +38,9 @@ class Channel{
 	    #$this->syncAdAccountByUser($user);#0.2
         #\App\Common\Helper::runTime();
 	    #return;
-        #$this->syncAdCampaignByUser($user);#8s 24268
+        ##$this->syncAdCampaignByUser($user);#8s 24268
 
-        #$this->syncAdSetByUser($user);#12s 25k
+        ##$this->syncAdSetByUser($user);#12s 25k
         #$this->syncAdAdByUser($user);#8s 28k
         #$this->syncFacebookPageByUser($user);
         $this->adDiagnoseByUser($user);

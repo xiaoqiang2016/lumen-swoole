@@ -44,6 +44,7 @@ class Facebook extends Channel{
                         $data['disable_reason'] = $disable_reason[$adAccount['disable_reason']];
                         $data['created_time'] = $this->parseTime($adAccount['created_time']);
                         $data['channel_id'] = $this->id;
+
                         $syncData[] = $data;
                     }
                 }
@@ -263,7 +264,7 @@ class Facebook extends Channel{
 
         $taskCount = count($adAccounts);
         foreach($adAccounts as $adAccount){
-            $ads = $adAccount->getAdAds();
+            //$ads = $adAccount->getAdAds();
             $sdk = $this->getSdk($tokens[$adAccount->token_id??0]);
             go(function() use($adAccount,$sdk,$ii,$chan){
                 $sdkDatas = $sdk->getPagesByAdAccountID($adAccount->account_id);
@@ -279,7 +280,6 @@ class Facebook extends Channel{
                 }
                 $chan->push(['index'=>$ii,'result'=>$result]);
             });
-            echo 1;
             $ii++;
         }
         $result = [];
@@ -287,15 +287,21 @@ class Facebook extends Channel{
         while(1){
             $data = $chan->pop();
             #$result[$data['index']] = $data['result'];
-            $result = array_merge($data['result'],$result);
-            echo $index."/".$taskCount;
+
+            if($data['result']) foreach($data['result'] as $v){
+                $result[] = $v;
+            }
+
+            echo $index."/".$taskCount . " | " . count($result);
             echo PHP_EOL;
             $index++;
             #print_r($data);
             #echo PHP_EOL;
-            if($index == $taskCount && $result = array_filter($result)){
+            if($index == $taskCount){
                 #print_r($result);
                 echo microtime(true) - $starttime;
+                echo PHP_EOL;
+                echo count($result);
                 $account_ids = array_column($adAccounts->toArray(),'account_id');
                 (new \App\Models\FacebookPage())->syncData(['account_id'=>$account_ids],$result);
             }
@@ -356,9 +362,9 @@ class Facebook extends Channel{
         $adAccounts = $user->getAdAccountBelongsByChannel($this->id);
         $adAccountIds = array_column($adAccounts->toArray(),"account_id");
         $adDiagnose = new \App\Services\AdDiagnose\Dispatcher();
-        $adDiagnose->handle(['ad_account_ids'=>$adAccountIds]);
-        #print_r($adAccountIds);
-        #print_r($adAccounts->getAdAccountIds());
+        foreach($adAccountIds as $ad_account_id){
+            $adDiagnose->handle(['ad_account_id'=>$ad_account_id]);
+        }
         return;
     }
     /*
@@ -368,15 +374,49 @@ class Facebook extends Channel{
      * ]
      */
     public function adInsightsDiagnose($params=[]){
+        if(!$params) return;
         //获取分类
         $ad_ids = array_column($params,'ad_id');
-        print_r($ad_ids);
         $catagorys = (new \App\Models\Msdw\DimFbAd())->getCategoryByAdIds($ad_ids);
+        #print_r($catagorys);
         $catagoryMap = [];
         foreach($catagorys as $catagory){
             $catagoryMap[$catagory['category1_cn']."_".$catagory['category2_cn']."_".$catagory['category3_cn']] = $catagory;
+            foreach($params as &$param){
+                if($param['ad_id'] == $catagory['ad_id']){
+                    $param['category1_cn'] = $catagory['category1_cn'];
+                    $param['category2_cn'] = $catagory['category2_cn'];
+                    $param['category3_cn'] = $catagory['category3_cn'];
+                }
+            }
         }
+
         $AdIndustryAverageStatsData = (new Models\AdIndustryAverageStats())->getInsights($catagoryMap,['cpm','ctr']);
-        print_r($AdIndustryAverageStatsData);
+
+        #print_r($AdIndustryAverageStatsData);
+        foreach($params as &$param){
+            $param['industry'] = [];
+            $param['diagnose'] = [];
+        }
+        foreach($AdIndustryAverageStatsData as $adsd){
+            foreach($params as &$param){
+                if($param['category1_cn'] == $adsd['category1_cn'] && $param['category2_cn'] == $adsd['category2_cn'] && $param['category3_cn'] == $adsd['category3_cn']){
+                    $param['industry'] = $adsd;
+                    unset($param['industry']['category1_cn'],$param['industry']['category2_cn'],$param['industry']['category3_cn']);
+                    foreach($param['insights'] as $k=>$v){
+                        $param['insights'][$k] = sprintf("%.2f",$param['insights'][$k]);
+                        $param['industry'][$k] = sprintf("%.2f",$param['industry'][$k]);
+                        #$param['insights'][$k] = 0.8;
+                        $check = $param['insights'][$k] - $param['industry'][$k];
+                        if($check > 0){
+                            $param['diagnose'][$k] = sprintf("%.2f",$check / $param['industry'][$k] * 100);
+                        }else{
+                            $param['diagnose'][$k] = sprintf("%.2f",$check / $param['insights'][$k] * 100);
+                        }
+                    }
+                }
+            }
+        }
+        return $params;
     }
 }

@@ -14,7 +14,8 @@ class AbTesting extends Base
         $obj = new \App\Models\Msdw\DimFbAdset();
         $map = [];
 
-        $map[] = "t.account_id IN (".implode(",",$this->getParam("ad_account_ids_number")).")";
+        $ad_account_id = $this->getParam("ad_account_id_number");
+        $map[] = "t.account_id = {$ad_account_id}";
         $map[] = "campaign.status = 'ACTIVE'";
         $map[] = "t.spend_cap <> ''";
         $map[] = "t.can_create_brand_lift_study = 'False'";
@@ -35,5 +36,19 @@ class AbTesting extends Base
             }
         }
         return $result;
+    }
+    public function count(){
+        $obj = new \App\Models\Msdw\DimFbAdset();
+        $ad_account_id = $this->getParam("ad_account_id_number");
+        $map[] = "t.account_id = {$ad_account_id}";
+        $map[] = "campaign.status = 'ACTIVE'";
+        $map[] = "t.spend_cap <> ''";
+        $map[] = "t.can_create_brand_lift_study = 'False'";
+        $sql = "SELECT count(1) as count
+                FROM facebookods.fb_campaign t
+                INNER JOIN msdw.dim_fb_campaign campaign ON campaign.campaign_id = t.campaign_id
+                WHERE ".implode(" AND ",$map)." ;";
+        $datas = $obj->getDB()->select($sql);
+        return $datas[0]['count'];
     }
 }

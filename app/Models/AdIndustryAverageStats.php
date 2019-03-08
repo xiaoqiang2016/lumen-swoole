@@ -8,20 +8,20 @@ class AdIndustryAverageStats extends Model{
     public function getInsights($map,$fields=[]){
         $tableName = $this->getTable();
         $_map = [];
-        $fields[] = 'category_level_1';
-        $fields[] = 'category_level_2';
-        $fields[] = 'category_level_3';
+        $fields[] = 'category_level_1 as category1_cn';
+        $fields[] = 'category_level_2 as category2_cn';
+        $fields[] = 'category_level_3 as category3_cn';
         foreach($map as $v){
             $m = [];
             for($i=1;$i<=3;$i++){
-                $m[] = "category_level_{$i} git";
+                $m[] = "category_level_{$i} ".($v["category{$i}_cn"]?" = '".$v["category{$i}_cn"]."'":' is null');
             }
-            $_map[] = "(category_level_1 = '{$v['category1_cn']}' AND category_level_2 = '{$v['category2_cn']}' AND category_level_3 = '{$v['category3_cn']}')";
+            $_map[] = "(".implode(" AND ",$m).")";
         }
         $_map = implode(" OR ",$_map);
         $sql = "SELECT ".(implode(",",$fields))." FROM {$tableName} WHERE {$_map}";
-        echo $sql;
         $r = $this->getDB()->select($sql);
-        print_r($r);
+        $r = json_decode(json_encode($r),true);
+        return $r;
     }
 }

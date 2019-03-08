@@ -8,8 +8,8 @@ class PageStatus extends Base
     public $name = "主页状态";
     public $description = "";
     public function handle(){
-        $ad_account_ids = $this->getParam('ad_account_ids');
-        $pages = Models\FacebookPage::whereIn('account_id',$ad_account_ids)->where('status','!=',1)->get(['page_id','name','status','account_id']);
+        $ad_account_id = $this->getParam('ad_account_id');
+        $pages = Models\FacebookPage::where('account_id',$ad_account_id)->where('status','!=',1)->get(['page_id','name','status','account_id']);
         $result = [];
         if($pages) foreach($pages as $page){
             $_result = [];
@@ -25,6 +25,10 @@ class PageStatus extends Base
             $result[] = $_result;
         }
         return $result;
+    }
+    public function count(){
+        $ad_account_id = $this->getParam('ad_account_id');
+        return Models\FacebookPage::where('account_id',$ad_account_id)->count();
     }
     public function getDescription(){
 

@@ -9,15 +9,18 @@ class CtrLow extends Base
     public $name = "CTR较低";
     public $description = "";
     public $connection = 'msdw';
+    public $count = 0;
     public function handle(){
         $category_key = 'ctr';
         $per = '20';
-        $ad_account_ids = $this->getParam('ad_account_ids');
-        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCtrByAdAccountId($ad_account_ids);
+        $ad_account_id = $this->getParam('ad_account_id');
+        #echo $ad_account_id.PHP_EOL;
 
+        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCtrByAdAccountId([$ad_account_id]);
+        #print_r($datas);
         $ad_ids = array_column($datas,'ad_id');
+        if(!$ad_ids) return [];
         $categorys = (new Models\Msdw\DimFbAd())->getCategoryByAdIds($ad_ids);
-
         foreach($datas as &$data){
             foreach($categorys as $category){
                 if($category['ad_id'] == $data['ad_id']){
@@ -30,6 +33,7 @@ class CtrLow extends Base
         foreach($datas as $k=>$v){
             if(!isset($v['category1_cn']) || !$v['category1_cn']) unset($datas[$k]);
         }
+
         //归类类别
         $categoryData = [];
         foreach($categorys as $category){
@@ -59,6 +63,9 @@ class CtrLow extends Base
             #print_r($data);
             foreach($diagnoseData as $diagnose){
                 if($diagnose['category1_cn'] == $data['category1_cn'] && $diagnose['category2_cn'] == $data['category2_cn'] && $diagnose['category3_cn'] == $data['category3_cn']){
+                    $this->count++;
+                    $data[$category_key] = sprintf("%.2f",$data[$category_key]);
+                    $diagnose[$category_key] = sprintf("%.2f",$diagnose[$category_key]);
                     if($diagnose[$category_key] * (1-$per/100) > $data[$category_key]){
                         $r = [];
                         $r['account_id'] = $data['account_id'];
@@ -83,7 +90,7 @@ class CtrLow extends Base
         return $result;
 
     }
-    public function getDescription(){
-
+    public function count(){
+        return $this->count;
     }
 }

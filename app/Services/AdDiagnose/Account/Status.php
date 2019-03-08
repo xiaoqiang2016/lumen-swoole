@@ -7,6 +7,7 @@ class Status extends Base
 {
     public $name = "账户状态";
     public $description = "";
+    public $point = 1;
     public function handle(){
         $disable = [
             'NONE',
@@ -32,25 +33,18 @@ class Status extends Base
             'UNUSED_RESELLER_ACCOUNT' => '未使用的经销商账户',
             'UNUSED_ACCOUNT' => '未使用的账户',
         ];
-        $ad_account_ids = $this->getParam('ad_account_ids');
-        $r = Models\AdAccount::whereIn('id',$ad_account_ids)->where('remote_status','!=',1)->get(['id','remote_status']);
+        $ad_account_id = $this->getParam('ad_account_id');
+        $r = Models\AdAccount::where('id',$ad_account_id)->first(['id','remote_status']);
         $result = [];
-        foreach($r as $_r){
-            $_result = [];
-            $_result['account_id'] = $_r['id'];
-            $_result['status'] = 'fail';
-
-            if($_result['status'] == 'success'){
-                $_result['desc'] = "您的广告账号状态正常。";
-            }else{
-                $_result['desc'] = "您的广告账号因[".$disable_reason[$disable[$_r['remote_status']]]."]被关闭。";
-            }
-            $_result['addno'] = ['status'=>$_r['remote_status'],'disable_reason'=>$disable_reason[$disable[$_r['remote_status']]]];
-            $result[] = $_result;
+        if($r->remote_status != 1){
+            $result['status'] = 'fail';
+            $result['desc'] = "您的广告账号因[".$disable_reason[$disable[$r->remote_status]]."]被关闭。";
+            $result['addno'] = ['status'=>$r->remote_status,'disable_reason'=>$disable_reason[$disable[$r->remote_status]]];
+            $result = [$result];
         }
         return $result;
     }
-    public function getDescription(){
-
+    public function count(){
+        return 1;
     }
 }

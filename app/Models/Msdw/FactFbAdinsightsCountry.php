@@ -9,10 +9,11 @@ class FactFbAdinsightsCountry extends Model{
         $dateStart = date("Y-m-d",strtotime($date) - 86400 * 2);
         $keys = (new DimAdaccount())->getAdAccountKeys($ids);
         $ad_keys = implode(",",$keys);
+
         #$sql = "select max(adaccount_key) as adaccount_key,max(campaign_id) as campaign_id,max(adset_id) as set_id,ad_id,case when sum(impressions) = 0 then 0 else sum(clicks)/sum(impressions) end as ctr from msdw.fact_fb_adinsights_country where adaccount_key IN ({$ad_keys}) and calendar_date = '{$date}' group by ad_id ;";
         $sql = "select max(ac.adaccount_key) as adaccount_key,
                        max(ac.campaign_id) as campaign_id,
-                       max(ac.adset_id) as set_id,ac.ad_id,
+                       max(ac.adset_id) as set_id,max(ac.ad_id) as ad_id,
                        case when sum(ac.impressions) = 0 then 0 else sum(ac.clicks)/sum(ac.impressions) end as ctr 
                        from msdw.fact_fb_adinsights_country  ac
                        inner join msdw.dim_fb_ad ad on ad.ad_id = ac.ad_id 
@@ -20,9 +21,11 @@ class FactFbAdinsightsCountry extends Model{
                        adaccount_key IN ({$ad_keys}) AND
                        ac.calendar_date = '{$date}' AND ad.created_time > '{$dateStart}' 
                        group by ac.ad_id;";
+
         $result = $this->getDB()->select($sql);
         $keys = array_flip($keys);
         if($result) foreach($result as &$v){
+            #$v['ctr'] = 0;
             $v['account_id'] = $keys[$v['adaccount_key']];
         }
         return $result;
@@ -37,7 +40,7 @@ class FactFbAdinsightsCountry extends Model{
         #$sql = "select max(adaccount_key) as adaccount_key,max(campaign_id) as campaign_id,max(adset_id) as set_id,ad_id,case when sum(impressions) = 0 then 0 else sum(spend)/sum(impressions)*1000 end as cpm from msdw.fact_fb_adinsights_country where adaccount_key IN ({$ad_keys}) and calendar_date = '{$date}' group by ad_id ;";
         $sql = "select max(ac.adaccount_key) as adaccount_key,
                        max(ac.campaign_id) as campaign_id,
-                       max(ac.adset_id) as set_id,ac.ad_id,
+                       max(ac.adset_id) as set_id,max(ac.ad_id) as ad_id,
                        case when sum(ac.impressions) = 0 then 0 else sum(ac.spend)/sum(ac.impressions)*1000 end as cpm 
                        from msdw.fact_fb_adinsights_country  ac
                        inner join msdw.dim_fb_ad ad on ad.ad_id = ac.ad_id 
@@ -45,7 +48,6 @@ class FactFbAdinsightsCountry extends Model{
                        adaccount_key IN ({$ad_keys}) AND
                        ac.calendar_date = '{$date}' AND ad.created_time > '{$dateStart}' 
                        group by ac.ad_id;";
-
         $result = $this->getDB()->select($sql);
         $keys = array_flip($keys);
         if($result) foreach($result as &$v){

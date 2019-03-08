@@ -32,13 +32,12 @@ class SwooleServer extends Command{
             'dispatch_mode'=>1,
             'max_coroutine' => 9999999,
         ));
-        $httpServer->on('request', function ($request, $response) {
+        $httpServer->on('request', function($request, $response){
             if(env('APP_DEBUG')){
                 $logdir = realpath(__DIR__."/../../../storage/logs/")."/";
                 file_put_contents($logdir."sql_facebook.log", "" );
                 file_put_contents($logdir."sql_sinoclick.log", "");
                 \DB::connection("facebook")->listen(function ($query) use ($logdir) {
-
                     $sql = str_replace("?", "'%s'", $query->sql);
                     $log = vsprintf($sql, $query->bindings);
                     $log = '[' . date('Y-m-d H:i:s') . '] ('.$query->time.'ms) ' . $log . "\r\n";
@@ -95,9 +94,12 @@ class SwooleServer extends Command{
                 $controller = app()->make($controllerName);
                 $controller->setResponse($swooleResponse);
                 $controller->setParams($params);
-                $result = $controller->$actionName($request);
-                if($result !== false){
-                    $response->end($result);
+                $_result = $controller->$actionName($request);
+                if($_result !== false){
+                    $result = [];
+                    $result['error'] = [];
+                    $result['result'] = $_result;
+                    $swooleResponse->sendJson($result);
                 }
                 return;
             }
@@ -117,7 +119,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get("/Channel/adInsightsDiagnose");
+            $cli->get("/Channel/syncAllByUser");
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

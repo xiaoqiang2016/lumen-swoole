@@ -8,7 +8,7 @@ class Dispatcher
     private $routers = [
         'Account' => [
             #['handle'=>'Status'],
-            #['handle'=>'PageStatus'],
+            #['handle'=>'PageStatus'], //同步主页可能有问题
             #['handle'=>'ObjectiveNum'],
         ],
         'Campaign' => [
@@ -18,7 +18,7 @@ class Dispatcher
         ,
         'Ad' => [
             #['handle'=>'CtrLow'],
-            #['handle'=>'CpmHigh'],
+            ['handle'=>'CpmHigh'],
             #['handle'=>'CpaHigh'],
             #['handle'=>'UseCta'],
 

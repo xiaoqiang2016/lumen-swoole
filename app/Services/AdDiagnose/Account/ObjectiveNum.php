@@ -8,8 +8,9 @@ class ObjectiveNum extends Base
     public $name = "营销目标数量";
     public $description = "";
     public function handle(){
-        $ad_account_ids = $this->getParam('ad_account_ids_number');
-        $r = Models\Msdw\DimFbCampaign::whereIn('account_id',$ad_account_ids)->select('account_id','objective')->groupby("account_id","objective")->get();
+        $ad_account_id = $this->getParam('ad_account_id_number');
+        $r = Models\Msdw\DimFbCampaign::where('account_id',(int)$ad_account_id)->select('account_id','objective')->groupby("account_id","objective")->get();
+
         $result = [];
         $countData = [];
 
@@ -29,6 +30,9 @@ class ObjectiveNum extends Base
 
         }
         return $result;
+    }
+    public function count(){
+        return 1;
     }
     public function getDescription(){
 

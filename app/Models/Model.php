@@ -33,8 +33,13 @@ class Model extends \Illuminate\Database\Eloquent\Model{
             }
         }
         $t->delete();
-        if(count($map) > 0) foreach($data as &$v) $v = array_merge($v,$map);
-        $this->insertAll($data);
+        if(count($map) > 0 && isset($data[0]) && $data[0] !== false) {
+            foreach($data as &$v) $v = array_merge($v,$map);
+        }
+        if(isset($data[0]) && $data[0] !== false){
+            $this->insertAll($data);
+        }
+
     }
     public function updateAll(array $multipleDatas, $whenField = 'id', $whereField = 'id')
     {

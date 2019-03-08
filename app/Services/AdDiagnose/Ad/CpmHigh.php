@@ -9,6 +9,7 @@ class CpmHigh extends Base
     public $name = "CPM较高";
     public $description = "";
     public $connection = 'msdw';
+    public $count = 0;
     public function handle(){
         $category_key = 'cpm';
         $per = '20';
@@ -59,6 +60,7 @@ class CpmHigh extends Base
             #print_r($data);
             foreach($diagnoseData as $diagnose){
                 if($diagnose['category1_cn'] == $data['category1_cn'] && $diagnose['category2_cn'] == $data['category2_cn'] && $diagnose['category3_cn'] == $data['category3_cn']){
+                    $this->count++;
                     $data[$category_key] = sprintf("%.2f",$data[$category_key]);
                     $diagnose[$category_key] = sprintf("%.2f",$diagnose[$category_key]);
                     #echo $data[$category_key]."|".$diagnose[$category_key].PHP_EOL;
@@ -86,6 +88,8 @@ class CpmHigh extends Base
         }
         #print_r($ad_ids);
         return $result;
-
+    }
+    public function count(){
+        return $this->count;
     }
 }

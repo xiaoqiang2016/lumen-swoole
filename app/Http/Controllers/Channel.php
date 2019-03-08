@@ -27,6 +27,6 @@ class Channel extends Controller
         $params = [];
         $params[] = ['ad_id'=>'23843251176640547','insights'=>['ctr'=>'5.239453','cpm'=>'5.239453']];
         $params[] = ['ad_id'=>'23843251176620547','insights'=>['ctr'=>'5.239453','cpm'=>'5.239453']];
-        $this->channelService->getInstance(1)->adInsightsDiagnose($params);
+        return $this->channelService->getInstance(1)->adInsightsDiagnose($params);
     }
 }

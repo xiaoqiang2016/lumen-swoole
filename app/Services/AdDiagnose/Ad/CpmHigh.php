@@ -10,13 +10,15 @@ class CpmHigh extends Base
     public $description = "";
     public $connection = 'msdw';
     public $count = 0;
+    public $point = 3;
     public function handle(){
         $category_key = 'cpm';
         $per = '20';
-        $ad_account_ids = $this->getParam('ad_account_ids');
-        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCpmByAdAccountId($ad_account_ids);
+        $ad_account_id = $this->getParam('ad_account_id');
+        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCpmByAdAccountId([$ad_account_id]);
 
         $ad_ids = array_column($datas,'ad_id');
+        if(!$ad_ids) return [];
         $categorys = (new Models\Msdw\DimFbAd())->getCategoryByAdIds($ad_ids);
 
         foreach($datas as &$data){

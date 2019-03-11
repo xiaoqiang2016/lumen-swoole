@@ -42,7 +42,9 @@ class Channel{
 
         ##$this->syncAdSetByUser($user);#12s 25k
         #$this->syncAdAdByUser($user);#8s 28k
+
         #$this->syncFacebookPageByUser($user);
+
         $this->adDiagnoseByUser($user);
         #\App\Common\Helper::runTime();
         return;

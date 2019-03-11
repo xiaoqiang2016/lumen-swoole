@@ -10,6 +10,7 @@ class CtrLow extends Base
     public $description = "";
     public $connection = 'msdw';
     public $count = 0;
+    public $point = 3;
     public function handle(){
         $category_key = 'ctr';
         $per = '20';

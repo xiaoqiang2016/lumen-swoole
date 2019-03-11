@@ -7,6 +7,7 @@ class PageStatus extends Base
 {
     public $name = "主页状态";
     public $description = "";
+    public $point = 1;
     public function handle(){
         $ad_account_id = $this->getParam('ad_account_id');
         $pages = Models\FacebookPage::where('account_id',$ad_account_id)->where('status','!=',1)->get(['page_id','name','status','account_id']);

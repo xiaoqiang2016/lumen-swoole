@@ -9,6 +9,7 @@ class AbTesting extends Base
     public $name = "未使用A/B Testing";
     public $description = "";
     public $connection = 'msdw';
+    public $point = 4;
     public function handle(){
         $result = [];
         $obj = new \App\Models\Msdw\DimFbAdset();

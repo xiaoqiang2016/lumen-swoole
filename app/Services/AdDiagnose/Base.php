@@ -10,6 +10,7 @@ class Base
     public $name = '';
     public $point;
     protected $params = [];
+    public $count = 0;
     public function __construct($params){
         $this->params = $params;
     }
@@ -24,21 +25,25 @@ class Base
         return $result;
     }
     public function match(){
+
         $result = $this->handle();
         $syncData = [];
         $syncData['account_id'] = $this->getParam('ad_account_id');
         $syncData['group'] = $this->group;
         $syncData['handle'] = $this->handle;
         $syncData['name'] = $this->name;
+        $this->log('handle',$syncData);
         if($result){
             foreach($result as &$r) $r['addno'] = json_encode(isset($r['addno']) ? $r['addno'] : [],JSON_UNESCAPED_UNICODE);
         }else{
-            $result = [false];
+            $result = [];
         }
         (new \App\Models\AdDiagnose())->syncData($syncData,$result);
+
         $failCount = count($result);
         $result = [];
         $count = (int)$this->count();
+        $this->log('handle_success',['总数'=>$count,"错误数"=>$failCount]);
         if($count > 0){
             $basePoint = 5;
             $result['count'] = $count;
@@ -50,6 +55,17 @@ class Base
             $result = false;
         }
         (new \App\Models\AdDiagnoseLog())->syncData($syncData,[$result]);
+    }
+    public function log($action,$params){
+        $message = "";
+        $action_data = [
+            'handle' => '执行诊断',
+            'handle_success' => '诊断执行完毕',
+        ];
+        $message .=  $action_data[$action].":".PHP_EOL;
+        $message .=  json_encode($params,JSON_UNESCAPED_UNICODE).PHP_EOL;
+        $message .= "===================================".PHP_EOL;
+        echo $message;
     }
     public function getSuccess(){
 

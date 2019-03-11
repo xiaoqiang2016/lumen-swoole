@@ -19,8 +19,8 @@ class Facebook{
         return $this->token;
     }
 
-    public function setToken($token){
-        $this->token = $token;
+    public function setToken($token=false){
+        if($token !== false) $this->token = $token;
         return $this;
     }
 
@@ -31,9 +31,10 @@ class Facebook{
         return $data;
     }
     public function get($query){
+        #echo $query.PHP_EOL;
         $query = $this->parseQuery($query);
-        $url = "{$this->apiurl}/v{$this->version}/{$query}&access_token={$this->token}";
-
+        $separate = strpos($query,"?") ? '&' : '?';
+        $url = "{$this->apiurl}/v{$this->version}/{$query}{$separate}access_token={$this->token}";
         #echo $url;
         #echo PHP_EOL;
         #echo "https://graph.facebook.com/v3.2/me?fields=adaccounts.limit(1000){name,id,amount_spent,spend_cap,account_status,currency,owner,created_time}&access_token=EAAHE0mTSloIBAIjVmFt3NEbmLz1GvIYE5MUhdQqPaK1QJeRvu8whGPJp8DJWTDjTuWuw3gsZAZCBc1zZARE8KPeFfATHopP299Tm31J1aLmHZCJneShLqRgok6TxMG8rUh2lkB9red2RdmWqX6bPNCgJ52ndNlDHnsZCUgoWRnQZDZD";
@@ -97,6 +98,12 @@ class Facebook{
         #echo $query.PHP_EOL;
         $response = $this->get($query);
         $result = $response['promote_pages']['data']??[];
+        return $result;
+    }
+    public function getOeRequestList(){
+        $query = '630723763692369/resellervettingrequests';
+        $response = $this->get($query);
+        $result = $response['data'];
         return $result;
     }
 }

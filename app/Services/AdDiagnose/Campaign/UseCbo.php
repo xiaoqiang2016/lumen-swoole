@@ -9,6 +9,7 @@ class UseCbo extends Base
     public $name = "未使用CBO";
     public $description = "";
     public $connection = 'msdw';
+    public $point = 3;
     public function handle(){
         $result = [];
         $obj = new \App\Models\Msdw\DimFbAdset();

@@ -33,10 +33,11 @@ class Model extends \Illuminate\Database\Eloquent\Model{
             }
         }
         $t->delete();
-        if(count($map) > 0 && isset($data[0]) && $data[0] !== false) {
+        $data = array_filter($data);
+        if(count($map) > 0 && isset($data[0]) && $data !== []) {
             foreach($data as &$v) $v = array_merge($v,$map);
         }
-        if(isset($data[0]) && $data[0] !== false){
+        if(isset($data[0]) && $data !== []){
             $this->insertAll($data);
         }
 

@@ -7,6 +7,7 @@ class ObjectiveNum extends Base
 {
     public $name = "营销目标数量";
     public $description = "";
+    public $point = 2;
     public function handle(){
         $ad_account_id = $this->getParam('ad_account_id_number');
         $r = Models\Msdw\DimFbCampaign::where('account_id',(int)$ad_account_id)->select('account_id','objective')->groupby("account_id","objective")->get();

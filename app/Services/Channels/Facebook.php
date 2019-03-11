@@ -261,7 +261,6 @@ class Facebook extends Channel{
         $chan = new co\Channel(1);
         $starttime = microtime(true);
         $ii = 0;
-
         $taskCount = count($adAccounts);
         foreach($adAccounts as $adAccount){
             //$ads = $adAccount->getAdAds();
@@ -418,5 +417,61 @@ class Facebook extends Channel{
             }
         }
         return $params;
+    }
+    public static function syncOeRequest(){
+        $sdk = (new self())->getSdk();
+        $_oeList = $sdk->getOeRequestList();
+        $oeList = [];
+        
+        if($_oeList){
+            foreach($_oeList as $oe){
+                $r = [];
+                $advertiser_data = $oe['advertiser_data'];
+                $r['oe_id'] = $oe['id'];
+                $r['status'] = 'oe_'.$oe['status'];
+                $r['apply_number'] = $advertiser_data['ad_account_number'] ?? 0;
+                $r['bind_bm_id'] = $advertiser_data['business_manager_id'];
+                $r['business_license'] = $advertiser_data['business_registration'];
+                $r['business_code'] = $advertiser_data['business_registration_id'];
+                $r['address_cn'] = $advertiser_data['chinese_address'];
+                $r['business_name_cn'] = $advertiser_data['chinese_legal_entity_name'];
+                $r['city'] = $advertiser_data['city'];
+                $r['email'] = $advertiser_data['contact'];
+                $r['website'] = $advertiser_data['official_website_url'];
+                $r['mobile'] = isset($advertiser_data['phone_number']) ? $advertiser_data['phone_number']['phone_number'] : '';
+                $r['mobile_id'] = isset($advertiser_data['phone_number']) ? $advertiser_data['phone_number']['id'] : '';
+                $r['promotable_urls'] = $advertiser_data['promotable_urls'] ?? [];
+                $r['promotable_page_ids'] = $advertiser_data['promotable_page_ids'] ?? [];
+                $r['promotable_app_ids'] = $advertiser_data['promotable_app_ids'] ?? [];
+                $r['timezone_id'] = $advertiser_data['time_zone'];
+                $r['facebook_user_id'] = $advertiser_data['user_id'] ?? 0;
+                $r['zip_code'] = $advertiser_data['zip_code'] ?? '';
+                $r['oe_remote_created'] = date("Y-m-d H:i:s",strtotime($oe['time_created']));
+                $r['oe_remote_updated'] = date("Y-m-d H:i:s",strtotime($oe['time_updated']));
+                $r['vertical'] = $advertiser_data['vertical'];
+                $r['subvertical'] = $oe['subvertical'] ?? '';
+                $r['oe_token_id'] = isset($oe['token']) ? $oe['token']['id'] : '';
+                $r['oe_change_reasons'] = isset($oe['request_changes_reason']) ? $oe['request_changes_reason'] : '';
+                $r['request_id'] = isset($oe['ad_account_creation_request_id']) ? $oe['ad_account_creation_request_id']['id'] : '';
+                //格式化
+                $r['promotable_urls'] = json_encode($r['promotable_urls']);
+                $r['promotable_page_ids'] = json_encode($r['promotable_page_ids']);
+                $r['promotable_app_ids'] = json_encode($r['promotable_app_ids']);
+                $oeList[] = $r;
+            }
+        }
+        $oeList = array_column($oeList,null,'oe_id');
+        print_r($oeList);
+        return;
+        $of = new \App\Models\OpenaccountFacebook();
+        $existsData = $of->get(['id','oe_id','oe_remote_updated']);
+        if($existsData){
+            foreach($existsData as $oe){
+
+            }
+        }
+        print_r($existsData->toArray());
+
+        #$of->insertAll($oeList);
     }
 }

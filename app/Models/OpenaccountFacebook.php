@@ -4,5 +4,13 @@ namespace App\Models;
 
 class OpenaccountFacebook extends Model{
     protected $table = 't_openaccount_facebook';
-    protected $connection = 'sinoclick';
+    public function notify(){
+        if($this->status == 'oe_pending'){
+
+        }
+    }
+    public function notifySave(){
+        $result = $this->save();
+        return $result;
+    }
 }

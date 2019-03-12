@@ -19,6 +19,10 @@ class Facebook extends Controller
 
     }
     public function syncOeRequest(){
-        \App\Services\Channels\Facebook::syncOeRequest();
+        #\App\Services\Channels\Facebook::syncOeRequest();
+        \App\Services\Channels\Facebook::syncFbRequest();
+    }
+    public function getVerticalList(){
+
     }
 }

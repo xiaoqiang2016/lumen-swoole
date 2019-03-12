@@ -422,7 +422,6 @@ class Facebook extends Channel{
         $sdk = (new self())->getSdk();
         $_oeList = $sdk->getOeRequestList();
         $oeList = [];
-        
         if($_oeList){
             foreach($_oeList as $oe){
                 $r = [];
@@ -460,18 +459,97 @@ class Facebook extends Channel{
                 $oeList[] = $r;
             }
         }
-        $oeList = array_column($oeList,null,'oe_id');
-        print_r($oeList);
-        return;
+        $oeRemoteList = array_column($oeList,null,'oe_id');
         $of = new \App\Models\OpenaccountFacebook();
         $existsData = $of->get(['id','oe_id','oe_remote_updated']);
-        if($existsData){
-            foreach($existsData as $oe){
-
+        if(!$existsData->isEmpty()){
+            #$existsData = array_column($existsData->toArray(),null,'oe_id');
+        }
+        if($oeRemoteList){
+            foreach($oeRemoteList as $oeRemoteData){
+                $oe = false;
+                if(!$existsData->isEmpty()){
+                    foreach($existsData as $v) if($v->oe_id == $oeRemoteData['oe_id']){
+                        $oe = $v;
+                        break;
+                    }
+                }
+                //新增
+                if(!$oe){
+                    $oe = \App\Models\OpenaccountFacebook::create($oeRemoteData);
+                    $oe->notify();
+                }else{
+                    //更新
+                    if($oeRemoteData['oe_remote_updated'] > $oe->oe_remote_updated){
+                        $oe->fill($oeRemoteData)->save();
+                    }
+                }
+                
             }
         }
-        print_r($existsData->toArray());
+    }
+    //同步Request数据
+    public static function syncFbRequest(){
+        $pending_data = [
+            'pending',//'审核中',
+            'under_review',//'审核中',
+        ];
+        $approved_data = [
+            'auto_approved',//'已获批',
+            'approved',// '已获批',
+        ];
+        $disapproved_data = [
+            'disapproved',// '未获批',
+        ];
+        $change_data = [
+            'requested_change',//'申请需修改',
+        ];
+        $sdk = (new self())->getSdk();
+        $listen_data = array_merge($pending_data,['oe_approved']);
+        $requestList = \App\Models\OpenaccountFacebook::whereIn('status',$listen_data)->get(['status','oe_id','id','request_id']);
+        if(!$requestList->isEmpty()){
+            
+            foreach($requestList as $request){
+                $remote_data = $sdk->getOpenaccountRequestDetail($request->request_id);
+                if(!$remote_data) continue;
+                if($request['status'] != $remote_data['status']){
+                    $request->sync_updated = date("Y-m-d H:i:s",time());
 
-        #$of->insertAll($oeList);
+                    $request->status = $remote_data['status'];
+                    $request->apply_number = count($remote_data['ad_accounts_info']);
+                    $request->bind_bm_id = '';
+                    //$request->business_license = '';
+                    $request->business_code = $remote_data['business_registration_id'];
+                    $request->address_cn = $remote_data['address_in_local_language'];
+
+                    $address_in_english = $remote_data['address_in_english'] ?? [];
+                    $request->address_en = $address_in_english['address_line_1']??'';
+                    $request->business_name_cn = $remote_data['chinese_legal_entity_name']??'';
+                    $request->business_name_en = $remote_data['english_legal_entity_name']??'';
+                    $request->city = $address_in_english['city'] ?? '';
+                    $request->state = $address_in_english['state'] ?? '';
+
+                    $contact = $remote_data['contact'] ?? [];
+                    $request->contact_email = $contact['email']??'';
+                    $request->contact_name = $contact['name']??'';
+                    $request->website = $remote_data['official_website_url'];
+                    #$request->mobile = $remote_data['official_website_url'];
+                    #$request->mobile_id = $remote_data['official_website_url'];
+                    $request->promotable_urls = json_encode($remote_data['promotable_urls'] ?? [],JSON_UNESCAPED_UNICODE);
+                    $request->promotable_page_ids = json_encode($remote_data['promotable_page_ids'] ?? [],JSON_UNESCAPED_UNICODE);
+                    $request->promotable_app_ids = json_encode($remote_data['promotable_app_ids'] ?? [],JSON_UNESCAPED_UNICODE);
+
+                    //$request->timezone_id = 
+                    $request->zip_code = $address_in_english['zip']??'';
+                    $request->fb_remote_created = date("Y-m-d H:i:s",strtotime($remote_data['time_created']));
+                    $request->vertical = $remote_data['vertical'];
+                    $request->subvertical = $remote_data['subvertical'];
+                    $request->request_change_reasons = json_encode($remote_data['request_change_reasons']??[],JSON_UNESCAPED_UNICODE);
+                    $request->notifySave();
+                }
+                $requestData = [];  
+            }
+        }
+        echo 'syncFbRequest';
     }
 }

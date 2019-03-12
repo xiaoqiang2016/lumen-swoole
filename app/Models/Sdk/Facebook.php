@@ -106,4 +106,11 @@ class Facebook{
         $result = $response['data'];
         return $result;
     }
+    public function getOpenaccountRequestDetail($request_id){
+        $query = "{$request_id}?fields=status,is_test,id,english_legal_entity_name,credit_card_id,contact,disapproval_reasons,chinese_legal_entity_name,business,creator,appeal_reason,address_in_local_language,extended_credit_id,advertiser_business,address_in_chinese,official_website_url,oe_request_id,legal_entity_name_in_local_language,is_under_authorization,is_smb,planning_agency_business,business_registration_id,address_in_english,additional_comment,planning_agency_business_id,promotable_app_ids,promotable_page_ids,promotable_urls,request_change_reasons,subvertical,ad_accounts_info,time_created,ad_accounts_currency,vertical,adaccounts.limit(100){account_id,account_status,name,timezone_id,timezone_name}";
+        $response = $this->get($query);
+    
+        $result = $response ?? [];
+        return $result;
+    }
 }

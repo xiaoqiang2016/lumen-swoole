@@ -16,6 +16,7 @@ class CreateOpenaccountTable extends Migration
     {
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->increments('id');
+            $table->dateTime("sync_updated")->nullable(true)->comment("数据更新时间。");
             $table->string("status",50)->nullable(false)->default("")->comment("状态。");
             $table->integer('apply_number')->nullable(false)->default(0)->comment("申请数量。");
             $table->integer('bind_bm_id')->nullable(false)->default(0)->comment("绑定的bm id。");
@@ -25,8 +26,10 @@ class CreateOpenaccountTable extends Migration
             $table->string('address_en',500)->nullable(false)->default("")->comment("公司英文地址。");
             $table->string('business_name_cn',500)->nullable(false)->default("")->comment("公司中文名称。");
             $table->string('business_name_en',500)->nullable(false)->default("")->comment("公司英文名称。");
-            $table->string('city',50)->nullable(false)->comment("所在城市。");
-            $table->string('email',255)->nullable(false)->comment("联系邮件。");
+            $table->string('city',50)->nullable(false)->comment("所在城市(英文)。");
+            $table->string('state',50)->nullable(false)->comment("所在省份(英文)。");
+            $table->string('contact_email',255)->nullable(false)->default('')->comment("联系邮件。");
+            $table->string('contact_name',255)->nullable(false)->default('')->comment("联系人。");
             $table->string('website',255)->nullable(false)->comment("网站地址。");
             $table->string("mobile",255)->nullable(false)->comment("手机号码。");
             $table->string("mobile_id",50)->nullable(false)->comment("手机号码id。");

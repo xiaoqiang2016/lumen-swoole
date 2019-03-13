@@ -7,27 +7,27 @@ class Dispatcher
 {
     private $routers = [
         'Account' => [
-            #['handle'=>'Status'],
-            #['handle'=>'PageStatus'], //同步主页可能有问题
-            #['handle'=>'ObjectiveNum'],
+            ['handle'=>'Status'],
+            ['handle'=>'PageStatus'], //同步主页可能有问题
+            ['handle'=>'ObjectiveNum'],
         ],
         'Campaign' => [
-            #['handle'=>'AbTesting'],
-            #['handle'=>'UseCbo'],
+            ['handle'=>'AbTesting'],
+            ['handle'=>'UseCbo'],
         ]
         ,
         'Ad' => [
-            #['handle'=>'CtrLow'],
+            ['handle'=>'CtrLow'],
             ['handle'=>'CpmHigh'],
-            #['handle'=>'CpaHigh'],
-            #['handle'=>'UseCta'],
+            ['handle'=>'CpaHigh'],
+            ['handle'=>'UseCta'],
 
         ],
         'Set' => [
-            #['handle'=>'LinkClickBidAmount'],
-            #['handle'=>'ConversionsBidAmount'],
-            #['handle'=>'ConversionsDailyBudget'],
-            #['handle'=>'PlatformsPosition']
+            ['handle'=>'LinkClickBidAmount'],
+            ['handle'=>'ConversionsBidAmount'],
+            //['handle'=>'ConversionsDailyBudget'],
+            ['handle'=>'PlatformsPosition']
         ]
     ];
     //调度器

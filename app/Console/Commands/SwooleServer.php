@@ -33,7 +33,7 @@ class SwooleServer extends Command{
             'max_coroutine' => 9999999,
         ));
         $httpServer->on('request', function($request, $response){
-            if(env('APP_DEBUG')){
+            if(env('APP_DEBUG') && false){
                 $logdir = realpath(__DIR__."/../../../storage/logs/")."/";
                 file_put_contents($logdir."sql_facebook.log", "" );
                 file_put_contents($logdir."sql_sinoclick.log", "");
@@ -128,7 +128,9 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
+
             $cli->get("/Permissions/getPermissions");
+
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

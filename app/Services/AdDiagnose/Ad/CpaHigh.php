@@ -9,11 +9,12 @@ class CpaHigh extends Base
     public $name = "CPA较高";
     public $description = "";
     public $connection = 'msdw';
+    public $point = 2;
     public function handle(){
         $category_key = 'cpm';
         $per = '20';
-        $ad_account_ids = $this->getParam('ad_account_ids');
-        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCpaByAdAccountId($ad_account_ids);
+        $ad_account_id = $this->getParam('ad_account_id');
+        $datas = (new Models\Msdw\FactFbAdinsightsCountry())->getCpaByAdAccountId([$ad_account_id]);
         $cpaMap = [];
         $capMap['MOBILE_APP_ENGAGEMENT'] = 'cpa_link_click'; //app
         $capMap['CONVERSIONS'] = 'cpa_purchase';
@@ -32,6 +33,7 @@ class CpaHigh extends Base
 
 
         $ad_ids = array_column($datas,'ad_id');
+        if(!$ad_ids) return [];
         $categorys = (new Models\Msdw\DimFbAd())->getCategoryByAdIds($ad_ids);
 
         foreach($datas as &$data){
@@ -76,6 +78,7 @@ class CpaHigh extends Base
             #print_r($data);
             foreach($diagnoseData as $diagnose){
                 if($diagnose['category1_cn'] == $data['category1_cn'] && $diagnose['category2_cn'] == $data['category2_cn'] && $diagnose['category3_cn'] == $data['category3_cn']){
+                    $this->count++;
                     $bKey = $capMap[$data['objective']];
                     $value = $data['cpa'];
                     $r = [];
@@ -114,5 +117,8 @@ class CpaHigh extends Base
         }
         return $result;
 
+    }
+    public function count(){
+        return $this->count;
     }
 }

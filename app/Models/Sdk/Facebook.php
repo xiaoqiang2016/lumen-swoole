@@ -19,8 +19,8 @@ class Facebook{
         return $this->token;
     }
 
-    public function setToken($token){
-        $this->token = $token;
+    public function setToken($token=false){
+        if($token !== false) $this->token = $token;
         return $this;
     }
 
@@ -31,9 +31,10 @@ class Facebook{
         return $data;
     }
     public function get($query){
+        #echo $query.PHP_EOL;
         $query = $this->parseQuery($query);
-        $url = "{$this->apiurl}/v{$this->version}/{$query}&access_token={$this->token}";
-
+        $separate = strpos($query,"?") ? '&' : '?';
+        $url = "{$this->apiurl}/v{$this->version}/{$query}{$separate}access_token={$this->token}";
         #echo $url;
         #echo PHP_EOL;
         #echo "https://graph.facebook.com/v3.2/me?fields=adaccounts.limit(1000){name,id,amount_spent,spend_cap,account_status,currency,owner,created_time}&access_token=EAAHE0mTSloIBAIjVmFt3NEbmLz1GvIYE5MUhdQqPaK1QJeRvu8whGPJp8DJWTDjTuWuw3gsZAZCBc1zZARE8KPeFfATHopP299Tm31J1aLmHZCJneShLqRgok6TxMG8rUh2lkB9red2RdmWqX6bPNCgJ52ndNlDHnsZCUgoWRnQZDZD";
@@ -97,6 +98,19 @@ class Facebook{
         #echo $query.PHP_EOL;
         $response = $this->get($query);
         $result = $response['promote_pages']['data']??[];
+        return $result;
+    }
+    public function getOeRequestList(){
+        $query = '630723763692369/resellervettingrequests';
+        $response = $this->get($query);
+        $result = $response['data'];
+        return $result;
+    }
+    public function getOpenaccountRequestDetail($request_id){
+        $query = "{$request_id}?fields=status,is_test,id,english_legal_entity_name,credit_card_id,contact,disapproval_reasons,chinese_legal_entity_name,business,creator,appeal_reason,address_in_local_language,extended_credit_id,advertiser_business,address_in_chinese,official_website_url,oe_request_id,legal_entity_name_in_local_language,is_under_authorization,is_smb,planning_agency_business,business_registration_id,address_in_english,additional_comment,planning_agency_business_id,promotable_app_ids,promotable_page_ids,promotable_urls,request_change_reasons,subvertical,ad_accounts_info,time_created,ad_accounts_currency,vertical,adaccounts.limit(100){account_id,account_status,name,timezone_id,timezone_name}";
+        $response = $this->get($query);
+    
+        $result = $response ?? [];
         return $result;
     }
 }

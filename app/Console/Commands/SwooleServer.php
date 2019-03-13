@@ -70,10 +70,11 @@ class SwooleServer extends Command{
             $_pathData = array_filter(explode("/",$path_info));
             $pathData = [];
             if($_pathData) foreach($_pathData as $v) $pathData[] = $v;
-            $controllerName = $pathData[0]??false;
-            $actionName = $pathData[1]??false;
+            $groupName = $pathData[0]??false;
+            $controllerName = $pathData[1]??false;
+            $actionName = $pathData[2]??false;
             //数据验证
-            $valideClassName = "App\\Http\\Requests\\{$controllerName}\\{$actionName}";
+            $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             if(class_exists($valideClassName) && $actionName){
                 $valide = new $valideClassName();
                 $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
@@ -88,7 +89,8 @@ class SwooleServer extends Command{
                 }
             }
             //Result
-            $controllerName = 'App\\Http\\Controllers\\'.$controllerName;
+            $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
+            #var_export($controllerName);exit;
             if(class_exists($controllerName)){
                 #$request =  Request::capture();
                 $controller = app()->make($controllerName);
@@ -119,7 +121,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get("/Facebook/syncOeRequest");
+            $cli->get("/Manager/Adaccount/test");
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

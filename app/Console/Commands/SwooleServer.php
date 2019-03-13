@@ -6,11 +6,12 @@ use Co;
 class SwooleServer extends Command{
 	protected $signature = 'http {action}';
     protected $description = 'Swoole Server.';
-
+    private $cache;
     private $serverConf = [
     	'httpPort' => 9502,
     ];
     private $app = false;
+    private $httpServer;
     public function __construct()
     {
         parent::__construct();
@@ -111,8 +112,26 @@ class SwooleServer extends Command{
         });
         $httpServer->on('start', function () {
             $this->test();
+            //task
+            $this->cache['task_push_lock'] = false;
+            swoole_timer_tick(1000, function ($timer_id) {
+                $this->sendTask();
+            });
+        });
+        $httpServer->on('Task', function (swoole_server $serv, $task_id, $from_id, $data) {
+            echo "Tasker进程接收到数据";
+            echo "#{$serv->worker_id}\tonTask: [PID={$serv->worker_pid}]: task_id=$task_id, data_len=".strlen($data).".".PHP_EOL;
+            $serv->finish($data);
         });
         $httpServer->start();
+        $this->httpServer = $httpServer;
+    }
+    private function sendTask(){
+        if($this->cache['task_push_lock']) return;
+        $this->cache['task_push_lock'] = true;
+        $tasks = \App\Models\Task::where("status","wait")->orderby("id","ASC")->limit(10)->get();
+        $this->httpServer->task($tasks);
+        #echo $this->httpServer->test;
     }
     private function test(){
         $startTime = microtime(true);

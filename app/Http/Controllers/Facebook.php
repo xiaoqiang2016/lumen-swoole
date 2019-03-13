@@ -5,7 +5,7 @@ use Swoole;
 use App;
 class Facebook extends Controller
 {
-    public $syncAll = 0;
+    public $syncAll = 0; 
     public function sync($params){
         $this->syncAll = 1;
         $account_id = $params['account_id'];

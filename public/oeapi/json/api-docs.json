@@ -1,0 +1,106 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Sino Click",
+        "description": "Sino Click 后端API。",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:9501",
+            "description": "本地环境"
+        }
+    ],
+    "paths": {
+        "test": {},
+        "/User/login": {
+            "post": {
+                "tags": [
+                    "用户"
+                ],
+                "summary": "登陆",
+                "description": "用户登陆接口.",
+                "operationId": "createUser",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "The user name for login",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "description": "The password for login in clear text",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": "successful operation"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ApiResponse": {
+                "title": "响应实体",
+                "description": "响应实体，响应结果统一使用该结构",
+                "properties": {
+                    "error": {
+                        "description": "响应代码",
+                        "properties": {
+                            "code": {
+                                "description": "错误源",
+                                "type": "string"
+                            },
+                            "message": {
+                                "description": "响应结果提示",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "message": {
+                        "description": "响应结果提示",
+                        "type": "string"
+                    },
+                    "result": {
+                        "description": "响应结果",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "error": {
+                "title": "错误结构",
+                "description": "错误结构",
+                "properties": {
+                    "code": {
+                        "description": "错误码",
+                        "type": "string"
+                    },
+                    "message": {
+                        "description": "错误信息",
+                        "type": "object|string"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "access_token": {
+                "type": "apiKey",
+                "name": "access_token",
+                "in": "header"
+            }
+        }
+    }
+}

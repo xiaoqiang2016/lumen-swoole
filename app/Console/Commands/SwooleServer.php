@@ -110,8 +110,6 @@ class SwooleServer extends Command{
                 return;
             }
 
-            die(print_r(12121));
-
             $httpCode = 404;
             $response->status($httpCode);
             if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;

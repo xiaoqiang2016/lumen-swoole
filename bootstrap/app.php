@@ -66,6 +66,10 @@ $app->singleton(
 //     'auth' => App\Http\Middleware\Authenticate::class,
 // ]);
 
+// $app->routeMiddleware([
+//     'Example' => App\Http\Middleware\ExampleMiddleware::class,
+// ]);
+
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers
@@ -95,6 +99,7 @@ $app->register(\SwaggerLume\ServiceProvider::class);
 $app->register(\Abram\Odbc\ODBCServiceProvider::class);//ODBC驱动
 $app->withFacades();
 $app->withEloquent();
+
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {

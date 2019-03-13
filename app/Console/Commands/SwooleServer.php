@@ -8,7 +8,7 @@ class SwooleServer extends Command{
     protected $description = 'Swoole Server.';
     private $cache;
     private $serverConf = [
-    	'httpPort' => 9502,
+    	'httpPort' => 9506,
     ];
     private $app = false;
     private $httpServer;
@@ -58,6 +58,7 @@ class SwooleServer extends Command{
                 });
             }
             $path_info = $request->server['path_info'];
+
             $swooleResponse = new \App\Common\SwooleResponse($response);
             if($swooleResponse->sendFile($path_info)) return;
             //解析传参
@@ -71,10 +72,13 @@ class SwooleServer extends Command{
             $_pathData = array_filter(explode("/",$path_info));
             $pathData = [];
             if($_pathData) foreach($_pathData as $v) $pathData[] = $v;
-            $controllerName = $pathData[0]??false;
-            $actionName = $pathData[1]??false;
+
+            $groupName = $pathData[0]??false;
+            $controllerName = $pathData[1]??false;
+            $actionName = $pathData[2]??false;
+
             //数据验证
-            $valideClassName = "App\\Http\\Requests\\{$controllerName}\\{$actionName}";
+            $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             if(class_exists($valideClassName) && $actionName){
                 $valide = new $valideClassName();
                 $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
@@ -89,13 +93,16 @@ class SwooleServer extends Command{
                 }
             }
             //Result
-            $controllerName = 'App\\Http\\Controllers\\'.$controllerName;
+
+            $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
+            #var_export($controllerName);exit;
             if(class_exists($controllerName)){
                 #$request =  Request::capture();
                 $controller = app()->make($controllerName);
                 $controller->setResponse($swooleResponse);
                 $controller->setParams($params);
                 $_result = $controller->$actionName($request);
+
                 if($_result !== false){
                     $result = [];
                     $result['error'] = [];
@@ -104,6 +111,7 @@ class SwooleServer extends Command{
                 }
                 return;
             }
+
             $httpCode = 404;
             $response->status($httpCode);
             if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;
@@ -138,7 +146,10 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get("/Facebook/syncOeRequest");
+
+            $cli->get("/Permissions/getPermissions");
+
+
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

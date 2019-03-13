@@ -7,8 +7,12 @@ class Test extends Controller
 {
 
     //
-    public function test(Request $request, Channel $channel){
-        $channel->test();
-        echo 'test controller';
+    public function test(){
+    	$params = $this->getParams();
+        #$channel->test();
+        //echo 'test controller';
+
+    	 return $params;
+    
     }
 }

@@ -18,6 +18,7 @@ class CreateOpenaccountTable extends Migration
             $table->increments('id');
             $table->dateTime("sync_updated")->nullable(true)->comment("数据更新时间。");
             $table->string("status",50)->nullable(false)->default("")->comment("状态。");
+            $table->string("remote_status",50)->nullable(false)->default("")->comment("远端状态。");
             $table->integer('apply_number')->nullable(false)->default(0)->comment("申请数量。");
             $table->integer('bind_bm_id')->nullable(false)->default(0)->comment("绑定的bm id。");
             $table->string('business_license',500)->nullable(false)->default("")->comment("营业执照图片。");

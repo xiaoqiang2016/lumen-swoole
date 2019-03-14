@@ -1,0 +1,323 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "OE API",
+    "version": "0.1.0",
+    "title": "OE API",
+    "termsOfService": "http://www.meetsocial.cn"
+  },
+  "host": "127.0.0.1:9502",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Facebook",
+      "description": "Facebook API"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/Facebook/OpenAccountVertify": {
+      "post": {
+        "tags": [
+          "Facebook"
+        ],
+        "summary": "提交开户审核",
+        "description": "",
+        "operationId": "Facebook.OpenAccountVertify",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "apply_id",
+            "in": "formData",
+            "description": "开户申请id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "formData",
+            "description": "审批状态。[oe_approved:通过,oe_disapproved:拒绝,oe_changes_requested:申请需修改]",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "oe_approved",
+                "oe_disapproved",
+                "oe_changes_requested"
+              ]
+            }
+          },
+          {
+            "name": "vertical",
+            "in": "formData",
+            "description": "一级行业分类",
+            "required": true,
+            "type": "string",
+            "default": ""
+          },
+          {
+            "name": "sub_vertical",
+            "in": "formData",
+            "description": "二级行业分类",
+            "required": true,
+            "type": "string",
+            "default": ""
+          },
+          {
+            "name": "agency_bm_id",
+            "in": "formData",
+            "description": "代理商bm id",
+            "required": false,
+            "type": "string",
+            "default": ""
+          },
+          {
+            "name": "bussniss_name_en",
+            "in": "formData",
+            "description": "公司名(英文)",
+            "required": false,
+            "type": "string",
+            "default": ""
+          },
+          {
+            "name": "oe_change_reasons",
+            "in": "formData",
+            "description": "错误信息(如状态为oe_changes_requested则为必填)",
+            "required": false,
+            "type": "string",
+            "default": ""
+          },
+          {
+            "name": "spend_limit",
+            "in": "formData",
+            "description": "每个广告帐户的花费上限(默认0.01)",
+            "required": false,
+            "type": "string",
+            "default": 0.01
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success"
+          }
+        }
+      }
+    },
+    "/Facebook/getOpenAccountList": {
+      "post": {
+        "tags": [
+          "Facebook"
+        ],
+        "summary": "获取开户列表",
+        "description": "",
+        "operationId": "Facebook.getOpenAccountList",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "apply_id",
+            "in": "formData",
+            "description": "开户申请id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "formData",
+            "description": "审批状态",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "formData",
+            "description": "分页页码",
+            "required": false,
+            "type": "string",
+            "default": 1
+          },
+          {
+            "name": "page_length",
+            "in": "formData",
+            "description": "分页长度",
+            "required": false,
+            "type": "string",
+            "default": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/OpenAccount"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "OpenAccountStatus": {
+      "type": "string",
+      "enum": [
+        "oe_disapproved",
+        "oe_changes_requested",
+        "oe_pending",
+        "approved",
+        "disapproved",
+        "changes_requested",
+        "pending"
+      ],
+      "description": "[oe_disapproved : OE拒绝，oe_changes_requested : OE需修改，oe_pending : OE需审核，approved : 已获批，disapproved : Facebook拒绝，changes_requested : Facebook审核需修改 , pending : Facebook审核中]"
+    },
+    "OpenAccount": {
+      "type": "object",
+      "properties": {
+        "apply_id": {
+          "type": "integer",
+          "description": "唯一标识"
+        },
+        "client_id": {
+          "type": "integer",
+          "description": "客户ID"
+        },
+        "status": {
+          "$ref": "#/definitions/OpenAccountStatus"
+        },
+        "apply_number": {
+          "type": "integer",
+          "description": "申请的广告账户数量"
+        },
+        "bind_bm_id": {
+          "type": "integer",
+          "description": "用户绑定的bm id"
+        },
+        "business_license": {
+          "type": "string",
+          "description": "营业执照地址"
+        },
+        "business_code": {
+          "type": "string",
+          "description": "营业执照编码"
+        },
+        "address_cn": {
+          "type": "string",
+          "description": "企业地址(中文)"
+        },
+        "address_en": {
+          "type": "string",
+          "description": "企业地址(英文)"
+        },
+        "business_name_cn": {
+          "type": "string",
+          "description": "公司名称(英文)"
+        },
+        "business_name_en": {
+          "type": "string",
+          "description": "公司名称(英文)"
+        },
+        "city": {
+          "type": "string",
+          "description": "所在城市(英文)"
+        },
+        "state": {
+          "type": "string",
+          "description": "所在省份(英文)"
+        },
+        "zip_code": {
+          "type": "string",
+          "description": "邮政编码"
+        },
+        "contact_email": {
+          "type": "string",
+          "description": "联系人邮件"
+        },
+        "contact_name": {
+          "type": "string",
+          "description": "联系人名称"
+        },
+        "website": {
+          "type": "string",
+          "description": "网站地址"
+        },
+        "mobile": {
+          "type": "string",
+          "description": "手机号码"
+        },
+        "promotable_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "推广url"
+          }
+        },
+        "promotable_page_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "推广主页"
+          }
+        },
+        "promotable_app_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "推广app_id"
+          }
+        },
+        "timezone_id": {
+          "type": "string",
+          "description": "时区id"
+        },
+        "vertical": {
+          "type": "string",
+          "description": "一级行业分类"
+        },
+        "sub_vertical": {
+          "type": "string",
+          "description": "二级行业分类"
+        },
+        "oe_change_reasons": {
+          "type": "string",
+          "description": "oe审核错误信息"
+        },
+        "request_change_reasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "type": "string",
+                "description": "错误字段"
+              },
+              "reason": {
+                "type": "string",
+                "description": "错误原因"
+              },
+              "note": {
+                "type": "string",
+                "description": "修复建议"
+              }
+            }
+          },
+          "description": "Facebook审核错误信息"
+        }
+      }
+    }
+  }
+}

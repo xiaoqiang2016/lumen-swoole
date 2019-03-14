@@ -79,7 +79,9 @@ class SwooleServer extends Command{
 
             //数据验证
             $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
+
             if(class_exists($valideClassName) && $actionName){
+                $params['rules'] = $actionName;
                 $valide = new $valideClassName();
                 $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
                 $failed = $validator->failed();
@@ -138,7 +140,7 @@ class SwooleServer extends Command{
         if($this->cache['task_push_lock']) return;
         $this->cache['task_push_lock'] = true;
         $tasks = \App\Models\Task::where("status","wait")->orderby("id","ASC")->limit(10)->get();
-        $this->httpServer->task($tasks);
+        //$this->httpServer->task($tasks);
         #echo $this->httpServer->test;
     }
     private function test(){
@@ -146,9 +148,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-
-            $cli->get("/Manager/Permissions/getPermissions");
-
+            $cli->get("/Manager/role/role_add?loginName=2");
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

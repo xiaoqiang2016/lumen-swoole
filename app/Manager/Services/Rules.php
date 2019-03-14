@@ -2,11 +2,11 @@
 namespace App\Manager\Services;
 use Swoole; 
 use App\Models\Access as Access;
-class Permissions{
+class Rules{
 
 
    	//获取权限树
-   	public function getPermissions($params) {
+   	public function getRules($params,$flag=false) {
 
    		$result = Access::join('t_menu', function ($join) use($params) {
             $join->on('t_role_menu.menu_id', '=', 't_menu.id')
@@ -14,17 +14,22 @@ class Permissions{
                  ->where('t_menu.show','=',1);
         })
         ->select('t_menu.id','t_menu.name','t_menu.title','t_menu.sort','t_menu.level','t_menu.pid')
+        ->orderBy('t_menu.sort','desc')
         ->get()->toArray();
         $tree = [];
-        if($result) {
-		    $tree = $this->getTree($result,0);
+
+        if(!$flag) {
+            $tree = $this->getTree($result,0);
+        }else{
+            $tree = implode(',', array_column($result, 'name'));
         }
+
 	   	return $tree;
    }
 
 
-   	//递归生成菜单
-   	function getTree($data, $pid) {
+   	//递归生成权限菜单
+   	private function getTree($data, $pid) {
 		$tree = [];
 		foreach($data as $k => $v){
 		    if($v['pid'] == $pid){ 

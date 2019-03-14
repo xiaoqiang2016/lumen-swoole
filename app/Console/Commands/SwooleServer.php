@@ -2,13 +2,14 @@
 namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Co;
-#use Swoole;
+use Swoole;
 class SwooleServer extends Command{
 	protected $signature = 'http {action}';
     protected $description = 'Swoole Server.';
-    private $cache;
+    private $cache = ['test'=>0];
     private $serverConf = [
     	'httpPort' => 9506,
+        'serverPort' => 9507
     ];
     private $app = false;
     private $httpServer;
@@ -20,10 +21,55 @@ class SwooleServer extends Command{
     {
         $action = $this->argument('action');
         if($action == 'start'){
-            $this->start();
+
+            system("pkill -f php");
+            $this->httpStart();
+            $this->serverStart();
         }
     }
-    public function start(){
+    public function serverStart(){
+
+        $server = new Swoole\Server('0.0.0.0', $this->serverConf['serverPort'], SWOOLE_BASE, SWOOLE_SOCK_TCP);
+        $server->set(array(
+            'worker_num' => 4,
+            'task_worker_num' => 10,
+        ));
+        $server->on('Receive', function($serv, $fd, $reactor_id, $data) {
+            $tasks = \App\Models\Task::limit(10)->orderby('id','ASC')->get();
+            foreach($tasks as $task){
+                $serv->task($task, 0);
+            }
+        });
+        $server->on('Task', function ($serv, $task_id, $from_id, $data) {
+            #echo "Tasker进程接收到数据";
+            #echo "#{$serv->worker_id}\tonTask: [PID={$serv->worker_pid}]: task_id=$task_id, data_len=".strlen($data).".".PHP_EOL;
+            $c = "\\App\\Services\\Task";
+            $c = new $c;
+            $a = $data->action;
+            $params = json_decode($data->params,true);
+            $c->$a($params);
+            $serv->finish($data);
+        });
+        $server->on('Finish', function ($serv, $task_id, $data) {
+            #echo "Task#$task_id finished, data_len=".strlen($data).PHP_EOL;
+        });
+        $server->on('WorkerStart', function ($serv,$worker_id) {
+            if($worker_id === 0){
+                swoole_timer_tick(1000, function(){
+                    $client = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
+                    if (!$client->connect('127.0.0.1', $this->serverConf['serverPort'], 0.5))
+                    {
+                        exit("connect failed. Error: {$client->errCode}\n");
+                    }
+                    $client->send("hello world\n");
+                    $client->close();
+                });
+            }
+        });
+        $server->start();
+
+    }
+    public function httpStart(){
         $this->initApp();
         $httpServer = new \Swoole\Http\Server("0.0.0.0", $this->serverConf['httpPort']);
         $httpServer->set(array(
@@ -32,8 +78,10 @@ class SwooleServer extends Command{
             'max_request' => 5000,
             'dispatch_mode'=>1,
             'max_coroutine' => 9999999,
+            //'task_worker_num' => 1000,
         ));
         $httpServer->on('request', function($request, $response){
+
             if(env('APP_DEBUG') && false){
                 $logdir = realpath(__DIR__."/../../../storage/logs/")."/";
                 file_put_contents($logdir."sql_facebook.log", "" );
@@ -58,7 +106,6 @@ class SwooleServer extends Command{
                 });
             }
             $path_info = $request->server['path_info'];
-
             $swooleResponse = new \App\Common\SwooleResponse($response);
             if($swooleResponse->sendFile($path_info)) return;
             //解析传参
@@ -76,7 +123,8 @@ class SwooleServer extends Command{
             $groupName = $pathData[0]??false;
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
-
+            print_r($_pathData);
+            return;
             //数据验证
             $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             if(class_exists($valideClassName) && $actionName){
@@ -119,35 +167,17 @@ class SwooleServer extends Command{
             return;
         });
         $httpServer->on('start', function () {
-            $this->test();
-            //task
-            $this->cache['task_push_lock'] = false;
-            swoole_timer_tick(1000, function ($timer_id) {
-                $this->sendTask();
-            });
-        });
-        $httpServer->on('Task', function (swoole_server $serv, $task_id, $from_id, $data) {
-            echo "Tasker进程接收到数据";
-            echo "#{$serv->worker_id}\tonTask: [PID={$serv->worker_pid}]: task_id=$task_id, data_len=".strlen($data).".".PHP_EOL;
-            $serv->finish($data);
+            //$this->test();
         });
         $httpServer->start();
-        $this->httpServer = $httpServer;
-    }
-    private function sendTask(){
-        if($this->cache['task_push_lock']) return;
-        $this->cache['task_push_lock'] = true;
-        $tasks = \App\Models\Task::where("status","wait")->orderby("id","ASC")->limit(10)->get();
-        $this->httpServer->task($tasks);
-        #echo $this->httpServer->test;
+        
     }
     private function test(){
         $startTime = microtime(true);
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-
-            $cli->get("/Permissions/getPermissions");
+            $cli->get("/task");
 
 
             echo PHP_EOL.'Result:'.PHP_EOL;

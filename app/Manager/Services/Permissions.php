@@ -1,14 +1,8 @@
 <?php
-namespace App\Http\Services;
+namespace App\Manager\Services;
 use Swoole; 
-use App\Models\Role as Role;
-// use App\Models\Menu as Menu;
 use App\Models\Access as Access;
 class Permissions{
-
-   	public function __construct() {
-
-   	}
 
 
    	//获取权限树

@@ -147,7 +147,7 @@ class SwooleServer extends Command{
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
 
-            $cli->get("/Http/Permissions/getPermissions");
+            $cli->get("/Manager/Permissions/getPermissions");
 
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;

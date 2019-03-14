@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Manager\Controllers;
 use Illuminate\Http\Request;
 
 class Permissions extends Controller {
@@ -10,7 +10,7 @@ class Permissions extends Controller {
     public function getPermissions(){
     	//$params = $this->getParams();
     	$params['manager_id'] = 1;
-        $permission = new \App\Http\Services\Permissions();
+        $permission = new \App\Manager\Services\Permissions();
         return $permission->getPermissions($params);
     }
 }

@@ -12,7 +12,6 @@ class SwooleServer extends Command{
         'serverPort' => 9507
     ];
     private $app = false;
-    private $httpServer;
     public function __construct()
     {
         parent::__construct();
@@ -21,10 +20,34 @@ class SwooleServer extends Command{
     {
         $action = $this->argument('action');
         if($action == 'start'){
-
             system("pkill -f php");
-            $this->httpStart();
-            $this->serverStart();
+            $workerNum = 2;
+            $pool = new Swoole\Process\Pool($workerNum);
+            $pool->on("WorkerStart", function ($pool, $workerId) {
+                if($workerId == 0){
+                    $this->httpStart();
+                }
+                if($workerId == 1){
+                    #$this->serverStart();
+                    $this->execTask();
+                    sleep(1);
+                }
+            });
+            $pool->on("WorkerStop", function ($pool, $workerId) {
+                echo "Worker#{$workerId} is stopped\n";
+            });
+            $pool->start();
+        }
+    }
+    public function execTask(){
+        $tasks = \App\Models\Task::limit(10)->orderby('id','ASC')->get();
+        $c = "\\App\\Services\\Task";
+        $c = new $c();
+
+        foreach($tasks as $task){
+            $params = json_decode($task->params,true);
+            $action = $task->action;
+            $result = $c->$action($params);
         }
     }
     public function serverStart(){
@@ -55,7 +78,7 @@ class SwooleServer extends Command{
         });
         $server->on('WorkerStart', function ($serv,$worker_id) {
             if($worker_id === 0){
-                swoole_timer_tick(1000, function(){
+                swoole_timer_tick(10000, function(){
                     $client = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
                     if (!$client->connect('127.0.0.1', $this->serverConf['serverPort'], 0.5))
                     {
@@ -67,7 +90,6 @@ class SwooleServer extends Command{
             }
         });
         $server->start();
-
     }
     public function httpStart(){
         $this->initApp();
@@ -81,7 +103,7 @@ class SwooleServer extends Command{
             //'task_worker_num' => 1000,
         ));
         $httpServer->on('request', function($request, $response){
-
+            echo 123;
             if(env('APP_DEBUG') && false){
                 $logdir = realpath(__DIR__."/../../../storage/logs/")."/";
                 file_put_contents($logdir."sql_facebook.log", "" );

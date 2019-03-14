@@ -7,8 +7,9 @@ class Task
 {
     //开户状态变化
     public function openAccountNotify($params=[]){
-        echo 'openAccountNotify';
-        \App\Common\Curl::post('http://127.0.0.1:9506',['test'=>1]);
-
+        #echo 'openAccountNotify';
+        $url = 'http://www.baidu.com';
+        $a = \App\Common\Curl::get($url);
+        print_r($a);
     }
 }

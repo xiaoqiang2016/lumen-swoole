@@ -9,11 +9,13 @@ class Curl{
         return self::send($url,'POST',['postData'=>$data]);
     }
     static function get($url){
+
         return self::send($url,'GET');
     }
 
     static function send($url,$method='GET',$params=[]){
         $urlData = parse_url($url);
+
         $urlData['query'] = isset($urlData['query']) ? "?".$urlData['query'] : '';
         $urlData['path'] = isset($urlData['path']) ? $urlData['path'] : '/';
         $postData = [];
@@ -40,8 +42,9 @@ class Curl{
         if($method == 'GET'){
             $cli->get($path);
         }
+
         $result = $cli->body;
-        #echo "ERRORCODE:".$cli->statusCode.PHP_EOL;
+        echo "ERRORCODE:".$cli->statusCode.PHP_EOL;
         $cli->close();
         if($r = json_decode($result,true)) $result = $r;
 

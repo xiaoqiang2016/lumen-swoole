@@ -427,7 +427,7 @@ class Facebook extends Channel{
                 $r = [];
                 $advertiser_data = $oe['advertiser_data'];
                 $r['oe_id'] = $oe['id'];
-                $r['remote_status'] = 'oe_'.$oe['status'];
+                $r['remote_status'] = 'first_'.$oe['status'];
                 $r['apply_number'] = $advertiser_data['ad_account_number'] ?? 0;
                 $r['bind_bm_id'] = $advertiser_data['business_manager_id'];
                 $r['business_license'] = $advertiser_data['business_registration'];
@@ -445,12 +445,12 @@ class Facebook extends Channel{
                 $r['timezone_id'] = $advertiser_data['time_zone'];
                 $r['facebook_user_id'] = $advertiser_data['user_id'] ?? 0;
                 $r['zip_code'] = $advertiser_data['zip_code'] ?? '';
-                $r['oe_remote_created'] = date("Y-m-d H:i:s",strtotime($oe['time_created']));
-                $r['oe_remote_updated'] = date("Y-m-d H:i:s",strtotime($oe['time_updated']));
+                $r['first_remote_created'] = date("Y-m-d H:i:s",strtotime($oe['time_created']));
+                $r['first_remote_updated'] = date("Y-m-d H:i:s",strtotime($oe['time_updated']));
                 $r['vertical'] = $advertiser_data['vertical'];
                 $r['subvertical'] = $oe['subvertical'] ?? '';
                 $r['oe_token_id'] = isset($oe['token']) ? $oe['token']['id'] : '';
-                $r['oe_change_reasons'] = isset($oe['request_changes_reason']) ? $oe['request_changes_reason'] : '';
+                $r['first_change_reasons'] = isset($oe['request_changes_reason']) ? $oe['request_changes_reason'] : '';
                 $r['request_id'] = isset($oe['ad_account_creation_request_id']) ? $oe['ad_account_creation_request_id']['id'] : '';
                 //格式化
                 $r['promotable_urls'] = json_encode($r['promotable_urls']);
@@ -491,7 +491,7 @@ class Facebook extends Channel{
     //同步Request数据
     public static function syncFbRequest(){ 
         $sdk = (new self())->getSdk();
-        $listen_data = ['oe_pending','pending','oe_approved'];
+        $listen_data = ['first_pending','pending','first_approved'];
         #$requestList = \App\Models\OpenaccountFacebook::whereIn('status',$listen_data)->get(['status','oe_id','id','request_id','remote_status']);
         $requestList = \App\Models\OpenaccountFacebook::get(['status','oe_id','id','request_id','remote_status']);
  

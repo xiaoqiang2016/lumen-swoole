@@ -28,9 +28,8 @@ class SwooleServer extends Command{
                     $this->httpStart();
                 }
                 if($workerId == 1){
-                    #$this->serverStart();
-                    $this->execTask();
-                    sleep(1);
+                    #$this->execTask();
+                    sleep(10);
                 }
             });
             $pool->on("WorkerStop", function ($pool, $workerId) {
@@ -40,56 +39,33 @@ class SwooleServer extends Command{
         }
     }
     public function execTask(){
-        $tasks = \App\Models\Task::limit(10)->orderby('id','ASC')->get();
+        $tasks = \App\Models\Task::limit(10)->where("status","=",'wait')->orderby('id','ASC')->get();
         $c = "\\App\\Services\\Task";
         $c = new $c();
-
+        $chan = new co\Channel(1);
+        #$maxLength = count($tasks);
+        $index = 0;
+        $result = [];
         foreach($tasks as $task){
-            $params = json_decode($task->params,true);
-            $action = $task->action;
-            $result = $c->$action($params);
+            go(function() use ($task,$c,$chan,&$index,&$result){
+                $index++;
+                $params = json_decode($task->params,true);
+                $action = $task->action;
+                $result = $c->$action($params);
+                $task->status = $result['status'];
+                $exec_at = time();
+                if(isset($result['interval_time'])){
+                    $exec_at += $result['interval_time'];
+                }
+                $log = @json_decode($task->log,true);
+                if(!is_array($log)) $log = [];
+                $log[] = ['result'=>$result['result'],'time'=>date("Y-m-d H:i:s",time())];
+                $task->log = json_encode($log,JSON_UNESCAPED_UNICODE);
+                $task->retry++;
+                $task->exec_at = date("Y-m-d H:i:s",$exec_at);
+                $task->save();
+            });
         }
-    }
-    public function serverStart(){
-
-        $server = new Swoole\Server('0.0.0.0', $this->serverConf['serverPort'], SWOOLE_BASE, SWOOLE_SOCK_TCP);
-        $server->set(array(
-            'worker_num' => 4,
-            'task_worker_num' => 10,
-        ));
-        $server->on('Receive', function($serv, $fd, $reactor_id, $data) {
-            $tasks = \App\Models\Task::limit(10)->orderby('id','ASC')->get();
-            foreach($tasks as $task){
-                $serv->task($task, 0);
-            }
-        });
-        $server->on('Task', function ($serv, $task_id, $from_id, $data) {
-            #echo "Tasker进程接收到数据";
-            #echo "#{$serv->worker_id}\tonTask: [PID={$serv->worker_pid}]: task_id=$task_id, data_len=".strlen($data).".".PHP_EOL;
-            $c = "\\App\\Services\\Task";
-            $c = new $c;
-            $a = $data->action;
-            $params = json_decode($data->params,true);
-            $c->$a($params);
-            $serv->finish($data);
-        });
-        $server->on('Finish', function ($serv, $task_id, $data) {
-            #echo "Task#$task_id finished, data_len=".strlen($data).PHP_EOL;
-        });
-        $server->on('WorkerStart', function ($serv,$worker_id) {
-            if($worker_id === 0){
-                swoole_timer_tick(10000, function(){
-                    $client = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
-                    if (!$client->connect('127.0.0.1', $this->serverConf['serverPort'], 0.5))
-                    {
-                        exit("connect failed. Error: {$client->errCode}\n");
-                    }
-                    $client->send("hello world\n");
-                    $client->close();
-                });
-            }
-        });
-        $server->start();
     }
     public function httpStart(){
         $this->initApp();
@@ -103,7 +79,6 @@ class SwooleServer extends Command{
             //'task_worker_num' => 1000,
         ));
         $httpServer->on('request', function($request, $response){
-            echo 123;
             if(env('APP_DEBUG') && false){
                 $logdir = realpath(__DIR__."/../../../storage/logs/")."/";
                 file_put_contents($logdir."sql_facebook.log", "" );
@@ -132,7 +107,8 @@ class SwooleServer extends Command{
             if($swooleResponse->sendFile($path_info)) return;
             //解析传参
             $params = [];
-            $request->server['request_method'] == 'POST' && $requestData = $request->post;
+            #echo $request->server['request_method'];
+            $request->server['request_method'] == 'POST' && $params = $request->post;
             if($request->server['request_method'] == 'GET'){
                 if($quertString = $request->server['query_string']??false){
                     parse_str($quertString,$params);
@@ -145,8 +121,6 @@ class SwooleServer extends Command{
             $groupName = $pathData[0]??false;
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
-            print_r($_pathData);
-            return;
             //数据验证
             $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             if(class_exists($valideClassName) && $actionName){
@@ -163,7 +137,6 @@ class SwooleServer extends Command{
                 }
             }
             //Result
-
             $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
@@ -181,7 +154,6 @@ class SwooleServer extends Command{
                 }
                 return;
             }
-
             $httpCode = 404;
             $response->status($httpCode);
             if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;

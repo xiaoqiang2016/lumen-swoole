@@ -15,7 +15,7 @@ class Curl{
 
     static function send($url,$method='GET',$params=[]){
         $urlData = parse_url($url);
-
+        $port = $urlData['port'] ?? 80;
         $urlData['query'] = isset($urlData['query']) ? "?".$urlData['query'] : '';
         $urlData['path'] = isset($urlData['path']) ? $urlData['path'] : '/';
         $postData = [];
@@ -23,28 +23,27 @@ class Curl{
             $method = 'post';
             $postData = $params['postData'];
         }
-
         $cli = false;
         if($urlData['scheme'] == 'https'){
-            $cli = new Client($urlData['host'], 443, true);
+            $cli = new Client($urlData['host'], $port, true);
         }
         if($urlData['scheme'] == 'http'){
-            $cli = new Client($urlData['host'], 80);
+            $cli = new Client($urlData['host'], $port);
         }
         $cli->set([ 'timeout' => 10]);
         $cli->setHeaders([
             'Host' => $urlData['host']
         ]);
-        $path = $urlData['path'].$urlData['query'];
+        $path = $urlData['path'].$urlData['query']??'';
+        $method = strtoupper($method);
         if($method == 'POST'){
             $cli->post($path,$postData);
         }
         if($method == 'GET'){
             $cli->get($path);
         }
-
         $result = $cli->body;
-        echo "ERRORCODE:".$cli->statusCode.PHP_EOL;
+        #echo "ERRORCODE:".$cli->statusCode.PHP_EOL;
         $cli->close();
         if($r = json_decode($result,true)) $result = $r;
 

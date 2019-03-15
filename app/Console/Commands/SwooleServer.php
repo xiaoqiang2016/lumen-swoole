@@ -6,11 +6,12 @@ use Co;
 class SwooleServer extends Command{
 	protected $signature = 'http {action}';
     protected $description = 'Swoole Server.';
-
+    private $cache;
     private $serverConf = [
-    	'httpPort' => 9502,
+    	'httpPort' => 9506,
     ];
     private $app = false;
+    private $httpServer;
     public function __construct()
     {
         parent::__construct();
@@ -57,6 +58,7 @@ class SwooleServer extends Command{
                 });
             }
             $path_info = $request->server['path_info'];
+
             $swooleResponse = new \App\Common\SwooleResponse($response);
             if($swooleResponse->sendFile($path_info)) return;
             //解析传参
@@ -70,12 +72,16 @@ class SwooleServer extends Command{
             $_pathData = array_filter(explode("/",$path_info));
             $pathData = [];
             if($_pathData) foreach($_pathData as $v) $pathData[] = $v;
+
             $groupName = $pathData[0]??false;
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
+
             //数据验证
             $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
+
             if(class_exists($valideClassName) && $actionName){
+                $params['rules'] = $actionName;
                 $valide = new $valideClassName();
                 $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
                 $failed = $validator->failed();
@@ -90,6 +96,7 @@ class SwooleServer extends Command{
             }
             //获取用户id
             //Result
+
             $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
@@ -98,6 +105,7 @@ class SwooleServer extends Command{
                 $controller->setResponse($swooleResponse);
                 $controller->setParams($params);
                 $_result = $controller->$actionName($request);
+
                 if($_result !== false){
                     $result = [];
                     $result['error'] = [];
@@ -106,6 +114,7 @@ class SwooleServer extends Command{
                 }
                 return;
             }
+
             $httpCode = 404;
             $response->status($httpCode);
             if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;
@@ -114,15 +123,37 @@ class SwooleServer extends Command{
         });
         $httpServer->on('start', function () {
             $this->test();
+            //task
+            $this->cache['task_push_lock'] = false;
+            swoole_timer_tick(1000, function ($timer_id) {
+                $this->sendTask();
+            });
+        });
+        $httpServer->on('Task', function (swoole_server $serv, $task_id, $from_id, $data) {
+            echo "Tasker进程接收到数据";
+            echo "#{$serv->worker_id}\tonTask: [PID={$serv->worker_pid}]: task_id=$task_id, data_len=".strlen($data).".".PHP_EOL;
+            $serv->finish($data);
         });
         $httpServer->start();
+        $this->httpServer = $httpServer;
+    }
+    private function sendTask(){
+        if($this->cache['task_push_lock']) return;
+        $this->cache['task_push_lock'] = true;
+        $tasks = \App\Models\Task::where("status","wait")->orderby("id","ASC")->limit(10)->get();
+        //$this->httpServer->task($tasks);
+        #echo $this->httpServer->test;
     }
     private function test(){
         $startTime = microtime(true);
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
+<<<<<<< HEAD
             $cli->get("/Manager/Auth/register?phone=17521061195&password=123456&code=1");
+=======
+            $cli->get("/Manager/role/role_add?loginName=2");
+>>>>>>> 4145537d00bcc1d13d72e16267a41d3bce655d05
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

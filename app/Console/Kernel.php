@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         //
         Commands\SwooleServer::class,
         Commands\TestCommand::class,
+        Commands\ControllerMakeCommand::class,
     ];
 
     /**

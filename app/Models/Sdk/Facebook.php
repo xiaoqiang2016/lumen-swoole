@@ -36,6 +36,7 @@ class Facebook{
         $separate = strpos($query,"?") ? '&' : '?';
         $url = "{$this->apiurl}/v{$this->version}/{$query}{$separate}access_token={$this->token}";
         #echo $url;
+        #echo $url.PHP_EOL;
         #echo PHP_EOL;
         #echo "https://graph.facebook.com/v3.2/me?fields=adaccounts.limit(1000){name,id,amount_spent,spend_cap,account_status,currency,owner,created_time}&access_token=EAAHE0mTSloIBAIjVmFt3NEbmLz1GvIYE5MUhdQqPaK1QJeRvu8whGPJp8DJWTDjTuWuw3gsZAZCBc1zZARE8KPeFfATHopP299Tm31J1aLmHZCJneShLqRgok6TxMG8rUh2lkB9red2RdmWqX6bPNCgJ52ndNlDHnsZCUgoWRnQZDZD";
 

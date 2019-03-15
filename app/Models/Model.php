@@ -3,7 +3,7 @@ namespace App\Models;
 use DB;
 use Log;
 class Model extends \Illuminate\Database\Eloquent\Model{
-    protected $connection = 'sinoclick';
+    protected $connection = 'facetool';
     protected $guarded = [];
     protected $fieldConvert;
     public function getDB(){
@@ -101,4 +101,7 @@ class Model extends \Illuminate\Database\Eloquent\Model{
         return;
 
     }
+
+
+
 }

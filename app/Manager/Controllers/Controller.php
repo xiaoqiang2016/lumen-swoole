@@ -4,6 +4,10 @@ namespace App\Manager\Controllers;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4145537d00bcc1d13d72e16267a41d3bce655d05
 class Controller extends BaseController
 {
     /**

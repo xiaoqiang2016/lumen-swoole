@@ -149,11 +149,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-<<<<<<< HEAD
             $cli->get("/Manager/Auth/register?phone=17521061195&password=123456&code=1");
-=======
-            $cli->get("/Manager/role/role_add?loginName=2");
->>>>>>> 4145537d00bcc1d13d72e16267a41d3bce655d05
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

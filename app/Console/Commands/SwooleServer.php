@@ -88,6 +88,7 @@ class SwooleServer extends Command{
                     return;
                 }
             }
+            //获取用户id
             //Result
             $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
             #var_export($controllerName);exit;
@@ -121,7 +122,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get("/Manager/Adaccount/test");
+            $cli->get("/Manager/Auth/register?phone=17521061195&password=123456&code=1");
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

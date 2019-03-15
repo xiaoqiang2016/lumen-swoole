@@ -79,28 +79,35 @@ class SwooleServer extends Command{
 
             //数据验证
             $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
-
-            if(class_exists($valideClassName) && $actionName){
-                $params['rules'] = $actionName;
-                $valide = new $valideClassName();
-                $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
-                $failed = $validator->failed();
-
-                $messages = $validator->messages();
-                echo '=======++++++111111=';
-
-                dd(1);
-                if(count($messages) != 0){
-                    $result = [];
-                    $result['error'] = ['code'=>'FORM_VALIDATE_FAIL','message'=>$messages->toArray()];
-                    $result['result'] = [];
-                    $swooleResponse->sendJson($result);
-                    return;
+            $checkRoleClassName = "App\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
+            if(class_exists($valideClassName) && $actionName){ 
+                //基础权限验证
+                $params['permission'] = $actionName;
+                for($i = 1; $i <= 2; $i++) {
+                    switch ($i) {
+                        case 1:
+                            $valide = new $checkRoleClassName();
+                            break;
+                        default:
+                            $valide = new $valideClassName();
+                            break;
+                    }
+                    $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
+                    $failed = $validator->fails();
+                    $messages = $validator->messages();
+                    if($failed) {
+                        $result = [];
+                        $result['code'] = 400;
+                        $result['message'] = $messages->toArray();
+                        $result['result'] = [];
+                        $swooleResponse->sendJson($result);
+                        return;
+                    }
                 }
+                unset($params['permission']);
             }
-            //获取用户id
+            
             //Result
-
             $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
@@ -109,10 +116,10 @@ class SwooleServer extends Command{
                 $controller->setResponse($swooleResponse);
                 $controller->setParams($params);
                 $_result = $controller->$actionName($request);
-
                 if($_result !== false){
                     $result = [];
-                    $result['error'] = [];
+                    $result['code'] = 200;
+                    $result['message'] = [];
                     $result['result'] = $_result;
                     $swooleResponse->sendJson($result);
                 }
@@ -153,7 +160,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get("/Manager/Auth/register?phone=17521061195&password=123456&code=1");
+            $cli->get("/Manager/role/role_add?loginName=2&password=232");
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

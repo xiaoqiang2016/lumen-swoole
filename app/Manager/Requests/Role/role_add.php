@@ -3,19 +3,16 @@ namespace App\Manager\Requests\Role;
 
 class role_add{
 
-
 	public function rules(){
-		$rules = new \App\Manager\Services\Rules();
-		$data = $rules->getRules(['manager_id'=>1],true);
-
+		
 		return [
-            'rules' => "in:".$data,
+			'loginName' => 'required',
             'password' => 'required'
 		];
 	}
 	public function messages(){
 		return [
-			'rules.in'=>'抱歉你没有权限'
+			
 		];
 	}
 	public function attributes(){

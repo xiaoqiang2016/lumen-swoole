@@ -106,7 +106,6 @@ class SwooleServer extends Command{
                 }
             }
             unset($params['permission']);
-            
             //Result
             $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
             #var_export($controllerName);exit;

@@ -85,7 +85,11 @@ class SwooleServer extends Command{
                 $valide = new $valideClassName();
                 $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
                 $failed = $validator->failed();
+
                 $messages = $validator->messages();
+                echo '=======++++++111111=';
+
+                dd(1);
                 if(count($messages) != 0){
                     $result = [];
                     $result['error'] = ['code'=>'FORM_VALIDATE_FAIL','message'=>$messages->toArray()];

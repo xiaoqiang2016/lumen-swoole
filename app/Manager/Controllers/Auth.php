@@ -15,7 +15,7 @@ class Auth extends Controller
     //public function register(Request $request)
     public function register()
     {
-        echo 1;exit;
+        echo 2;exit;
         //$loginName = 'leo.qin';
         $params = $this->getParams();
         //var_export($params);exit;

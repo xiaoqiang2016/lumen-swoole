@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Channel\Controllers;
 use Swoole;
 use App;
+use App\Services\Channels\Facebook as FacebookService;
 class Facebook extends Controller
 {
-    public $syncAll = 0; 
+    public $syncAll = 0;
     public function sync($params){
         $this->syncAll = 1;
         $account_id = $params['account_id'];
@@ -19,7 +20,9 @@ class Facebook extends Controller
 
     }
     public function syncOeRequest(){
-        #\App\Services\Channels\Facebook::syncOeRequest();
+        \App\Services\Channels\Facebook::syncOeRequest();
+    }
+    public function syncFbRequest(){
         \App\Services\Channels\Facebook::syncFbRequest();
     }
     public function getVerticalList(){
@@ -51,7 +54,10 @@ class Facebook extends Controller
      */
     public function openAccount(){
         $params = $this->getParams();
-        #print_r($params);
-        echo 123;
+        FacebookService::openAccount($params);
+    }
+    public function openAccountAudit(){
+        $params = $this->getParams();
+        FacebookService::openAccountAudit($params);
     }
 }

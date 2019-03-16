@@ -43,6 +43,12 @@ class Facebook{
 
         return Curl::get($url);
     }
+    public function post($query,$data=[]){
+        $query = $this->parseQuery($query);
+        $url = "{$this->apiurl}/v{$this->version}/{$query}";
+        $data['access_token'] = $this->token;
+        return Curl::post($url,$data);
+    }
     public function getAdCampaignListByAdAccountID($account_id){
         $fields = "campaigns.limit(99999){name,objective,created_time,effective_status,id}";
         $query = "{$account_id}?fields={$fields}";
@@ -113,5 +119,27 @@ class Facebook{
     
         $result = $response ?? [];
         return $result;
+    }
+    public function openAccountAudit($params){
+        $oe_id = $params['oe_id'];
+        $status = $params['status'];
+        $vertical = $params['vertical'];
+        $sub_vertical = $params['sub_vertical'];
+        $agent_bm_id = $params['agent_bm_id'] ?? '';
+        $business_name_en = $params['business_name_en'] ?? '';
+        $reason = $params['reason'] ?? '';
+        $query = "{$oe_id}";
+        $params = [];
+        $status = strtoupper($status);
+        $params['Status'] = $status;
+        $params['Payment'] = 'EXTENDED_CREDIT';
+        $params['SpendLimit'] = '0.01';
+        $params['Vertical'] = $vertical;
+        $params['Subvertical'] = $sub_vertical;
+        if($agent_bm_id) $params['PlanningAgencyBusinessID'] = $agent_bm_id;
+        if($business_name_en) $params['EnglishBusinessName'] = $business_name_en;
+        if($reason) $params['Reason'] = $reason;
+        $response = $this->post($query,$params);
+        print_r($response);
     }
 }

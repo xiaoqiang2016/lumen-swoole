@@ -2,15 +2,20 @@
 namespace App\Models;
 
 
-class OpenaccountFacebook extends Model{
-    protected $table = 't_openaccount_facebook';
+class FacebookOpenAccount extends Model{
+    protected $table = 't_facebook_openaccount';
     public function notify(){
         if($this->status == 'oe_pending'){
 
         }
     }
     public function notifySave(){
+        $vertical = \App\Models\FacebookVertical::where("key","=",$this->sub_vertical)->where("status","=",1)->first(["parent_key"]);
+        $this->vertical = $vertical->parent_key;
         $this->status = $this->convertStatus($this->remote_status);
+        $this->promotable_urls = implode(",",$this->promotable_urls);
+        $this->promotable_app_ids = $this->promotable_app_ids ? implode(",",$this->promotable_app_ids) : "";
+        $this->promotable_page_ids = $this->promotable_page_ids ? implode(",",$this->promotable_page_ids) : "";
         $result = $this->save();
         $hookParams = $this->toArray();
         $hookParams['apply_id'] = $this->id;
@@ -24,10 +29,10 @@ class OpenaccountFacebook extends Model{
     }
     public function convertStatus($remote_status){
         $status = [];
-        $status['oe_disapproved'] = ['oe_disapproved'];
-        $status['oe_changes_requested'] = ['oe_changes_requested'];
-        $status['oe_pending'] = ['oe_pending'];
-        $status['oe_approved'] = ['oe_approved'];
+        $status['first_disapproved'] = ['first_disapproved','first_disapproved'];
+        $status['first_changes_requested'] = ['first_changes_requested'];
+        $status['first_pending'] = ['first_pending'];
+        $status['first_approved'] = ['first_approved'];
         $status['approved'] = ['approved'];
         $status['disapproved'] = ['disapproved'];
         $status['changes_requested'] = ['changes_requested','requested_change'];

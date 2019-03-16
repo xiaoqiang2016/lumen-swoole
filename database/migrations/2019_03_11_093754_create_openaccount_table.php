@@ -6,7 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateOpenaccountTable extends Migration
 {
-    private $tableName = 't_openaccount_facebook';
+    private $tableName = 't_facebook_openaccount';
     /**
      * Run the migrations.
      *

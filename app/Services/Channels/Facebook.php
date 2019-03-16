@@ -460,7 +460,7 @@ class Facebook extends Channel{
             }
         }
         $oeRemoteList = array_column($oeList,null,'oe_id');
-        $of = new \App\Models\OpenaccountFacebook();
+        $of = new \App\Models\FacebookOpenAccount();
         $existsData = $of->get(['id','oe_id','oe_remote_updated']);
         if(!$existsData->isEmpty()){
             #$existsData = array_column($existsData->toArray(),null,'oe_id');
@@ -476,7 +476,7 @@ class Facebook extends Channel{
                 }
                 //新增
                 if(!$oe){
-                    $oe = new \App\Models\OpenaccountFacebook();
+                    $oe = new \App\Models\FacebookOpenAccount();
                     $oe->fill($oeRemoteData)->notifySave();
                 }else{
                     //更新
@@ -493,7 +493,7 @@ class Facebook extends Channel{
         $sdk = (new self())->getSdk();
         $listen_data = ['first_pending','pending','first_approved'];
         #$requestList = \App\Models\OpenaccountFacebook::whereIn('status',$listen_data)->get(['status','oe_id','id','request_id','remote_status']);
-        $requestList = \App\Models\OpenaccountFacebook::get(['status','oe_id','id','request_id','remote_status']);
+        $requestList = \App\Models\FacebookOpenAccount::get(['status','oe_id','id','request_id','remote_status']);
  
         if(!$requestList->isEmpty()){
             foreach($requestList as $request){
@@ -540,5 +540,35 @@ class Facebook extends Channel{
             }
         }
         echo 'syncFbRequest';
+    }
+    public static function openAccount($params){
+        if($params['apply_id'] ?? 0 > 0){
+            $openAccount = \App\Models\FacebookOpenAccount::find($params['apply_id']);
+            unset($params['apply_id']);
+        }else{
+            $openAccount = new \App\Models\FacebookOpenAccount();
+        }
+        $params['remote_status'] = 'first_pending';
+        $openAccount->fill($params)->notifySave();
+    }
+    //开户审核
+    public static function openAccountAudit($params){
+        $openAccount = \App\Models\FacebookOpenAccount::find($params['apply_id']);
+        //oe 审核
+        if($openAccount->oe_id){
+            $sdk = new \App\Models\Sdk\Facebook();
+            $auditParams = [
+                'oe_id' => $openAccount->oe_id,
+                'status' => $params['status'],
+                'vertical' => $openAccount->vertical,
+                'sub_vertical' => $openAccount->sub_vertical,
+                'agent_bm_id' => $openAccount->agent_bm_id,
+                'business_name_en' => $openAccount->business_name_en,
+                'reason' => '',
+            ];
+            $sdk->openAccountAudit($auditParams);
+        }else{
+
+        }
     }
 }

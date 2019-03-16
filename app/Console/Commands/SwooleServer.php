@@ -122,9 +122,9 @@ class SwooleServer extends Command{
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
             //数据验证
-            $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
+            $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             if(class_exists($valideClassName) && $actionName){
-                $valide = new $valideClassName();
+                $valide = new $valideClassName($params);
                 $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
                 $failed = $validator->failed();
                 $messages = $validator->messages();
@@ -137,7 +137,7 @@ class SwooleServer extends Command{
                 }
             }
             //Result
-            $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
+            $controllerName = "App\\Http\\{$groupName}\\Controllers\\{$controllerName}";
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
                 #$request =  Request::capture();
@@ -156,12 +156,13 @@ class SwooleServer extends Command{
             }
             $httpCode = 404;
             $response->status($httpCode);
-            if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;
+            #if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;
+
             $response->end($httpCode);
             return;
         });
         $httpServer->on('start', function () {
-            //$this->test();
+            $this->test();
         });
         $httpServer->start();
         
@@ -171,9 +172,36 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get("/task");
-
-
+//            $params = [
+//          #      'apply_id' => 667,
+//                'client_id' => '1s',
+//                'apply_number' => 10,
+//                'business_license' => 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=310278820,3623369202&fm=26&gp=0.png',
+//                'business_code' => '99999',
+//                'address_cn' => '上海市',
+//                'address_en' => 'Shanghai',
+//                'business_name_cn' => '上海市昆玉网络有限公司',
+////                'business_name_en' => '上海市昆玉网络有限公司',
+//                'city' => 'Shanghai',
+//                'state' => 'Shanghai',
+//                'zip_code' => '000000',
+//                'contact_email' => 'test@test.com',
+//                'contact_name' => '测试联系人',
+//                'timezone_id' => 42,
+////                'website' => 'http://www.sinoclick.com',
+////                'mobile' => 'http://www.sinoclick.com',
+//                'promotable_urls' => ['http://www.sinoclick.com'],
+//                'promotable_app_ids' => ['123123','4444'],
+//                'bind_bm_id' => '111',
+//                'sub_vertical' => 'TOY_AND_HOBBY',
+//            ];
+//            $cli->post("/Channel/Facebook/openAccount",$params);
+            $params = [
+                'apply_id' => 671,
+                'status' => 'disapproved',
+            ];
+            $cli->post("/Channel/Facebook/openAccountAudit",$params);
+            #$cli->post("/Channel/Facebook/syncOeRequest",$params);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

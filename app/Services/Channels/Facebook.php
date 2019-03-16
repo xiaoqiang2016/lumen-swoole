@@ -555,8 +555,11 @@ class Facebook extends Channel{
     public static function openAccountAudit($params){
         $openAccount = \App\Models\FacebookOpenAccount::find($params['apply_id']);
         //oe 审核
-        if($openAccount->oe_id){
+        $openAccount->status = 'submiting';
+        if($openAccount->oe_id || true){
             $sdk = new \App\Models\Sdk\Facebook();
+            $openAccount->oe_change_reasons = $params['reason'] ?? '';
+            $openAccount->setSubVertical($params['sub_vertical']);
             $auditParams = [
                 'oe_id' => $openAccount->oe_id,
                 'status' => $params['status'],
@@ -564,11 +567,19 @@ class Facebook extends Channel{
                 'sub_vertical' => $openAccount->sub_vertical,
                 'agent_bm_id' => $openAccount->agent_bm_id,
                 'business_name_en' => $openAccount->business_name_en,
-                'reason' => '',
+                'reason' => $openAccount->oe_change_reasons,
             ];
-            $sdk->openAccountAudit($auditParams);
-        }else{
+            $result = $sdk->openAccountAudit($auditParams);
+            if($result['request_id'] ?? 0 > 0){
+                $openAccount->remote_status = $params['status'];
 
+            }else{
+                print_r($result);
+            }
+
+        }else{
+            #echo 123;
         }
+        $openAccount->notifySave();
     }
 }

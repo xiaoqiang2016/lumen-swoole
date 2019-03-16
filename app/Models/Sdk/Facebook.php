@@ -140,6 +140,6 @@ class Facebook{
         if($business_name_en) $params['EnglishBusinessName'] = $business_name_en;
         if($reason) $params['Reason'] = $reason;
         $response = $this->post($query,$params);
-        print_r($response);
+        return $response;
     }
 }

@@ -198,7 +198,9 @@ class SwooleServer extends Command{
 //            $cli->post("/Channel/Facebook/openAccount",$params);
             $params = [
                 'apply_id' => 671,
-                'status' => 'disapproved',
+                'status' => 'changes_requested',
+                'reason' => '修改建议',
+                'sub_vertical' => 'MOBILE_AND_SOCIAL',
             ];
             $cli->post("/Channel/Facebook/openAccountAudit",$params);
             #$cli->post("/Channel/Facebook/syncOeRequest",$params);

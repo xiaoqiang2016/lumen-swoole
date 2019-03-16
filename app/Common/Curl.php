@@ -43,7 +43,6 @@ class Curl{
         #$path = 'v3.2/552758385231841?Status=DISAPPROVED&Payment=EXTENDED_CREDIT&SpendLimit=0.01&Vertical=RETAIL&Subvertical=TOY_AND_HOBBY&access_token=CAAUibl40bIcBAJkRAVZBTk8NkN4U36hrmRpUE4uyR3txrmzmKTybxRSSZBBMz3VNDZABKtXbbbZAqiGUFUz6pmJ0ZA2jbBLrioPEoz4sm1FYjmakfeOKfZCQOnzIZCOyqIZBTaXJaRWC8b0kb1v2lrVUHye9m7uq8F9dCOTJZBuz1Lq61HZCmhsypslk1ZA0aRqjT8ZD';
 
         if($method == 'POST'){
-            $postData = [];
             $cli->post($path,$postData);
         }
         if($method == 'GET'){

@@ -10,12 +10,11 @@ class FacebookOpenAccount extends Model{
         }
     }
     public function notifySave(){
-        $vertical = \App\Models\FacebookVertical::where("key","=",$this->sub_vertical)->where("status","=",1)->first(["parent_key"]);
-        $this->vertical = $vertical->parent_key;
+        $this->setSubVertical($this->sub_vertical);
         $this->status = $this->convertStatus($this->remote_status);
-        $this->promotable_urls = implode(",",$this->promotable_urls);
-        $this->promotable_app_ids = $this->promotable_app_ids ? implode(",",$this->promotable_app_ids) : "";
-        $this->promotable_page_ids = $this->promotable_page_ids ? implode(",",$this->promotable_page_ids) : "";
+        $this->promotable_urls = is_array($this->promotable_urls) ? implode(",",$this->promotable_urls) : $this->promotable_urls;
+        $this->promotable_app_ids = is_array($this->promotable_app_ids) ? implode(",",$this->promotable_app_ids) : $this->promotable_app_ids;
+        $this->promotable_page_ids = is_array($this->promotable_page_ids) ? implode(",",$this->promotable_page_ids) : $this->promotable_page_ids;
         $result = $this->save();
         $hookParams = $this->toArray();
         $hookParams['apply_id'] = $this->id;
@@ -29,7 +28,7 @@ class FacebookOpenAccount extends Model{
     }
     public function convertStatus($remote_status){
         $status = [];
-        $status['first_disapproved'] = ['first_disapproved','first_disapproved'];
+        $status['disapproved'] = ['first_disapproved','first_disapproved'];
         $status['first_changes_requested'] = ['first_changes_requested'];
         $status['first_pending'] = ['first_pending'];
         $status['first_approved'] = ['first_approved'];
@@ -44,5 +43,12 @@ class FacebookOpenAccount extends Model{
         }
         echo "转换在状态失败:{$remote_status}".PHP_EOL;
         return '';
+    }
+    //根据二级分类同时设置一级分类
+    public function setSubVertical($sub_vertical){
+        $vertical = \App\Models\FacebookVertical::where("key","=",$sub_vertical)->where("status","=",1)->first(["parent_key"]);
+        $this->vertical = $vertical->parent_key;
+        $this->sub_vertical = $sub_vertical;
+        return true;
     }
 }

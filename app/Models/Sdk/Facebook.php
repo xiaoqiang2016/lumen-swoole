@@ -9,6 +9,7 @@ class Facebook{
     private $batchTasks = [];
     private $apiurl = 'https://graph.facebook.com';
     private $version = '3.2';
+    private $bm_id = '630723763692369';
     public function __construct()
     {
         $this->setToken(env('SDK_FACEBOOK_TOKEN'));
@@ -140,6 +141,11 @@ class Facebook{
         if($business_name_en) $params['EnglishBusinessName'] = $business_name_en;
         if($reason) $params['Reason'] = $reason;
         $response = $this->post($query,$params);
+        return $response;
+    }
+    public function getOeToken(){
+        $query = "{$this->bm_id}/china_business_onboarding_attributions";
+        $response = $this->post($query,[]);
         return $response;
     }
 }

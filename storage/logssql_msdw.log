@@ -1,6 +1,0 @@
-[2019-03-04 05:56:47] (24.19ms) select * from `ms_user` where `loginname` = 'yy.kitty@sowoll.com'
-[2019-03-04 05:57:13] (212.74ms) select * from `ms_user` where `loginname` = 'yy.kitty@sowoll.com'
-[2019-03-04 05:57:30] (23.46ms) select * from `ms_user` where `loginname` = 'yy.kitty@sowoll.com'
-[2019-03-04 05:57:42] (31.18ms) select * from `ms_user` where `loginname` = 'yy.kitty@sowoll.com'
-[2019-03-04 05:58:16] (26.28ms) select * from `ms_user` where `loginname` = 'yy.kitty@sowoll.com'
-[2019-03-04 05:58:37] (26.2ms) select * from `ms_user` where `loginname` = 'yy.kitty@sowoll.com'

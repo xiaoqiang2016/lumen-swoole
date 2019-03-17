@@ -138,6 +138,7 @@ class SwooleServer extends Command{
             }
             //Result
             $controllerName = "App\\Http\\{$groupName}\\Controllers\\{$controllerName}";
+
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
                 #$request =  Request::capture();
@@ -145,7 +146,6 @@ class SwooleServer extends Command{
                 $controller->setResponse($swooleResponse);
                 $controller->setParams($params);
                 $_result = $controller->$actionName($request);
-
                 if($_result !== false){
                     $result = [];
                     $result['error'] = [];
@@ -172,38 +172,46 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-//            $params = [
-//          #      'apply_id' => 667,
-//                'client_id' => '1s',
-//                'apply_number' => 10,
-//                'business_license' => 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=310278820,3623369202&fm=26&gp=0.png',
-//                'business_code' => '99999',
-//                'address_cn' => '上海市',
-//                'address_en' => 'Shanghai',
-//                'business_name_cn' => '上海市昆玉网络有限公司',
-////                'business_name_en' => '上海市昆玉网络有限公司',
-//                'city' => 'Shanghai',
-//                'state' => 'Shanghai',
-//                'zip_code' => '000000',
-//                'contact_email' => 'test@test.com',
-//                'contact_name' => '测试联系人',
-//                'timezone_id' => 42,
-////                'website' => 'http://www.sinoclick.com',
-////                'mobile' => 'http://www.sinoclick.com',
-//                'promotable_urls' => ['http://www.sinoclick.com'],
-//                'promotable_app_ids' => ['123123','4444'],
-//                'bind_bm_id' => '111',
-//                'sub_vertical' => 'TOY_AND_HOBBY',
-//            ];
-//            $cli->post("/Channel/Facebook/openAccount",$params);
+
             $params = [
-                'apply_id' => 671,
-                'status' => 'changes_requested',
-                'reason' => '修改建议',
-                'sub_vertical' => 'MOBILE_AND_SOCIAL',
+          #      'apply_id' => 667,
+                'client_id' => '1s',
+                'apply_number' => 10,
+                'business_license' => 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=310278820,3623369202&fm=26&gp=0.png',
+                'business_code' => '99999',
+                'address_cn' => '上海市',
+                'address_en' => 'Shanghai',
+                'business_name_cn' => '上海市昆玉网络有限公司',
+//                'business_name_en' => '上海市昆玉网络有限公司',
+                'city' => 'Shanghai',
+                'state' => 'Shanghai',
+                'zip_code' => '000000',
+                'contact_email' => 'test@test.com',
+                'contact_name' => '测试联系人',
+                'timezone_id' => 42,
+//                'website' => 'http://www.sinoclick.com',
+//                'mobile' => 'http://www.sinoclick.com',
+                'promotable_urls' => ['http://www.sinoclick.com'],
+                'promotable_app_ids' => ['123123','4444'],
+                'bind_bm_id' => '111',
+                'sub_vertical' => 'TOY_AND_HOBBY',
             ];
-            $cli->post("/Channel/Facebook/openAccountAudit",$params);
-            #$cli->post("/Channel/Facebook/syncOeRequest",$params);
+            #$cli->post("/Channel/Facebook/openAccount",$params);
+//            $params = [
+//                'apply_id' => 671,
+//                'status' => 'changes_requested',
+//                'reason' => '修改建议',
+//                'sub_vertical' => 'MOBILE_AND_SOCIAL',
+//            ];
+//            $params = [
+//                'client_id' => 1,
+//                'fields' => 'client_id,vertical,status',
+//                'client_type' => 1,
+//            ];
+//            //同步数据
+//            $cli->post("/Channel/Facebook/getOpenaccountList",$params);
+            #$cli->post("/Channel/Facebook/openAccountAudit",$params);
+            $cli->post("/Channel/Facebook/syncOpenAccount",$params);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);
@@ -277,4 +285,5 @@ class SwooleServer extends Command{
         $this->app = $app;
         return $this->app;
     }
+
 }

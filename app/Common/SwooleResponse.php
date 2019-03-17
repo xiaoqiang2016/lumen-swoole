@@ -33,6 +33,7 @@ class SwooleResponse{
         //     break;
         // }
         $response = json_encode($response,JSON_UNESCAPED_UNICODE);
+        $this->response->header('Content-Type', "application/json;charset=utf-8");
         $this->response->end($response);
         return;
     }
@@ -54,7 +55,7 @@ class SwooleResponse{
             'ppt'  => 'application/vnd.ms-powerpoint',
 
             'pps'  => 'application/vnd.ms-powerpoint',
-
+            'json' => 'application/json',
             'pdf'  => 'application/pdf',
 
             'xml'  => 'application/xml',

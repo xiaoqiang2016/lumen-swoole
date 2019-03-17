@@ -28,16 +28,16 @@ class FacebookOpenAccount extends Model{
     }
     public function convertStatus($remote_status){
         $status = [];
-        $status['disapproved'] = ['first_disapproved','first_disapproved'];
-        $status['first_changes_requested'] = ['first_changes_requested'];
-        $status['first_pending'] = ['first_pending'];
-        $status['first_approved'] = ['first_approved'];
+        $status['internal_disapproved'] = ['oe_disapproved'];
+        $status['internal_changes_requested'] = ['oe_changes_requested'];
+        $status['internal_pending'] = ['oe_pending'];
+        $status['internal_approved'] = ['oe_approved'];
         $status['approved'] = ['approved'];
         $status['disapproved'] = ['disapproved'];
         $status['changes_requested'] = ['changes_requested','requested_change'];
         $status['pending'] = ['pending','under_review'];
         foreach($status as $k=>$v){
-            if(in_array($remote_status,$v)){
+            if($k == $v || in_array($remote_status,$v)){
                 return $k;
             }
         }
@@ -46,7 +46,8 @@ class FacebookOpenAccount extends Model{
     }
     //根据二级分类同时设置一级分类
     public function setSubVertical($sub_vertical){
-        $vertical = \App\Models\FacebookVertical::where("key","=",$sub_vertical)->where("status","=",1)->first(["parent_key"]);
+        if(!$sub_vertical) return false;
+        $vertical = \App\Models\FacebookVertical::where("key","=",$sub_vertical)->where("status","=",1)->first();
         $this->vertical = $vertical->parent_key;
         $this->sub_vertical = $sub_vertical;
         return true;

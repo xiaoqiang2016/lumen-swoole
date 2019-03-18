@@ -2,6 +2,6 @@
 namespace App\Models;
 
 class Menu extends Model{
-	protected $connection = 'facetool';
+	protected $connection = 'sinoclick';
     protected $table = 't_menu';
 }

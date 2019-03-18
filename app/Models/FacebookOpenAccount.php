@@ -15,9 +15,8 @@ class FacebookOpenAccount extends Model{
         $this->promotable_urls = is_array($this->promotable_urls) ? implode(",",$this->promotable_urls) : $this->promotable_urls;
         $this->promotable_app_ids = is_array($this->promotable_app_ids) ? implode(",",$this->promotable_app_ids) : $this->promotable_app_ids ?? '';
         $this->promotable_page_ids = is_array($this->promotable_page_ids) ? implode(",",$this->promotable_page_ids) : $this->promotable_page_ids ?? '';
-        $status_triger_count = json_decode($this->status_triger_count ?: '[]');
-
-        if(count($status_triger_count) == 0){
+        $status_triger_count = json_decode($this->status_triger_count ?: '[]',true);
+        if(count($status_triger_count??[]) == 0){
             $status_triger_count = [];
             $status_triger_count['internal_disapproved'] = 0;
             $status_triger_count['internal_changes_requested'] = 0;
@@ -28,7 +27,6 @@ class FacebookOpenAccount extends Model{
             $status_triger_count['changes_requested'] = 0;
             $status_triger_count['pending'] = 0;
         }
-        echo $this->status;
         $status_triger_count[$this->status]++;
         $this->status_triger_count = json_encode($status_triger_count);
         $result = $this->save();
@@ -84,10 +82,9 @@ class FacebookOpenAccount extends Model{
         $hookParams['timezones'] = array_filter(explode(",",$this->timezone_ids));
         $hookParams['vertical'] = $this->vertical;
         $hookParams['sub_vertical'] = $this->sub_vertical;
-        $hookParams['oe_change_reasons'] = $this->oe_change_reasons;
-        $hookParams['request_change_reasons'] = $this->request_change_reasons;
-        $hookParams['oe_change_reasons'] = $this->oe_change_reasons;
-        print_r($hookParams);
+        $hookParams['change_reasons'] = $this->change_reasons;
+        $hookParams['facebook_change_reasons'] = $this->facebook_change_reasons;
+
 
         Task::add('WebHook.openAccountNotify',$hookParams);
         return $result;

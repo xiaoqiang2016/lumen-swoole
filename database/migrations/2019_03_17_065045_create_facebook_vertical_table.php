@@ -239,8 +239,8 @@ class CreateFacebookVerticalTable extends Migration
                     ],
                     [
                         'key' => 'SMB_ENERGY',
-                        'name_cn' => 'Energy (SMB)',
-                        'name_en' => '能源（SMB）',
+                        'name_cn' => '能源（SMB）',
+                        'name_en' => 'Energy (SMB)',
                     ],
                     [
                         'key' => 'UTILITIES_AND_ENERGY_EQUIPMENT_AND_SERVICES',

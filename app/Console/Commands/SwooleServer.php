@@ -117,11 +117,25 @@ class SwooleServer extends Command{
             $_pathData = array_filter(explode("/",$path_info));
             $pathData = [];
             if($_pathData) foreach($_pathData as $v) $pathData[] = $v;
-
             $groupName = $pathData[0]??false;
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
             //数据验证
+            $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
+            if(class_exists($valideClassName) && $actionName){
+                $valide = new $valideClassName($params);
+                $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
+                $failed = $validator->failed();
+                $messages = $validator->messages();
+                if(count($messages) != 0){
+                    $result = [];
+                    $result['error'] = ['code'=>'FORM_VALIDATE_FAIL','message'=>$messages->toArray()];
+                    $result['result'] = [];
+                    $swooleResponse->sendJson($result);
+                    return;
+                }
+            }
+            //权限验证
             $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             $checkRoleClassName = "App\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
             if(class_exists($valideClassName) && $actionName){ 
@@ -194,7 +208,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get("/Manager/role/role_add?loginName=2&password=232");
+            #$cli->get("/Manager/role/role_add?loginName=2&password=232");
 
             $params = [
           #      'apply_id' => 667,
@@ -221,12 +235,12 @@ class SwooleServer extends Command{
                 'source' => 'SinoClick',
             ];
             #$cli->post("/Channel/Facebook/openAccount",$params);
-//            $params = [
-//                'apply_id' => 671,
-//                'status' => 'changes_requested',
-//                'reason' => '修改建议',
-//                'sub_vertical' => 'MOBILE_AND_SOCIAL',
-//            ];
+            $auditParams = [
+                'apply_id' => 5,
+                'status' => 'internal_changes_requested',
+                #'reason' => '修改建议',
+                'sub_vertical' => 'MOBILE_AND_SOCIAL',
+            ];
 //            $params = [
 //                'client_id' => 1,
 //                'fields' => 'client_id,vertical,status',
@@ -234,9 +248,9 @@ class SwooleServer extends Command{
 //            ];
 //            //同步数据
 //            $cli->post("/Channel/Facebook/getOpenaccountList",$params);
-            #$cli->post("/Channel/Facebook/openAccountAudit",$params);
-            #$cli->post("/Channel/Facebook/syncOpenAccount",$params);
-            $cli->post("/Channel/Facebook/openAccount",$params);
+            #$cli->post("/Channel/Facebook/openAccountAudit",$auditParams);
+            $cli->post("/Channel/Facebook/syncOpenAccount",$params);
+            #$cli->post("/Channel/Facebook/openAccount",$params);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

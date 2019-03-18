@@ -22,7 +22,7 @@ class openAccountAudit extends \App\Http\Requests\Base{
             'required',
             'in:internal_approved,internal_disapproved,internal_changes_requested'
         ];
-        $rules['reason'] = ['required_if:status,changes_requested'];
+        $rules['reason'] = ['required_if:status,internal_changes_requested'];
         $rules['sub_vertical'] = [
             'required',
             Rule::in($verticals),

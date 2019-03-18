@@ -117,7 +117,6 @@ class SwooleServer extends Command{
             $_pathData = array_filter(explode("/",$path_info));
             $pathData = [];
             if($_pathData) foreach($_pathData as $v) $pathData[] = $v;
-
             $groupName = $pathData[0]??false;
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
@@ -136,9 +135,38 @@ class SwooleServer extends Command{
                     return;
                 }
             }
+            //权限验证
+            $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
+            $checkRoleClassName = "App\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
+            if(class_exists($valideClassName) && $actionName){ 
+                //基础权限验证
+                $params['permission'] = $actionName;
+                for($i = 1; $i <= 2; $i++) {
+                    switch ($i) {
+                        case 1:
+                            $valide = new $checkRoleClassName();
+                            break;
+                        default:
+                            $valide = new $valideClassName();
+                            break;
+                    }
+                    $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
+                    $failed = $validator->fails();
+                    $messages = $validator->messages();
+                    if($failed) {
+                        $result = [];
+                        $result['code'] = 400;
+                        $result['message'] = $messages->toArray();
+                        $result['result'] = [];
+                        $swooleResponse->sendJson($result);
+                        return;
+                    }
+                }
+                unset($params['permission']);
+            }
+            
             //Result
             $controllerName = "App\\Http\\{$groupName}\\Controllers\\{$controllerName}";
-
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
                 #$request =  Request::capture();
@@ -148,7 +176,8 @@ class SwooleServer extends Command{
                 $_result = $controller->$actionName($request);
                 if($_result !== false){
                     $result = [];
-                    $result['error'] = [];
+                    $result['code'] = 200;
+                    $result['message'] = [];
                     $result['result'] = $_result;
                     $swooleResponse->sendJson($result);
                 }
@@ -165,17 +194,25 @@ class SwooleServer extends Command{
             $this->test();
         });
         $httpServer->start();
-        
+        $this->httpServer = $httpServer;
+    }
+    private function sendTask(){
+        if($this->cache['task_push_lock']) return;
+        $this->cache['task_push_lock'] = true;
+        $tasks = \App\Models\Task::where("status","wait")->orderby("id","ASC")->limit(10)->get();
+        //$this->httpServer->task($tasks);
+        #echo $this->httpServer->test;
     }
     private function test(){
         $startTime = microtime(true);
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
+            #$cli->get("/Manager/role/role_add?loginName=2&password=232");
 
             $params = [
           #      'apply_id' => 667,
-                'client_id' => '1s',
+                'client_id' => '1',
                 'apply_number' => 10,
                 'business_license' => 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=310278820,3623369202&fm=26&gp=0.png',
                 'business_code' => '99999',
@@ -195,8 +232,25 @@ class SwooleServer extends Command{
                 'promotable_app_ids' => ['123123','4444'],
                 'bind_bm_id' => '111',
                 'sub_vertical' => 'TOY_AND_HOBBY',
+                'source' => 'SinoClick',
             ];
+            #$cli->post("/Channel/Facebook/openAccount",$params);
+            $auditParams = [
+                'apply_id' => 5,
+                'status' => 'internal_changes_requested',
+                #'reason' => '修改建议',
+                'sub_vertical' => 'MOBILE_AND_SOCIAL',
+            ];
+//            $params = [
+//                'client_id' => 1,
+//                'fields' => 'client_id,vertical,status',
+//                'client_type' => 1,
+//            ];
+//            //同步数据
+//            $cli->post("/Channel/Facebook/getOpenaccountList",$params);
+            #$cli->post("/Channel/Facebook/openAccountAudit",$auditParams);
             $cli->post("/Channel/Facebook/syncOpenAccount",$params);
+            #$cli->post("/Channel/Facebook/openAccount",$params);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

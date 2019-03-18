@@ -31,6 +31,7 @@ class openAccount extends \App\Http\Requests\Base{
                 }
             ];
         }
+        $rules['apply_number'] = ['required'];
         $rules['business_license'] = ['required','active_url'];
         $rules['business_code'] = ['required'];
         $rules['address_cn'] = ['required'];

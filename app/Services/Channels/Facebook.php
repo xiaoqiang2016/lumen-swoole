@@ -481,12 +481,12 @@ class Facebook extends Channel{
                 //新增
                 if(!$oe){
                     $oe = new \App\Models\FacebookOpenAccount();
-                    $oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
+                    #$oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
                     $oe->fill($oeRemoteData)->notifySave();
                 }else{
                     //更新
-                    $oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
-                    if($oeRemoteData['remote_updated'] > $oe->remote_updated + 10){
+                    #$oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
+                    if(strtotime($oeRemoteData['remote_updated']) > strtotime($oe->remote_updated) + 10){
                         $oe->fill($oeRemoteData)->notifySave();
                     }
                 }
@@ -517,9 +517,8 @@ class Facebook extends Channel{
             foreach($requestList as $request){
                 if(!$request->request_id) continue;
                 $remote_data = $sdk->getOpenaccountRequestDetail($request->request_id);
-                
                 if(!$remote_data) continue;
-                if(true || $request['remote_status'] != $remote_data['status']){
+                if($request['remote_status'] != $remote_data['status']){
            
                     $request->sync_updated = date("Y-m-d H:i:s",time());
                     $request->remote_status = $remote_data['status'];
@@ -566,39 +565,39 @@ class Facebook extends Channel{
         }else{
             $openAccount = new \App\Models\FacebookOpenAccount();
         }
-        $params['remote_status'] = 'first_pending';
+        $params['remote_status'] = 'internal_pending';
         $openAccount->fill($params)->notifySave();
     }
     //开户审核
     public static function openAccountAudit($params){
         $openAccount = \App\Models\FacebookOpenAccount::find($params['apply_id']);
         //oe 审核
-        $openAccount->status = 'submiting';
-        if($openAccount->oe_id || true){
+        if($openAccount->oe_id){
             $sdk = new \App\Models\Sdk\Facebook();
-            $openAccount->oe_change_reasons = $params['reason'] ?? '';
+            $openAccount->change_reasons = $params['reason'] ?? '';
             $openAccount->setSubVertical($params['sub_vertical']);
+            $status = str_replace("internal_","",$params['status']);
+            $status = strtoupper($status);
             $auditParams = [
                 'oe_id' => $openAccount->oe_id,
-                'status' => $params['status'],
+                'status' => $status,
                 'vertical' => $openAccount->vertical,
                 'sub_vertical' => $openAccount->sub_vertical,
                 'agent_bm_id' => $openAccount->agent_bm_id,
                 'business_name_en' => $openAccount->business_name_en,
-                'reason' => $openAccount->oe_change_reasons,
+                'reason' => $openAccount->change_reasons,
             ];
             $result = $sdk->openAccountAudit($auditParams);
             if($result['request_id'] ?? 0 > 0){
                 $openAccount->remote_status = $params['status'];
-
+                $openAccount->notifySave();
             }else{
                 print_r($result);
             }
-
         }else{
             #echo 123;
         }
-        $openAccount->notifySave();
+
     }
     private function uploadLicense($url){
         $dirpath  = '/tmp/'.md5($url);

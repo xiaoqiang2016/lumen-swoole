@@ -53,7 +53,7 @@ return [
         //     'engine' => env('DB_SINOCLICK_ENGINE', null),
         //     'timezone' => env('DB_SINOCLICK_TIMEZONE', '+00:00'),
         // ],
-        'sinoclick' => [
+        'facetool' => [
             'driver' => 'mysql',
             'host' => env('DB_SINOCLICK_HOST', '192.168.1.19'),
             'port' => env('DB_SINOCLICK_PORT', 3306),

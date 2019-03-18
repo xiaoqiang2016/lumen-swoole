@@ -175,7 +175,7 @@ class SwooleServer extends Command{
 
             $params = [
           #      'apply_id' => 667,
-                'client_id' => '1s',
+                'client_id' => '1',
                 'apply_number' => 10,
                 'business_license' => 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=310278820,3623369202&fm=26&gp=0.png',
                 'business_code' => '99999',
@@ -195,6 +195,7 @@ class SwooleServer extends Command{
                 'promotable_app_ids' => ['123123','4444'],
                 'bind_bm_id' => '111',
                 'sub_vertical' => 'TOY_AND_HOBBY',
+                'source' => 'SinoClick',
             ];
             #$cli->post("/Channel/Facebook/openAccount",$params);
 //            $params = [
@@ -211,7 +212,8 @@ class SwooleServer extends Command{
 //            //同步数据
 //            $cli->post("/Channel/Facebook/getOpenaccountList",$params);
             #$cli->post("/Channel/Facebook/openAccountAudit",$params);
-            $cli->post("/Channel/Facebook/syncOpenAccount",$params);
+            #$cli->post("/Channel/Facebook/syncOpenAccount",$params);
+            $cli->post("/Channel/Facebook/openAccount",$params);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

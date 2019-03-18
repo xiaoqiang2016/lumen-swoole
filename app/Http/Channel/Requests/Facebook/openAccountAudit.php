@@ -13,14 +13,14 @@ class openAccountAudit extends \App\Http\Requests\Base{
                 if($r === null){
                     return $fail($attribute.' 无效.');
                 }
-                if(!in_array($r->status,['pending'])){
+                if(!in_array($r->status,['internal_pending'])){
                     return $fail('当前状态['.$r->status.']不可审核.');
                 }
             }
         ];
         $rules['status'] = [
             'required',
-            'in:disapproved,approved,changes_requested'
+            'in:internal_approved,internal_disapproved,internal_changes_requested'
         ];
         $rules['reason'] = ['required_if:status,changes_requested'];
         $rules['sub_vertical'] = [

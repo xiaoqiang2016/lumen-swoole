@@ -33,7 +33,7 @@ class Facebook extends Controller
     public function syncOpenAccount(){
         $facebook_service = new  \App\Services\Channels\Facebook();
         $facebook_service->syncOeRequest();
-        $facebook_service->syncFbRequest();
+        #$facebook_service->syncFbRequest();
         #$result = $facebook_service->getOeLinkByClientID(111);
         #print_r($result);
     }

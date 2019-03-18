@@ -13,8 +13,24 @@ class FacebookOpenAccount extends Model{
         $this->setSubVertical($this->sub_vertical);
         $this->status = $this->convertStatus($this->remote_status);
         $this->promotable_urls = is_array($this->promotable_urls) ? implode(",",$this->promotable_urls) : $this->promotable_urls;
-        $this->promotable_app_ids = is_array($this->promotable_app_ids) ? implode(",",$this->promotable_app_ids) : $this->promotable_app_ids;
-        $this->promotable_page_ids = is_array($this->promotable_page_ids) ? implode(",",$this->promotable_page_ids) : $this->promotable_page_ids;
+        $this->promotable_app_ids = is_array($this->promotable_app_ids) ? implode(",",$this->promotable_app_ids) : $this->promotable_app_ids ?? '';
+        $this->promotable_page_ids = is_array($this->promotable_page_ids) ? implode(",",$this->promotable_page_ids) : $this->promotable_page_ids ?? '';
+        $status_triger_count = json_decode($this->status_triger_count ?: '[]');
+
+        if(count($status_triger_count) == 0){
+            $status_triger_count = [];
+            $status_triger_count['internal_disapproved'] = 0;
+            $status_triger_count['internal_changes_requested'] = 0;
+            $status_triger_count['internal_pending'] = 0;
+            $status_triger_count['internal_approved'] = 0;
+            $status_triger_count['approved'] = 0;
+            $status_triger_count['disapproved'] = 0;
+            $status_triger_count['changes_requested'] = 0;
+            $status_triger_count['pending'] = 0;
+        }
+        echo $this->status;
+        $status_triger_count[$this->status]++;
+        $this->status_triger_count = json_encode($status_triger_count);
         $result = $this->save();
         $hookParams = $this->toArray();
         $hookParams['apply_id'] = $this->id;
@@ -22,8 +38,58 @@ class FacebookOpenAccount extends Model{
         unset($hookParams['remote_status']);
         unset($hookParams['oe_id']);
         unset($hookParams['request_id']);
+
+        $apply_approve_node = [];
+        //审批节点
+        if($this->status == 'internal_pending'){
+            $internal_pending_count = $status_triger_count['internal_pending'] - 1;
+            if($internal_pending_count == $status_triger_count['changes_requested']){
+                $apply_approve_node = [1];
+            }else{
+                $apply_approve_node = [1,2];
+            }
+        }
+        //来源 1:openaccount, 2:sinoclick 3:Facebook OE
+        if($this->oe_id){
+            $hookParams['application_source'] = 3;
+        }
+        if($this->source == 'OpenAccount') $hookParams['application_source'] = 1;
+        if($this->source == 'SinoClick') $hookParams['application_source'] = 2;
+        $application_source = 3;
+        $hookParams = [];
+        $hookParams['apply_id'] = $this->id; //申请标识唯一ID
+        $hookParams['clientId'] = $this->client_id; //客户ID
+        $hookParams['status'] = $this->status; //当前审批的状态
+        $hookParams['apply_approve_node'] = $apply_approve_node; //需要添加的审批节点
+        $hookParams['apply_number'] = $this->apply_number;//申请广告账号数量
+        $hookParams['planning_agency_business_id'] = $this->agent_bm_id;
+        $hookParams['business_management_id'] = $this->bind_bm_id;
+        $hookParams['application_source'] = $application_source;
+        $hookParams['business_license'] = $this->business_license;
+        $hookParams['business_code'] = $this->business_code;
+        $hookParams['address_cn'] = $this->address_cn;
+        $hookParams['address_en'] = $this->address_en;
+        $hookParams['business_name_cn'] = $this->business_name_cn;
+        $hookParams['business_name_en'] = $this->business_name_en;
+        $hookParams['city'] = $this->city;
+        $hookParams['state'] = $this->state;
+        $hookParams['zip_code'] = $this->zip_code;
+        $hookParams['contact_email'] = $this->contact_email;
+        $hookParams['contact_name'] = $this->contact_name;
+        $hookParams['website'] = $this->website;
+        $hookParams['mobile'] = $this->mobile;
+        $hookParams['promotable_urls'] = array_filter(explode(",",$this->promotable_urls));
+        $hookParams['promotable_page_ids'] = array_filter(explode(",",$this->promotable_page_ids));
+        $hookParams['promotable_app_ids'] = array_filter(explode(",",$this->promotable_app_ids));
+        $hookParams['timezones'] = array_filter(explode(",",$this->timezone_ids));
+        $hookParams['vertical'] = $this->vertical;
+        $hookParams['sub_vertical'] = $this->sub_vertical;
+        $hookParams['oe_change_reasons'] = $this->oe_change_reasons;
+        $hookParams['request_change_reasons'] = $this->request_change_reasons;
+        $hookParams['oe_change_reasons'] = $this->oe_change_reasons;
+        print_r($hookParams);
+
         Task::add('WebHook.openAccountNotify',$hookParams);
-        #print_r($this->toArray());
         return $result;
     }
     public function convertStatus($remote_status){
@@ -37,7 +103,7 @@ class FacebookOpenAccount extends Model{
         $status['changes_requested'] = ['changes_requested','requested_change'];
         $status['pending'] = ['pending','under_review'];
         foreach($status as $k=>$v){
-            if($k == $v || in_array($remote_status,$v)){
+            if($k == $remote_status || in_array($remote_status,$v)){
                 return $k;
             }
         }

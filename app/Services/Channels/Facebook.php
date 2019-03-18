@@ -481,12 +481,12 @@ class Facebook extends Channel{
                 //新增
                 if(!$oe){
                     $oe = new \App\Models\FacebookOpenAccount();
-                    $oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
+                    #$oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
                     $oe->fill($oeRemoteData)->notifySave();
                 }else{
                     //更新
-                    $oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
-                    if($oeRemoteData['remote_updated'] > $oe->remote_updated + 10){
+                    #$oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
+                    if(strtotime($oeRemoteData['remote_updated']) > strtotime($oe->remote_updated) + 10){
                         $oe->fill($oeRemoteData)->notifySave();
                     }
                 }
@@ -566,7 +566,7 @@ class Facebook extends Channel{
         }else{
             $openAccount = new \App\Models\FacebookOpenAccount();
         }
-        $params['remote_status'] = 'first_pending';
+        $params['remote_status'] = 'internal_pending';
         $openAccount->fill($params)->notifySave();
     }
     //开户审核

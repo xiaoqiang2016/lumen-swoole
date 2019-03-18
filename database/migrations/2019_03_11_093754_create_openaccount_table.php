@@ -54,6 +54,10 @@ class CreateOpenaccountTable extends Migration
             $table->string("sub_vertical",100)->nullable(false)->default("")->comment("二级行业分类。");
             $table->string("change_reasons",2000)->nullable(false)->default("[]")->comment("OE审核错误信息。");
             $table->string("facebook_change_reasons",2000)->nullable(false)->default("[]")->comment("FB审核错误信息。");
+            $table->string('status_triger_count',2000)->nullable(false)->default("[]")->comment("状态触发数。");
+            $table->string('source',50)->nullable(false)->default("OpenAccount")->comment("来源。");
+
+            $table->string('timezone_ids',500)->nullable(false)->default('')->comment("时区ID列表。");
             $table->timestamps();
         });
     }

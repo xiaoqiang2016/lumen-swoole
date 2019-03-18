@@ -8,10 +8,10 @@ class CheckRole{
 		//获取拥有的权限集合
 		$rules = new \App\Manager\Services\Rules();
 		$hasRules = $rules->getRules(['manager_id'=>1],true);
-
+		$hasRules = $hasRules . ',list'; 
+		
 		return [
-            'rules' => "in:".$hasRules,
-            //'permission' => "in:1,2,3",
+            'permission' => "in:".$hasRules,
 		];
 	}
 	public function messages(){

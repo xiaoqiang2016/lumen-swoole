@@ -7,9 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model{
 	protected $connection = 'facetool';
     protected $table = 't_role';
+    public $timestamps = false;
+    //获取所有有效角色
+  	public function findAll() {
+  		return $this->select('guid','name','memo')->where('status','=',1)->get()->toArray();
+  	}
 
-    public function roles() {
-    	return $this->belongsToMany('App\Models\Menu','t_role_menu','role_id','menu_id','id','id');
-    }
+  	//获取子级有效角色列表
+  	public function findChildRole($id) {
+        if($id == 1) {
+            return $this->findAll();
+        }
+
+       	return app('db')->connection("{$this->connection}")->select("SELECT guid,name,memo FROM `t_role` WHERE (id IN (SELECT `role_id` FROM `t_manager` WHERE FIND_IN_SET('{$id}',parent_ids)) OR create_manager_id = {$id}) AND status = 1 ");
+        
+  	}
 
 }

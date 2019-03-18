@@ -1,24 +1,22 @@
 <?php
 namespace App\Manager\Requests\Role;
 
-class role_add{
+class roleDel{
 
 	public function rules(){
 		
 		return [
-			'loginName' => 'required',
-            'password' => 'required'
+			'guid' => 'required'
 		];
 	}
 	public function messages(){
 		return [
-			
+			'guid.required' => '标识必填'
 		];
 	}
 	public function attributes(){
 		return [
-            'loginName' => '登录名',
-            'password' =>'登录密码',
+            'guid' => 'ID',
 		];
 	}
 }

@@ -63,7 +63,7 @@ class SwooleServer extends Command{
             if($swooleResponse->sendFile($path_info)) return;
             //解析传参
             $params = [];
-            $request->server['request_method'] == 'POST' && $requestData = $request->post;
+            $request->server['request_method'] == 'POST' && $params = $request->post;
             if($request->server['request_method'] == 'GET'){
                 if($quertString = $request->server['query_string']??false){
                     parse_str($quertString,$params);
@@ -80,7 +80,7 @@ class SwooleServer extends Command{
             //数据验证
             $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             $checkRoleClassName = "App\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
-            if(class_exists($valideClassName) && $actionName){ 
+            if(class_exists($checkRoleClassName) && $actionName){ 
                 //基础权限验证
                 $params['permission'] = $actionName;
                 for($i = 1; $i <= 2; $i++) {
@@ -103,6 +103,7 @@ class SwooleServer extends Command{
                         $swooleResponse->sendJson($result);
                         return;
                     }
+                    if(!class_exists($valideClassName)) break;
                 }
                 unset($params['permission']);
             }
@@ -160,7 +161,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->get("/Manager/role/role_add?loginName=2&password=232");
+            $cli->post("/Manager/menu/list",[['name'=>'代理商','memo'=>'备注']]);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

@@ -39,9 +39,6 @@ class SwooleServer extends Command{
         }
     }
     public function execTask(){
-        $r = \App\Common\Curl::syncPost('http://127.0.0.1:9506',['test'=>123]);
-        print_r($r);
-        return;
         $tasks = \App\Models\Task::limit(10)->where("status","=",'wait')->orderby('id','ASC')->get();
         $c = "\\App\\Services\\Task";
         $c = new $c();
@@ -50,7 +47,7 @@ class SwooleServer extends Command{
         $index = 0;
         $result = [];
         foreach($tasks as $task){
-            go(function() use ($task,$c,$chan,&$index,&$result){
+            #go(function() use ($task,$c,$chan,&$index,&$result){
                 $index++;
                 $params = json_decode($task->params,true);
                 $action = $task->action;
@@ -67,7 +64,7 @@ class SwooleServer extends Command{
                 $task->retry++;
                 $task->exec_at = date("Y-m-d H:i:s",$exec_at);
                 $task->save();
-            });
+            #});
         }
     }
     public function httpStart(){

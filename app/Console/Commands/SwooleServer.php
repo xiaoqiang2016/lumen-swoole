@@ -28,8 +28,8 @@ class SwooleServer extends Command{
                     $this->httpStart();
                 }
                 if($workerId == 1){
-                    #$this->execTask();
-                    sleep(10);
+                    $this->execTask();
+                    sleep(1);
                 }
             });
             $pool->on("WorkerStop", function ($pool, $workerId) {
@@ -39,6 +39,9 @@ class SwooleServer extends Command{
         }
     }
     public function execTask(){
+        $r = \App\Common\Curl::syncPost('http://127.0.0.1:9506',['test'=>123]);
+        print_r($r);
+        return;
         $tasks = \App\Models\Task::limit(10)->where("status","=",'wait')->orderby('id','ASC')->get();
         $c = "\\App\\Services\\Task";
         $c = new $c();
@@ -196,21 +199,6 @@ class SwooleServer extends Command{
                 'bind_bm_id' => '111',
                 'sub_vertical' => 'TOY_AND_HOBBY',
             ];
-            #$cli->post("/Channel/Facebook/openAccount",$params);
-//            $params = [
-//                'apply_id' => 671,
-//                'status' => 'changes_requested',
-//                'reason' => '修改建议',
-//                'sub_vertical' => 'MOBILE_AND_SOCIAL',
-//            ];
-//            $params = [
-//                'client_id' => 1,
-//                'fields' => 'client_id,vertical,status',
-//                'client_type' => 1,
-//            ];
-//            //同步数据
-//            $cli->post("/Channel/Facebook/getOpenaccountList",$params);
-            #$cli->post("/Channel/Facebook/openAccountAudit",$params);
             $cli->post("/Channel/Facebook/syncOpenAccount",$params);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;

@@ -2,16 +2,16 @@
 namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Co;
-#use Swoole;
+use Swoole;
 class SwooleServer extends Command{
 	protected $signature = 'http {action}';
     protected $description = 'Swoole Server.';
-    private $cache;
+    private $cache = ['test'=>0];
     private $serverConf = [
     	'httpPort' => 9506,
+        'serverPort' => 9507
     ];
     private $app = false;
-    private $httpServer;
     public function __construct()
     {
         parent::__construct();
@@ -20,10 +20,54 @@ class SwooleServer extends Command{
     {
         $action = $this->argument('action');
         if($action == 'start'){
-            $this->start();
+            system("pkill -f php");
+            $workerNum = 2;
+            $pool = new Swoole\Process\Pool($workerNum);
+            $pool->on("WorkerStart", function ($pool, $workerId) {
+                if($workerId == 0){
+                    $this->httpStart();
+                }
+                if($workerId == 1){
+                    #$this->execTask();
+                    sleep(10);
+                }
+            });
+            $pool->on("WorkerStop", function ($pool, $workerId) {
+                echo "Worker#{$workerId} is stopped\n";
+            });
+            $pool->start();
         }
     }
-    public function start(){
+    public function execTask(){
+        $tasks = \App\Models\Task::limit(10)->where("status","=",'wait')->orderby('id','ASC')->get();
+        $c = "\\App\\Services\\Task";
+        $c = new $c();
+        $chan = new co\Channel(1);
+        #$maxLength = count($tasks);
+        $index = 0;
+        $result = [];
+        foreach($tasks as $task){
+            go(function() use ($task,$c,$chan,&$index,&$result){
+                $index++;
+                $params = json_decode($task->params,true);
+                $action = $task->action;
+                $result = $c->$action($params);
+                $task->status = $result['status'];
+                $exec_at = time();
+                if(isset($result['interval_time'])){
+                    $exec_at += $result['interval_time'];
+                }
+                $log = @json_decode($task->log,true);
+                if(!is_array($log)) $log = [];
+                $log[] = ['result'=>$result['result'],'time'=>date("Y-m-d H:i:s",time())];
+                $task->log = json_encode($log,JSON_UNESCAPED_UNICODE);
+                $task->retry++;
+                $task->exec_at = date("Y-m-d H:i:s",$exec_at);
+                $task->save();
+            });
+        }
+    }
+    public function httpStart(){
         $this->initApp();
         $httpServer = new \Swoole\Http\Server("0.0.0.0", $this->serverConf['httpPort']);
         $httpServer->set(array(
@@ -32,6 +76,7 @@ class SwooleServer extends Command{
             'max_request' => 5000,
             'dispatch_mode'=>1,
             'max_coroutine' => 9999999,
+            //'task_worker_num' => 1000,
         ));
         $httpServer->on('request', function($request, $response){
             if(env('APP_DEBUG') && false){
@@ -58,12 +103,12 @@ class SwooleServer extends Command{
                 });
             }
             $path_info = $request->server['path_info'];
-
             $swooleResponse = new \App\Common\SwooleResponse($response);
             if($swooleResponse->sendFile($path_info)) return;
             //解析传参
             $params = [];
-            $request->server['request_method'] == 'POST' && $requestData = $request->post;
+            #echo $request->server['request_method'];
+            $request->server['request_method'] == 'POST' && $params = $request->post;
             if($request->server['request_method'] == 'GET'){
                 if($quertString = $request->server['query_string']??false){
                     parse_str($quertString,$params);
@@ -76,7 +121,6 @@ class SwooleServer extends Command{
             $groupName = $pathData[0]??false;
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
-
             //数据验证
             $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             $checkRoleClassName = "App\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
@@ -108,7 +152,7 @@ class SwooleServer extends Command{
             }
             
             //Result
-            $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
+            $controllerName = "App\\Http\\{$groupName}\\Controllers\\{$controllerName}";
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
                 #$request =  Request::capture();
@@ -125,25 +169,15 @@ class SwooleServer extends Command{
                 }
                 return;
             }
-
             $httpCode = 404;
             $response->status($httpCode);
-            if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;
+            #if($swooleResponse->sendFile("status/{$httpCode}.jpeg")) return;
+
             $response->end($httpCode);
             return;
         });
         $httpServer->on('start', function () {
             $this->test();
-            //task
-            $this->cache['task_push_lock'] = false;
-            swoole_timer_tick(1000, function ($timer_id) {
-                $this->sendTask();
-            });
-        });
-        $httpServer->on('Task', function (swoole_server $serv, $task_id, $from_id, $data) {
-            echo "Tasker进程接收到数据";
-            echo "#{$serv->worker_id}\tonTask: [PID={$serv->worker_pid}]: task_id=$task_id, data_len=".strlen($data).".".PHP_EOL;
-            $serv->finish($data);
         });
         $httpServer->start();
         $this->httpServer = $httpServer;
@@ -161,6 +195,46 @@ class SwooleServer extends Command{
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
             $cli->get("/Manager/role/role_add?loginName=2&password=232");
+
+            $params = [
+          #      'apply_id' => 667,
+                'client_id' => '1s',
+                'apply_number' => 10,
+                'business_license' => 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=310278820,3623369202&fm=26&gp=0.png',
+                'business_code' => '99999',
+                'address_cn' => '上海市',
+                'address_en' => 'Shanghai',
+                'business_name_cn' => '上海市昆玉网络有限公司',
+//                'business_name_en' => '上海市昆玉网络有限公司',
+                'city' => 'Shanghai',
+                'state' => 'Shanghai',
+                'zip_code' => '000000',
+                'contact_email' => 'test@test.com',
+                'contact_name' => '测试联系人',
+                'timezone_id' => 42,
+//                'website' => 'http://www.sinoclick.com',
+//                'mobile' => 'http://www.sinoclick.com',
+                'promotable_urls' => ['http://www.sinoclick.com'],
+                'promotable_app_ids' => ['123123','4444'],
+                'bind_bm_id' => '111',
+                'sub_vertical' => 'TOY_AND_HOBBY',
+            ];
+            #$cli->post("/Channel/Facebook/openAccount",$params);
+//            $params = [
+//                'apply_id' => 671,
+//                'status' => 'changes_requested',
+//                'reason' => '修改建议',
+//                'sub_vertical' => 'MOBILE_AND_SOCIAL',
+//            ];
+//            $params = [
+//                'client_id' => 1,
+//                'fields' => 'client_id,vertical,status',
+//                'client_type' => 1,
+//            ];
+//            //同步数据
+//            $cli->post("/Channel/Facebook/getOpenaccountList",$params);
+            #$cli->post("/Channel/Facebook/openAccountAudit",$params);
+            $cli->post("/Channel/Facebook/syncOpenAccount",$params);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);
@@ -234,4 +308,5 @@ class SwooleServer extends Command{
         $this->app = $app;
         return $this->app;
     }
+
 }

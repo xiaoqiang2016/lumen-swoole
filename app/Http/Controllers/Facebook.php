@@ -25,4 +25,33 @@ class Facebook extends Controller
     public function getVerticalList(){
 
     }
+    /*
+     * apply_id
+     * client_id
+     * apply_number
+     * bind_bm_id
+     * agent_bm_id
+     * business_license
+     * business_code
+     * address_cn
+     * address_en
+     * business_name_cn
+     * business_name_en
+     * city
+     * state
+     * zip_code
+     * contact_email
+     * contact_name
+     * website
+     * promotable_urls
+     * promotable_page_ids
+     * promotable_app_ids
+     * timezone_id
+     * sub_vertical
+     */
+    public function openAccount(){
+        $params = $this->getParams();
+        #print_r($params);
+        echo 123;
+    }
 }

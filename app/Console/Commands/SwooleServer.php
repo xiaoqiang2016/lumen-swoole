@@ -1,6 +1,7 @@
 <?php
 namespace App\Console\Commands;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Redis as Redis;
 use Co;
 #use Swoole;
 class SwooleServer extends Command{
@@ -62,8 +63,8 @@ class SwooleServer extends Command{
             $swooleResponse = new \App\Common\SwooleResponse($response);
             if($swooleResponse->sendFile($path_info)) return;
             //取token
-            $token = 1111;
-            $user = Redis::get('accessToken:'.$token)??0;
+            //$token = $_SERVER['HTTP_TOKEN'];
+            //$user = Redis::get('accessToken:'.$token)??0;
             //解析传参
             $params = [];
             $request->server['request_method'] == 'POST' && $params = $request->post;
@@ -119,7 +120,7 @@ class SwooleServer extends Command{
                 $controller = app()->make($controllerName);
                 $controller->setResponse($swooleResponse);
                 $controller->setParams($params);
-                $controller->setUserInfo($user);
+                //$controller->setUserInfo();
                 $_result = $controller->$actionName($request);
                 if($_result !== false){
                     $result = [];

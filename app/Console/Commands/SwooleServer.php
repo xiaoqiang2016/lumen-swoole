@@ -61,6 +61,9 @@ class SwooleServer extends Command{
 
             $swooleResponse = new \App\Common\SwooleResponse($response);
             if($swooleResponse->sendFile($path_info)) return;
+            //取token
+            $token = 1111;
+            $user = Redis::get('accessToken:'.$token)??0;
             //解析传参
             $params = [];
             $request->server['request_method'] == 'POST' && $params = $request->post;
@@ -108,7 +111,7 @@ class SwooleServer extends Command{
                 }
                 unset($params['permission']);
             }
-            
+
             //Result
             $controllerName = 'App\\Http\\'.$groupName.'\\Controllers\\'.$controllerName;
             #var_export($controllerName);exit;
@@ -117,6 +120,7 @@ class SwooleServer extends Command{
                 $controller = app()->make($controllerName);
                 $controller->setResponse($swooleResponse);
                 $controller->setParams($params);
+                $controller->setUserInfo($user);
                 $_result = $controller->$actionName($request);
                 if($_result !== false){
                     $result = [];

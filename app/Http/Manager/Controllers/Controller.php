@@ -83,14 +83,14 @@ class Controller extends BaseController
         if($ret['use_status'] == 99) return $this->errorMsg=array('code'=>400,'msg'=>'账号被禁用，请联系客服');
 //        print_r($ret);
 //        $data = array('user_id'=>$userId);
-        return $this->setLoginUser(array('user_id'=>$ret['id']));
+        return $this->setLoginUser($ret);
         //return $user;
     }
     //
     public function setLoginUser($params)
     {
         $token = md5(microtime(true,rand(1000,999999)));
-        Redis::set("accessToken:{$token}",array('user_id'=>$params['user_id']));
+        Redis::set("accessToken:{$token}",$params,86400);
         return $token;
     }
 }

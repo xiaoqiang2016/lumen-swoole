@@ -161,7 +161,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->post("/Manager/menu/list",[['name'=>'代理商','memo'=>'备注']]);
+            $cli->post("/Manager/role/list",[['name'=>'代理商','memo'=>'备注']]);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

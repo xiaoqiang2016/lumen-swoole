@@ -45,6 +45,7 @@ class Controller extends BaseController
      */
     public $response;
     private $userService;
+    public $errorMsg=array();
     public $request;
     public function setRequest(Request $request){
         $access_token = $request->cookie(env('USER_LOGIN_KEY'));

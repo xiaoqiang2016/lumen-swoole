@@ -80,7 +80,7 @@ class SwooleServer extends Command{
             //数据验证
             $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             $checkRoleClassName = "App\\Http\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
-            if(class_exists($checkRoleClassName) && $actionName){ 
+            if(class_exists($checkRoleClassName) && $actionName){
                 //基础权限验证
                 $params['permission'] = $actionName;
                 for($i = 1; $i <= 2; $i++) {
@@ -161,7 +161,9 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->post("/Manager/menu/list",[['name'=>'代理商','memo'=>'备注']]);
+            //$cli->post("/Manager/menu/list",[['name'=>'代理商','memo'=>'备注']]);
+//            $cli->post("/Manager/Auth/register?",[['name'=>'代理商','memo'=>'备注']]);
+            $cli->get("/Manager/Auth/register?phone='15151654876'");
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

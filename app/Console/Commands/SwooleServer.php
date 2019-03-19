@@ -21,7 +21,7 @@ class SwooleServer extends Command{
         $action = $this->argument('action');
         if($action == 'start'){
             system("pkill -f php");
-            $workerNum = 2;
+            $workerNum = 3;
             $pool = new Swoole\Process\Pool($workerNum);
             $pool->on("WorkerStart", function ($pool, $workerId) {
                 if($workerId == 0){
@@ -30,6 +30,10 @@ class SwooleServer extends Command{
                 if($workerId == 1){
                     $this->execTask();
                     sleep(1);
+                }
+                if($workerId == 2){
+                    $this->syncAccount();
+                    sleep(600);
                 }
             });
             $pool->on("WorkerStop", function ($pool, $workerId) {
@@ -195,7 +199,16 @@ class SwooleServer extends Command{
         //$this->httpServer->task($tasks);
         #echo $this->httpServer->test;
     }
+    private function syncAccount(){
+        go(function(){
+            $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
+            $cli->set([ 'timeout' => 100]);
+            $cli->post("/Channel/Facebook/syncOpenAccount",[]);
+            $cli->close();
+        });
+    }
     private function test(){
+        return;
         $startTime = microtime(true);
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
@@ -247,8 +260,8 @@ class SwooleServer extends Command{
             ];
             #$cli->post("/Channel/Facebook/getOeLink",$getOeLinkParams);
             #$cli->post("/Channel/Facebook/getOpenaccountList",$params);
-            $cli->post("/Channel/Facebook/openAccountAudit",$auditParams);
-            #$cli->post("/Channel/Facebook/syncOpenAccount",[]);
+            #$cli->post("/Channel/Facebook/openAccountAudit",$auditParams);
+            $cli->post("/Channel/Facebook/syncOpenAccount",[]);
             #$cli->post("/Channel/Facebook/openAccount",$openAccountParams);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;

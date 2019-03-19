@@ -32,7 +32,7 @@ class Facebook extends Controller
     }
     public function syncOpenAccount(){
         $facebook_service = new  \App\Services\Channels\Facebook();
-        $facebook_service->syncOeRequest();
+        #$facebook_service->syncOeRequest();
         $facebook_service->syncFbRequest();
         #$result = $facebook_service->getOeLinkByClientID(111);
         #print_r($result);
@@ -57,7 +57,6 @@ class Facebook extends Controller
             $client_ids = App\Models\Client::where('parent_id','=',$client_id)->get(['id']);
             if(count($client_ids) > 0){
                 $client_ids = array_column($client_ids->toArray(),'id');
-
             }
             $client_ids[] = $client_id;
             $model = $model->whereIn('client_id',$client_ids);
@@ -74,12 +73,20 @@ class Facebook extends Controller
         }else{
             $fields = $mainFields;
         }
+        
         if($status){
             $model = $model->where('status','=',$status);
         }
-
-        $list = $model->offset(($page-1)*$page_length)->limit($page_length)->orderby('updated_at','desc')->get($fields);
         $count = $model->count();
+        $list = $model->offset(($page-1)*$page_length)->limit($page_length)->orderby('updated_at','desc')->get($fields);
+        if($list){
+            $converFields = ['timezone_ids','promotable_app_ids','promotable_urls','promotable_page_ids'];
+            foreach($list as &$v){
+                foreach($converFields as $field){
+                    if(isset($v->$field)) $v->$field = $v->implode2array($v->$field);
+                }
+            }
+        }
         return ['list'=>$list,'count'=>$count];
     }
     /*

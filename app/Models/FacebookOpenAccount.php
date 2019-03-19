@@ -9,10 +9,11 @@ class FacebookOpenAccount extends Model{
 
         }
     }
-    private function array2implode($array){
+    public function array2implode($array){
         return is_array($array) ? implode(",",$array) : $array ?? '';
     }
-    private function implode2array($array){
+    public function implode2array($array){
+        if(!$array) return [];
         return array_filter(explode(",",$array));
     }
     public function notifySave(){
@@ -24,7 +25,7 @@ class FacebookOpenAccount extends Model{
         $this->promotable_page_ids = $this->array2implode($this->promotable_page_ids);
         $this->timezone_ids = $this->array2implode($this->timezone_ids);
         $this->account_names = $this->array2implode($this->account_names);
-         
+        $this->account_ids = $this->array2implode($this->account_ids);
         if(!$this->account_names){
             $account_names = [];
             for($i=1;$i<=$this->apply_number;$i++){
@@ -39,7 +40,7 @@ class FacebookOpenAccount extends Model{
         
         $status_triger_count = json_decode($this->status_triger_count ?: '[]',true);
  
-        $this->user_id = $this->user_id ?? 0;
+        #$this->user_id = $this->user_id ?? 0;
         if(count($status_triger_count??[]) == 0){
             $status_triger_count = [];
             $status_triger_count['internal_disapproved'] = 0;
@@ -113,10 +114,25 @@ class FacebookOpenAccount extends Model{
         $hookParams['RepId'] = $this->user_id ?? 0;
         $hookParams['account_names'] = $this->implode2array($this->account_names);
         $hookParams['apply_approve_number'] = $this->status_triger_count['internal_pending'] ?? 0;
+        
         $timezones = [];
         #Task::add('openAccountNotify',$hookParams);
         if($hookParams['RepId'] && $hookParams['clientId']) Task::add('openAccountNotify',$hookParams);
-        return $result;
+
+        $hookParams = [];
+        if($this->account_ids && $status_triger_count['approved'] = 1){
+            $hookParams['apply_id'] = $this->id;
+            $hookParams['adaccounts'] = [];
+            for($i=0;$i<$this->apply_number;$i++){
+                $adaccount = [];
+                $adaccount['id'] = $this->implode2array($this->account_ids)[$i];
+                $adaccount['name'] = $this->implode2array($this->account_names)[$i];
+                $adaccount['timezone_id'] = $this->implode2array($this->timezone_ids)[$i];
+                $hookParams['adaccounts'][] = $adaccount;
+            }
+            Task::add('openAccountAdAccountNotify',$hookParams);
+        }
+        return true;
     }
     public function convertStatus($remote_status){
         $status = [];
@@ -124,7 +140,7 @@ class FacebookOpenAccount extends Model{
         $status['internal_changes_requested'] = ['oe_changes_requested'];
         $status['internal_pending'] = ['oe_pending'];
         $status['internal_approved'] = ['oe_approved'];
-        $status['approved'] = ['approved'];
+        $status['approved'] = ['approved','auto_approved'];
         $status['disapproved'] = ['disapproved'];
         $status['changes_requested'] = ['changes_requested','requested_change'];
         $status['pending'] = ['pending','under_review'];

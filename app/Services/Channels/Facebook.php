@@ -458,7 +458,7 @@ class Facebook extends Channel{
                 }
                 if($r['oe_token_id'] > 0){
                     $token = \App\Models\FacebookOeToken::where('token_id','=',$r['oe_token_id'])->first(['client_id','user_id']);
-                     
+       
                     if($token !== null){
                         $r['client_id'] = $token->client_id;
                         $r['user_id'] = $token->user_id;
@@ -521,17 +521,17 @@ class Facebook extends Channel{
     //同步Request数据
     public function syncFbRequest(){
         $sdk = $this->getSdk();
-        $listen_data = ['pending','internal_approved'];
+        
+        $listen_data = ['pending','internal_approved','approved'];
         $requestList = \App\Models\FacebookOpenAccount::whereIn('status',$listen_data)->get(['status','oe_id','id','request_id','remote_status']);
-        #$requestList = \App\Models\FacebookOpenAccount::get(['status','oe_id','id','request_id','remote_status']);
-
+        #$requestList = \App\Models\FacebookOpenAccount::get(['status','oe_id','id','request_id','remote_status']); 
         if(!$requestList->isEmpty()){
             foreach($requestList as $request){
                 if(!$request->request_id) continue;
                 $remote_data = $sdk->getOpenaccountRequestDetail($request->request_id);
                 if(!$remote_data) continue;
-                if($request['remote_status'] != $remote_data['status']){
-           
+                 
+                if(true || $request['remote_status'] != $remote_data['status']){
                     $request->sync_updated = date("Y-m-d H:i:s",time());
                     $request->remote_status = $remote_data['status'];
                     $request->apply_number = count($remote_data['ad_accounts_info']);
@@ -563,6 +563,24 @@ class Facebook extends Channel{
                     $request->vertical = $remote_data['vertical'];
                     $request->sub_vertical = $remote_data['subvertical'];
                     $request->facebook_change_reasons = json_encode($remote_data['request_change_reasons']??[],JSON_UNESCAPED_UNICODE);
+
+                    $adaccounts = $remote_data['adaccounts'] ?? [];
+                    if($adaccounts){
+                        $data = $adaccounts['data'] ?? [];
+                        if($data){
+                            $account_ids = [];
+                            $account_names = [];
+                            $timezone_ids = [];
+                            foreach($data as $adaccount){
+                                $account_ids[] = $adaccount['id'];
+                                $account_names[] = $adaccount['name'];
+                                $timezone_ids[] = $adaccount['timezone_id'];
+                            }
+                            $request->account_ids = $account_ids;
+                            $request->account_names = $account_names;
+                            $request->timezone_ids = $timezone_ids;
+                        }
+                    } 
                     $request->notifySave();
                 }
                 $requestData = [];  

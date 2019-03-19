@@ -12,6 +12,15 @@ class getOeLink extends \App\Http\Requests\Base{
                 }
             }
         ];
+        $rules['user_id'] = [
+            'required',
+            function($attribute, $value, $fail){
+                $r = \App\Models\User::where('id','=',(int)$value)->first(['id']);
+                if($r === null){
+                    return $fail($attribute.' 无效.');
+                }
+            }
+        ];
         return $rules;
     }
     public function messages(){
@@ -20,6 +29,7 @@ class getOeLink extends \App\Http\Requests\Base{
     public function attributes(){
         return [
             'client_id' => 'Client ID',
+            'user_id' => '用户 ID',
         ];
     }
 }

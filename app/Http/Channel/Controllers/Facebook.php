@@ -28,7 +28,7 @@ class Facebook extends Controller
     public function getOeLink(){
         $params = $this->getParams();
         $facebook_service = new  \App\Services\Channels\Facebook();
-        return $facebook_service->getOeLinkByClientID($params['client_id']);
+        return $facebook_service->getOeLinkByClientID($params['client_id'],$params['user_id']);
     }
     public function syncOpenAccount(){
         $facebook_service = new  \App\Services\Channels\Facebook();
@@ -44,16 +44,15 @@ class Facebook extends Controller
     public function getOpenaccountList(){
         $model = new \App\Models\FacebookOpenAccount();
         $params = $this->getParams();
-        $page = $params['page'] ?? 1;
-        $page_length = $params['page_length'] ?? 10;
-        $client_type = $params['client_type'] ?? 0;
-        $fields = $params['fields'] ?? '';
+        $page = $params['page'] ?: 1;
+        $page_length = $params['page_length'] ?: 10;
+        $client_type = $params['client_type'] ?: 0;
+        $fields = $params['fields'] ?: '';
         $client_id = $params['client_id'];
-        $status = $params['status'] ?? '';
-
+        $status = $params['status'] ?: ''; 
         $map = [];
         $mainFields = ["id as apply_id",'client_id','status','apply_number','bind_bm_id','agent_bm_id','business_license','business_code','address_cn','address_en','business_name_cn','business_name_en','city','state','zip_code','contact_email',
-            'contact_name','website','mobile','promotable_urls','promotable_page_ids','promotable_app_ids','timezone_id','vertical','sub_vertical','change_reasons','facebook_change_reasons'];
+            'contact_name','website','mobile','promotable_urls','promotable_page_ids','promotable_app_ids','timezone_ids','vertical','sub_vertical','change_reasons','facebook_change_reasons'];
         if($client_type == 1){//代理商
             $client_ids = App\Models\Client::where('parent_id','=',$client_id)->get(['id']);
             if(count($client_ids) > 0){

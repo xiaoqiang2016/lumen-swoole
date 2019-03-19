@@ -15,7 +15,7 @@ class openAccount extends \App\Http\Requests\Base{
                     if($r === null){
                         return $fail($attribute.' 无效.');
                     }
-                    if(!in_array($r->status,['changes_requested','pending','facebook_changes_requested'])){
+                    if(!in_array($r->status,['internal_changes_requested','internal_pending','changes_requested'])){
                         return $fail('当前状态不可修改.');
                     }
                 }
@@ -25,6 +25,15 @@ class openAccount extends \App\Http\Requests\Base{
                 'required',
                 function($attribute, $value, $fail){
                     $r = \App\Models\Client::where('id','=',(int)$value)->first(['id']);
+                    if($r === null){
+                        return $fail($attribute.' 无效.');
+                    }
+                }
+            ];
+            $rules['user_id'] = [
+                'required',
+                function($attribute, $value, $fail){
+                    $r = \App\Models\User::where('id','=',(int)$value)->first(['id']);
                     if($r === null){
                         return $fail($attribute.' 无效.');
                     }
@@ -44,7 +53,8 @@ class openAccount extends \App\Http\Requests\Base{
         $rules['promotable_urls'] = ['required','array'];
         $rules['promotable_page_ids'] = ['required_without:promotable_app_ids','array'];
         $rules['promotable_app_ids'] = ['required_without:promotable_page_ids','array'];
-        $rules['timezone_id'] = ['required'];
+        #$rules['ad_account_names'] = ['required','array','size:'.$params['apply_number']];
+        $rules['timezone_ids'] = ['required','array','size:'.$params['apply_number']];
         $rules['promotable_urls.*'] = ['active_url','distinct'];
         $rules['promotable_page_ids.*'] = ['numeric','distinct'];
         $rules['promotable_app_ids.*'] = ['numeric','distinct'];
@@ -76,7 +86,7 @@ class openAccount extends \App\Http\Requests\Base{
             'promotable_urls' => '推广url',
             'promotable_app_ids' => '推广app id',
             'promotable_page_ids' => '推广主页',
-            'timezone_id' => '时区',
+            'timezone_ids' => '时区',
             'bind_bm_id' => '广告主商务管理平台编号',
             'agent_bm_id' => '代理商商务管理平台编号',
         ];

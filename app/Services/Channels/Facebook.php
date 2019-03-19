@@ -183,11 +183,6 @@ class Facebook extends Channel{
            # $taskCount = 3;
             foreach($adAccounts as $adAccount){
                 if($i >= $taskCount) break;
-//                $r[] = $adAccount->account_id;
-//
-//                $requests[] = ['uri' => 'https://graph.facebook.com/v3.2/'.$adAccount->account_id.'?fields=ads.limit(999999)%7Bname%2Cdaily_budget%2Ccreated_time%2Ceffective_status%2Cid%2Ccampaign_id%2Cadset_id%7D&access_token=EAAHE0mTSloIBAIjVmFt3NEbmLz1GvIYE5MUhdQqPaK1QJeRvu8whGPJp8DJWTDjTuWuw3gsZAZCBc1zZARE8KPeFfATHopP299Tm31J1aLmHZCJneShLqRgok6TxMG8rUh2lkB9red2RdmWqX6bPNCgJ52ndNlDHnsZCUgoWRnQZDZD'];
-//
-//                continue;
                 go(function() use ($adAccount,&$tokens,$i,$chan){
                     $starttime = microtime(true);
                     $sdk = $this->getSdk($tokens[$adAccount->token_id??0]);
@@ -421,6 +416,7 @@ class Facebook extends Channel{
     public function syncOeRequest(){
         $sdk = $this->getSdk();
         $_oeList = $sdk->getOeRequestList();
+         
         $oeList = [];
         $facebookVertical = new \App\Models\FacebookVertical();
         if($_oeList){
@@ -448,23 +444,32 @@ class Facebook extends Channel{
                 $r['zip_code'] = $advertiser_data['zip_code'] ?? '';
                 $r['remote_created'] = date("Y-m-d H:i:s",strtotime($oe['time_created']));
                 $r['remote_updated'] = date("Y-m-d H:i:s",strtotime($oe['time_updated']));
+                if($r['remote_created'] < "2019-03-19 20:00:00"){
+                    continue;
+                }
                 $r['vertical'] = $facebookVertical->getKeyByNameEN($advertiser_data['vertical'] ?? '');
                 $r['sub_vertical'] = $facebookVertical->getKeyByNameEN($oe['sub_vertical'] ?? '');
                 $r['oe_token_id'] = isset($oe['token']) ? $oe['token']['id'] : 0;
                 $r['change_reasons'] = isset($oe['request_changes_reason']) ? $oe['request_changes_reason'] : '';
                 $r['request_id'] = isset($oe['ad_account_creation_request_id']) ? $oe['ad_account_creation_request_id']['id'] : '';
-
-                if($r['oe_token_id'] > 0){
-                    $token = \App\Models\FacebookOeToken::where('token_id','=',$r['oe_token_id'])->first(['client_id']);
-                    if($token !== null) $r['client_id'] = $token->client_id;
+                $r['timezone_ids'] = [];
+                for($i=0;$i<$r['apply_number'];$i++){
+                    $r['timezone_ids'][] = 42;
                 }
-
+                if($r['oe_token_id'] > 0){
+                    $token = \App\Models\FacebookOeToken::where('token_id','=',$r['oe_token_id'])->first(['client_id','user_id']);
+                     
+                    if($token !== null){
+                        $r['client_id'] = $token->client_id;
+                        $r['user_id'] = $token->user_id;
+                    }
+                }
                 $oeList[] = $r;
             }
         }
         $oeRemoteList = array_column($oeList,null,'oe_id');
         $of = new \App\Models\FacebookOpenAccount();
-        $existsData = $of->get(['id','oe_id','remote_updated']);
+        $existsData = $of->get(['id','oe_id','remote_updated','status_triger_count']);
 
         if(!$existsData->isEmpty()){
             #$existsData = array_column($existsData->toArray(),null,'oe_id');
@@ -494,12 +499,19 @@ class Facebook extends Channel{
             }
         }
     }
-    public function getOeLinkByClientID($client_id){
+    public function getOeLinkByClientID($client_id,$user_id=0){
         $sdk = $this->getSdk();
         $oeToken = $sdk->getOeToken();
         $params = [];
+        $user_id = 0;
+        if(!$user_id){
+            $r = \App\Models\User::where('client_id','=',$client_id)->first(['id']);
+            if($r !== null){
+                $user_id = $r->id;
+            }
+        }
         $params['client_id'] = $client_id;
-        $data = ['token_id'=>$oeToken['id'],'link'=>$oeToken['link_with_id'],'client_id'=>$params['client_id'],'params'=>json_encode($params)];
+        $data = ['token_id'=>$oeToken['id'],'link'=>$oeToken['link_with_id'],'user_id'=>$user_id,'client_id'=>$params['client_id'],'params'=>json_encode($params)];
         \App\Models\FacebookOeToken::create($data);
         return ['link'=>$data['link']];
     }
@@ -560,8 +572,11 @@ class Facebook extends Channel{
     }
     public static function openAccount($params){
         if($params['apply_id'] ?? 0 > 0){
+            unset($params['user_id']);
+            unset($params['client_id']);
             $openAccount = \App\Models\FacebookOpenAccount::find($params['apply_id']);
             unset($params['apply_id']);
+            
         }else{
             $openAccount = new \App\Models\FacebookOpenAccount();
         }
@@ -574,7 +589,7 @@ class Facebook extends Channel{
         //oe 审核
         if($openAccount->oe_id){
             $sdk = new \App\Models\Sdk\Facebook();
-            $openAccount->change_reasons = $params['reason'] ?? '';
+            $openAccount->change_reasons = $params['status'] == 'internal_approved' ? '' : ($params['reason'] ?? '');
             $openAccount->setSubVertical($params['sub_vertical']);
             $status = str_replace("internal_","",$params['status']);
             $status = strtoupper($status);
@@ -586,16 +601,19 @@ class Facebook extends Channel{
                 'agent_bm_id' => $openAccount->agent_bm_id,
                 'business_name_en' => $openAccount->business_name_en,
                 'reason' => $openAccount->change_reasons,
-            ];
+            ]; 
             $result = $sdk->openAccountAudit($auditParams);
+            #$result['request_id'] = 407325013388640;
             if($result['request_id'] ?? 0 > 0){
+                $openAccount->request_id = $result['request_id'];
                 $openAccount->remote_status = $params['status'];
                 $openAccount->notifySave();
             }else{
-                print_r($result);
+
             }
         }else{
-            #echo 123;
+            $openAccount->remote_status = 'fail';
+            $openAccount->notifySave();
         }
 
     }

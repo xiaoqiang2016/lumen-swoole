@@ -7,14 +7,13 @@ class Task
 {
     //开户状态变化
     public function openAccountNotify($params=[]){
-        #echo 'openAccountNotify';
-        #$url = 'http://127.0.0.1:9506/';
-        $url = "";
-        $result = \App\Common\Curl::post($url,$params);
+        return ['status'=>'success','result'=>[]];
+        $url = "http://test.iland-web.meetsocial.cn/faceBook/openAccountFromOE.html";
+        $result = \App\Common\Curl::syncPost($url,$params);
         if(is_array($result) && $result['gcode'] == 200){
-            return ['status'=>'success','interval_time'=>10,'result'=>$result];
+            return ['status'=>'success','result'=>$result];
         }else{
-            return ['status'=>'fail','result'=>$result];
+            return ['status'=>'wait','result'=>$result];
         }
     }
 }

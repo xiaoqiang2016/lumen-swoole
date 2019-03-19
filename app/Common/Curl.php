@@ -95,7 +95,11 @@ class Curl{
             //设置post方式提交
             curl_setopt($curl, CURLOPT_POST, 1);
             //设置post数据
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            if(is_array($data)) $data = http_build_query($data);
+            #print_r($data);
+            #return;
+            curl_setopt($curl,CURLOPT_TIMEOUT,5); 
+            curl_setopt($curl, CURLOPT_POSTFIELDS,$data);
             //执行命令
             $result = curl_exec($curl);
             //关闭URL请求

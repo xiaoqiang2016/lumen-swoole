@@ -1,412 +1,464 @@
 {
     "openapi" : "3.0.0",
     "info" : {
-        "title" : "FacebookService",
-        "description" : "FacebookService",
-        "version" : "0.1"
+      "title" : "FacebookService",
+      "description" : "FacebookService",
+      "version" : "0.1"
     },
     "servers" : [ {
-        "url" : "http://local-channel.meetsocial.cn/",
-        "description" : "本地测试地址"
+      "url" : "http://test-channel.meetsocial.cn/",
+      "description" : "测试服务器"
+    }, {
+      "url" : "http://127.0.0.1:9506/Channel/",
+      "description" : "本地测试"
     } ],
     "tags" : [ {
-        "name" : "Facebook",
-        "description" : "Facebook API"
+      "name" : "Facebook",
+      "description" : "Facebook API"
     } ],
     "paths" : {
-        "/Facebook/getVerticalList" : {
-            "post" : {
-                "tags" : [ "Facebook" ],
-                "summary" : "获取行业分类",
-                "operationId" : "Facebook.getVerticalList",
-                "responses" : {
-                    "200" : {
-                        "description" : "success",
-                        "content" : {
-                            "application/json" : {
-                                "schema" : {
-                                    "$ref" : "#/components/schemas/inline_response_200"
-                                }
-                            }
-                        }
-                    }
+      "/Facebook/getVerticalList" : {
+        "post" : {
+          "tags" : [ "Facebook" ],
+          "summary" : "获取行业分类",
+          "operationId" : "Facebook.getVerticalList",
+          "responses" : {
+            "200" : {
+              "description" : "success",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "$ref" : "#/components/schemas/inline_response_200"
+                  }
                 }
+              }
             }
-        },
-        "/Facebook/getOpenaccountList" : {
-            "post" : {
-                "tags" : [ "Facebook" ],
-                "summary" : "获取开户记录列表",
-                "operationId" : "Facebook.getOpenaccountList",
-                "requestBody" : {
-                    "content" : {
-                        "application/x-www-form-urlencoded" : {
-                            "schema" : {
-                                "$ref" : "#/components/schemas/body"
-                            }
-                        }
-                    }
-                },
-                "responses" : {
-                    "200" : {
-                        "description" : "success"
-                    }
-                }
-            }
-        },
-        "/Facebook/getOeLink" : {
-            "post" : {
-                "tags" : [ "Facebook" ],
-                "summary" : "获取OE开户链接",
-                "operationId" : "Facebook.getOeLink",
-                "requestBody" : {
-                    "content" : {
-                        "application/x-www-form-urlencoded" : {
-                            "schema" : {
-                                "$ref" : "#/components/schemas/body_1"
-                            }
-                        }
-                    }
-                },
-                "responses" : {
-                    "200" : {
-                        "description" : "success"
-                    }
-                }
-            }
-        },
-        "/Facebook/openAccount" : {
-            "post" : {
-                "tags" : [ "Facebook" ],
-                "summary" : "提交开户申请",
-                "operationId" : "Facebook.openAccount",
-                "requestBody" : {
-                    "content" : {
-                        "application/x-www-form-urlencoded" : {
-                            "schema" : {
-                                "$ref" : "#/components/schemas/body_2"
-                            }
-                        }
-                    },
-                    "required" : true
-                },
-                "responses" : {
-                    "200" : {
-                        "description" : "success"
-                    }
-                }
-            }
+          }
         }
+      },
+      "/Facebook/getOpenaccountList" : {
+        "post" : {
+          "tags" : [ "Facebook" ],
+          "summary" : "获取开户记录列表",
+          "operationId" : "Facebook.getOpenaccountList",
+          "requestBody" : {
+            "content" : {
+              "application/x-www-form-urlencoded" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/body"
+                }
+              }
+            }
+          },
+          "responses" : {
+            "200" : {
+              "description" : "success"
+            }
+          }
+        }
+      },
+      "/Facebook/openAccountAudit" : {
+        "post" : {
+          "tags" : [ "Facebook" ],
+          "summary" : "开户审批",
+          "operationId" : "Facebook.openAccountAudit",
+          "requestBody" : {
+            "content" : {
+              "application/x-www-form-urlencoded" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/body_1"
+                }
+              }
+            }
+          },
+          "responses" : {
+            "200" : {
+              "description" : "success"
+            }
+          }
+        }
+      },
+      "/Facebook/getOeLink" : {
+        "post" : {
+          "tags" : [ "Facebook" ],
+          "summary" : "获取OE开户链接",
+          "operationId" : "Facebook.getOeLink",
+          "requestBody" : {
+            "content" : {
+              "application/x-www-form-urlencoded" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/body_2"
+                }
+              }
+            }
+          },
+          "responses" : {
+            "200" : {
+              "description" : "success"
+            }
+          }
+        }
+      },
+      "/Facebook/openAccount" : {
+        "post" : {
+          "tags" : [ "Facebook" ],
+          "summary" : "提交开户申请",
+          "operationId" : "Facebook.openAccount",
+          "requestBody" : {
+            "content" : {
+              "application/x-www-form-urlencoded" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/body_3"
+                }
+              }
+            },
+            "required" : true
+          },
+          "responses" : {
+            "200" : {
+              "description" : "success"
+            }
+          }
+        }
+      }
     },
     "components" : {
-        "schemas" : {
-            "OpenAccountStatus" : {
-                "type" : "array",
-                "description" : "internal_approved=内审已批准,internal_pending=内审待审核,internal_disapproved=内审已否决,internal_changes_requested=内审需修改,approved=Facebook已批准,pending=Facebook待审核,disapproved=Facebook已否决,changes_requested=Facebook审核需修改,submiting=送审中,fail=失败",
-                "items" : {
-                    "type" : "string",
-                    "enum" : [ "internal_approved", "internal_pending", "internal_disapproved", "internal_changes_requested", "approved", "pending", "disapproved", "changes_requested" ]
-                }
+      "schemas" : {
+        "OpenAccountStatus" : {
+          "type" : "array",
+          "description" : "internal_approved=内审已批准,internal_pending=内审待审核,internal_disapproved=内审已否决,internal_changes_requested=内审需修改,approved=Facebook已批准,pending=Facebook待审核,disapproved=Facebook已否决,changes_requested=Facebook审核需修改,fail=失败",
+          "items" : {
+            "type" : "string",
+            "enum" : [ "internal_approved", "internal_pending", "internal_disapproved", "internal_changes_requested", "approved", "pending", "disapproved", "changes_requested", "fail" ]
+          }
+        },
+        "AdAccount" : {
+          "type" : "object",
+          "properties" : {
+            "id" : {
+              "type" : "string",
+              "description" : "广告账户id"
             },
-            "AdAccount" : {
-                "type" : "object",
-                "properties" : {
-                    "id" : {
-                        "type" : "string",
-                        "description" : "广告账户id"
-                    },
-                    "name" : {
-                        "type" : "string",
-                        "description" : "广告账户名称"
-                    },
-                    "timezone_id" : {
-                        "type" : "integer",
-                        "description" : "时区id"
-                    }
-                }
+            "name" : {
+              "type" : "string",
+              "description" : "广告账户名称"
             },
-            "OpenAccount" : {
-                "type" : "object",
-                "properties" : {
-                    "apply_id" : {
-                        "type" : "integer",
-                        "description" : "唯一标识"
-                    },
-                    "client_id" : {
-                        "type" : "integer",
-                        "description" : "客户ID"
-                    },
-                    "status" : {
-                        "$ref" : "#/components/schemas/OpenAccountStatus"
-                    },
-                    "apply_number" : {
-                        "type" : "integer",
-                        "description" : "申请的广告账户数量"
-                    },
-                    "bind_bm_id" : {
-                        "type" : "integer",
-                        "description" : "用户绑定的bm id"
-                    },
-                    "agent_bm_id" : {
-                        "type" : "integer",
-                        "description" : "代理商的bm id"
-                    },
-                    "business_license" : {
-                        "type" : "string",
-                        "description" : "营业执照地址"
-                    },
-                    "business_code" : {
-                        "type" : "string",
-                        "description" : "营业执照编码"
-                    },
-                    "address_cn" : {
-                        "type" : "string",
-                        "description" : "企业地址(中文)"
-                    },
-                    "address_en" : {
-                        "type" : "string",
-                        "description" : "企业地址(英文)"
-                    },
-                    "business_name_cn" : {
-                        "type" : "string",
-                        "description" : "公司名称(英文)"
-                    },
-                    "business_name_en" : {
-                        "type" : "string",
-                        "description" : "公司名称(英文)"
-                    },
-                    "city" : {
-                        "type" : "string",
-                        "description" : "所在城市(英文)"
-                    },
-                    "state" : {
-                        "type" : "string",
-                        "description" : "所在省份(英文)"
-                    },
-                    "zip_code" : {
-                        "type" : "string",
-                        "description" : "邮政编码"
-                    },
-                    "contact_email" : {
-                        "type" : "string",
-                        "description" : "联系人邮件"
-                    },
-                    "contact_name" : {
-                        "type" : "string",
-                        "description" : "联系人名称"
-                    },
-                    "website" : {
-                        "type" : "string",
-                        "description" : "网站地址"
-                    },
-                    "mobile" : {
-                        "type" : "string",
-                        "description" : "手机号码"
-                    },
-                    "promotable_urls" : {
-                        "type" : "array",
-                        "description" : "推广url列表",
-                        "items" : {
-                            "type" : "string",
-                            "format" : "uri"
-                        }
-                    },
-                    "promotable_page_ids" : {
-                        "type" : "array",
-                        "description" : "推广主页id列表(与APP id不能同时为空)",
-                        "items" : {
-                            "type" : "number"
-                        }
-                    },
-                    "promotable_app_ids" : {
-                        "type" : "array",
-                        "description" : "推广APP id列表(与主页id不能同时为空)",
-                        "items" : {
-                            "type" : "number"
-                        }
-                    },
-                    "timezone_id" : {
-                        "type" : "string",
-                        "description" : "时区id"
-                    },
-                    "vertical" : {
-                        "type" : "string",
-                        "description" : "一级行业分类"
-                    },
-                    "sub_vertical" : {
-                        "type" : "string",
-                        "description" : "二级行业分类"
-                    },
-                    "change_reasons" : {
-                        "type" : "string",
-                        "description" : "初审错误信息"
-                    },
-                    "facebook_change_reasons" : {
-                        "type" : "string",
-                        "description" : "facebook审核错误信息"
-                    }
-                }
+            "timezone_id" : {
+              "type" : "integer",
+              "description" : "时区id"
             },
-            "inline_response_200" : {
-                "type" : "object",
-                "properties" : {
-                    "key" : {
-                        "type" : "string",
-                        "description" : "键名"
-                    },
-                    "parent_key" : {
-                        "type" : "string",
-                        "description" : "父级键名"
-                    },
-                    "level" : {
-                        "type" : "string",
-                        "description" : "层级(顶级为0)"
-                    },
-                    "name_cn" : {
-                        "type" : "string",
-                        "description" : "中文名"
-                    },
-                    "name_en" : {
-                        "type" : "string",
-                        "description" : "英文名"
-                    }
-                }
-            },
-            "body" : {
-                "type" : "object",
-                "properties" : {
-                    "client_id" : {
-                        "type" : "integer",
-                        "description" : "Client ID"
-                    },
-                    "client_type" : {
-                        "type" : "integer",
-                        "description" : "查询Client关联的下级开户记录(1=代理商，0=直客)"
-                    },
-                    "status" : {
-                        "type" : "string",
-                        "description" : "状态筛选"
-                    },
-                    "fields" : {
-                        "type" : "string",
-                        "description" : "所需字段(逗号分隔)"
-                    },
-                    "page" : {
-                        "type" : "integer",
-                        "description" : "页码"
-                    },
-                    "page_length" : {
-                        "type" : "integer",
-                        "description" : "分页长度"
-                    }
-                }
-            },
-            "body_1" : {
-                "type" : "object",
-                "properties" : {
-                    "client_id" : {
-                        "type" : "integer",
-                        "description" : "Client ID"
-                    }
-                }
-            },
-            "body_2" : {
-                "type" : "object",
-                "properties" : {
-                    "apply_id" : {
-                        "type" : "integer",
-                        "description" : "开户申请id，如无为新增"
-                    },
-                    "apply_number" : {
-                        "type" : "integer",
-                        "description" : "广告账号开户数量"
-                    },
-                    "timezone_ids" : {
-                        "type" : "array",
-                        "description" : "时区 id(与开户数量一致)",
-                        "items" : {
-                            "type" : "integer"
-                        }
-                    },
-                    "client_id" : {
-                        "type" : "integer",
-                        "description" : "客户id，如新增则必填"
-                    },
-                    "bind_bm_id" : {
-                        "type" : "integer",
-                        "description" : "用户绑定的bm ID"
-                    },
-                    "agent_bm_id" : {
-                        "type" : "integer",
-                        "description" : "代理商BM ID"
-                    },
-                    "business_license" : {
-                        "type" : "string",
-                        "description" : "营业执照地址"
-                    },
-                    "business_code" : {
-                        "type" : "string",
-                        "description" : "营业执照编号"
-                    },
-                    "business_name_cn" : {
-                        "type" : "string",
-                        "description" : "公司名(中文)"
-                    },
-                    "business_name_en" : {
-                        "type" : "string",
-                        "description" : "公司名(中文)"
-                    },
-                    "address_cn" : {
-                        "type" : "string",
-                        "description" : "公司地址(英文)"
-                    },
-                    "address_en" : {
-                        "type" : "string",
-                        "description" : "公司地址(英文)"
-                    },
-                    "city" : {
-                        "type" : "string",
-                        "description" : "城市(英文)"
-                    },
-                    "state" : {
-                        "type" : "string",
-                        "description" : "省份(英文)"
-                    },
-                    "zip_code" : {
-                        "type" : "integer",
-                        "description" : "邮编"
-                    },
-                    "contact_email" : {
-                        "type" : "string",
-                        "description" : "联系人邮箱"
-                    },
-                    "contact_name" : {
-                        "type" : "string",
-                        "description" : "联系人名称"
-                    },
-                    "promotable_urls" : {
-                        "type" : "array",
-                        "description" : "推广网址",
-                        "items" : {
-                            "type" : "string"
-                        }
-                    },
-                    "promotable_page_ids" : {
-                        "type" : "array",
-                        "description" : "推广主页id",
-                        "items" : {
-                            "type" : "integer"
-                        }
-                    },
-                    "promotable_app_ids" : {
-                        "type" : "array",
-                        "description" : "推广app id",
-                        "items" : {
-                            "type" : "integer"
-                        }
-                    }
-                }
+            "client_id" : {
+              "type" : "integer"
             }
+          }
+        },
+        "OpenAccount" : {
+          "type" : "object",
+          "properties" : {
+            "apply_id" : {
+              "type" : "integer",
+              "description" : "唯一标识"
+            },
+            "client_id" : {
+              "type" : "integer",
+              "description" : "客户ID"
+            },
+            "status" : {
+              "$ref" : "#/components/schemas/OpenAccountStatus"
+            },
+            "apply_number" : {
+              "type" : "integer",
+              "description" : "申请的广告账户数量"
+            },
+            "bind_bm_id" : {
+              "type" : "integer",
+              "description" : "用户绑定的bm id"
+            },
+            "agent_bm_id" : {
+              "type" : "integer",
+              "description" : "代理商的bm id"
+            },
+            "business_license" : {
+              "type" : "string",
+              "description" : "营业执照地址"
+            },
+            "business_code" : {
+              "type" : "string",
+              "description" : "营业执照编码"
+            },
+            "address_cn" : {
+              "type" : "string",
+              "description" : "企业地址(中文)"
+            },
+            "address_en" : {
+              "type" : "string",
+              "description" : "企业地址(英文)"
+            },
+            "business_name_cn" : {
+              "type" : "string",
+              "description" : "公司名称(英文)"
+            },
+            "business_name_en" : {
+              "type" : "string",
+              "description" : "公司名称(英文)"
+            },
+            "city" : {
+              "type" : "string",
+              "description" : "所在城市(英文)"
+            },
+            "state" : {
+              "type" : "string",
+              "description" : "所在省份(英文)"
+            },
+            "zip_code" : {
+              "type" : "string",
+              "description" : "邮政编码"
+            },
+            "contact_email" : {
+              "type" : "string",
+              "description" : "联系人邮件"
+            },
+            "contact_name" : {
+              "type" : "string",
+              "description" : "联系人名称"
+            },
+            "website" : {
+              "type" : "string",
+              "description" : "网站地址"
+            },
+            "mobile" : {
+              "type" : "string",
+              "description" : "手机号码"
+            },
+            "promotable_urls" : {
+              "type" : "array",
+              "description" : "推广url列表",
+              "items" : {
+                "type" : "string",
+                "format" : "uri"
+              }
+            },
+            "promotable_page_ids" : {
+              "type" : "array",
+              "description" : "推广主页id列表(与APP id不能同时为空)",
+              "items" : {
+                "type" : "number"
+              }
+            },
+            "promotable_app_ids" : {
+              "type" : "array",
+              "description" : "推广APP id列表(与主页id不能同时为空)",
+              "items" : {
+                "type" : "number"
+              }
+            },
+            "timezone_id" : {
+              "type" : "string",
+              "description" : "时区id"
+            },
+            "vertical" : {
+              "type" : "string",
+              "description" : "一级行业分类"
+            },
+            "sub_vertical" : {
+              "type" : "string",
+              "description" : "二级行业分类"
+            },
+            "change_reasons" : {
+              "type" : "string",
+              "description" : "初审错误信息"
+            },
+            "facebook_change_reasons" : {
+              "type" : "string",
+              "description" : "facebook审核错误信息"
+            }
+          }
+        },
+        "inline_response_200" : {
+          "type" : "object",
+          "properties" : {
+            "key" : {
+              "type" : "string",
+              "description" : "键名"
+            },
+            "parent_key" : {
+              "type" : "string",
+              "description" : "父级键名"
+            },
+            "level" : {
+              "type" : "string",
+              "description" : "层级(顶级为0)"
+            },
+            "name_cn" : {
+              "type" : "string",
+              "description" : "中文名"
+            },
+            "name_en" : {
+              "type" : "string",
+              "description" : "英文名"
+            }
+          }
+        },
+        "body" : {
+          "type" : "object",
+          "properties" : {
+            "client_id" : {
+              "type" : "integer",
+              "description" : "Client ID"
+            },
+            "client_type" : {
+              "type" : "integer",
+              "description" : "查询Client关联的下级开户记录(1=代理商，0=直客)"
+            },
+            "status" : {
+              "type" : "string",
+              "description" : "状态筛选"
+            },
+            "fields" : {
+              "type" : "string",
+              "description" : "所需字段(逗号分隔)"
+            },
+            "page" : {
+              "type" : "integer",
+              "description" : "页码"
+            },
+            "page_length" : {
+              "type" : "integer",
+              "description" : "分页长度"
+            }
+          }
+        },
+        "body_1" : {
+          "type" : "object",
+          "properties" : {
+            "apply_id" : {
+              "type" : "integer",
+              "description" : "开户申请id(必须)"
+            },
+            "status" : {
+              "type" : "string",
+              "description" : "审核状态(必须) internal_approved = 批准 , internal_disapproved = 否决 internal_changes_requested = 需修改"
+            },
+            "reason" : {
+              "type" : "string",
+              "description" : "修改建议 (如需修改则不能为空)"
+            },
+            "sub_vertical" : {
+              "type" : "string",
+              "description" : "二级行业分类(必须)"
+            },
+            "business_name_en" : {
+              "type" : "string",
+              "description" : "英文公司名 (选填。OE开户可能此值为空，如果为空将会翻译为拼音名)"
+            }
+          }
+        },
+        "body_2" : {
+          "type" : "object",
+          "properties" : {
+            "client_id" : {
+              "type" : "integer",
+              "description" : "Client ID"
+            }
+          }
+        },
+        "body_3" : {
+          "type" : "object",
+          "properties" : {
+            "apply_id" : {
+              "type" : "integer",
+              "description" : "开户申请id，如无为新增"
+            },
+            "apply_number" : {
+              "type" : "integer",
+              "description" : "广告账号开户数量"
+            },
+            "timezone_ids" : {
+              "type" : "array",
+              "description" : "时区 id(与开户数量一致)",
+              "items" : {
+                "type" : "integer"
+              }
+            },
+            "client_id" : {
+              "type" : "integer",
+              "description" : "客户id，如新增则必填"
+            },
+            "bind_bm_id" : {
+              "type" : "integer",
+              "description" : "用户绑定的bm ID"
+            },
+            "agent_bm_id" : {
+              "type" : "integer",
+              "description" : "代理商BM ID"
+            },
+            "business_license" : {
+              "type" : "string",
+              "description" : "营业执照地址"
+            },
+            "business_code" : {
+              "type" : "string",
+              "description" : "营业执照编号"
+            },
+            "business_name_cn" : {
+              "type" : "string",
+              "description" : "公司名(中文)"
+            },
+            "business_name_en" : {
+              "type" : "string",
+              "description" : "公司名(中文)"
+            },
+            "address_cn" : {
+              "type" : "string",
+              "description" : "公司地址(英文)"
+            },
+            "address_en" : {
+              "type" : "string",
+              "description" : "公司地址(英文)"
+            },
+            "city" : {
+              "type" : "string",
+              "description" : "城市(英文)"
+            },
+            "state" : {
+              "type" : "string",
+              "description" : "省份(英文)"
+            },
+            "zip_code" : {
+              "type" : "integer",
+              "description" : "邮编"
+            },
+            "contact_email" : {
+              "type" : "string",
+              "description" : "联系人邮箱"
+            },
+            "contact_name" : {
+              "type" : "string",
+              "description" : "联系人名称"
+            },
+            "promotable_urls" : {
+              "type" : "array",
+              "description" : "推广网址",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "promotable_page_ids" : {
+              "type" : "array",
+              "description" : "推广主页id",
+              "items" : {
+                "type" : "integer"
+              }
+            },
+            "promotable_app_ids" : {
+              "type" : "array",
+              "description" : "推广app id",
+              "items" : {
+                "type" : "integer"
+              }
+            }
+          }
         }
+      }
     }
-}
+  }

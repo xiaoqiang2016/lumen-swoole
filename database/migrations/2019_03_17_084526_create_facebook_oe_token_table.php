@@ -18,6 +18,7 @@ class CreateFacebookOeTokenTable extends Migration
             $table->increments('id');
             $table->bigInteger('token_id')->default(0)->nullable(false)->comment("token id");
             $table->integer('client_id')->default(0)->nullable(false)->comment('Client ID');
+            $table->integer('user_id')->default(0)->nullable(false)->comment('用户ID');
             $table->string('link',2000)->default('')->nullable(false)->comment('地址。');
             $table->string('params',2000)->default('[]')->nullable(false)->comment('绑定参数');
             $table->timestamps();

@@ -17,6 +17,7 @@ class CreateOpenaccountTable extends Migration
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->increments('id');
             $table->integer('client_id')->nullable(false)->default(0)->comment("ClientID。");
+            $table->integer('user_id')->nullable(false)->default(0)->comment("用户ID。");
             $table->dateTime("sync_updated")->nullable(true)->comment("数据更新时间。");
             $table->string("status",50)->nullable(false)->default("")->comment("状态。");
             $table->string("remote_status",50)->nullable(false)->default("")->comment("远端状态。");
@@ -54,10 +55,14 @@ class CreateOpenaccountTable extends Migration
             $table->string("sub_vertical",100)->nullable(false)->default("")->comment("二级行业分类。");
             $table->string("change_reasons",2000)->nullable(false)->default("[]")->comment("OE审核错误信息。");
             $table->string("facebook_change_reasons",2000)->nullable(false)->default("[]")->comment("FB审核错误信息。");
-            $table->string('status_triger_count',2000)->nullable(false)->default("[]")->comment("状态触发数。");
+            $table->string('status_triger_count',500)->nullable(false)->default("[]")->comment("状态触发数。");
+            
             $table->string('source',50)->nullable(false)->default("OpenAccount")->comment("来源。");
 
             $table->string('timezone_ids',500)->nullable(false)->default('')->comment("时区ID列表。");
+            $table->string('account_names',500)->nullable(false)->default("[]")->comment("广告账号名称列表。");
+            $table->string('account_ids',500)->nullable(false)->default("[]")->comment("广告账号ID列表。");
+
             $table->timestamps();
         });
     }

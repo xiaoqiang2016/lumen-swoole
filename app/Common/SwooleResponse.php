@@ -6,6 +6,7 @@ use Swoole\Coroutine as co;
 use \Illuminate\Support\Facades\Redis;
 class SwooleResponse{
     private $response;
+    public $response_format = 'island';
     public function __construct($response){
         $this->response = $response;
     }
@@ -24,7 +25,7 @@ class SwooleResponse{
         }
         return false;
     }
-    public function sendJson($response){
+    public function sendJson($result,$error=[]){
         // switch(gettype($response)){
         //     case 'object':
         //         $response = $response->toArray();
@@ -32,6 +33,27 @@ class SwooleResponse{
         //     default:
         //     break;
         // }
+        $response = [];
+        $message = '';
+        if($this->response_format == 'island'){
+            $response['data'] = $result;
+            $message = '';
+            if(!$error){
+                $response['gcode'] = 200;
+            }else{
+                $message = [];
+                if($error['code'] == 'FORM.VALIDATE'){
+                    foreach($error['data'] as $data){
+                        $message[] = implode(" , ",$data);
+                    }
+                }
+                
+                $response['gcode'] = 500;
+                $message = implode(",",$message);
+            }
+            $response['message'] = $message;
+             
+        }
         $response = json_encode($response,JSON_UNESCAPED_UNICODE);
         $this->response->header('Content-Type', "application/json;charset=utf-8");
         $this->response->end($response);

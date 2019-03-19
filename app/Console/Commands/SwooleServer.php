@@ -39,7 +39,7 @@ class SwooleServer extends Command{
         }
     }
     public function execTask(){
-        $tasks = \App\Models\Task::limit(10)->where("status","=",'wait')->orderby('id','ASC')->get();
+        $tasks = \App\Models\Task::limit(1)->where("status","=",'wait')->orderby('id','ASC')->get();
         $c = "\\App\\Services\\Task";
         $c = new $c();
         $chan = new co\Channel(1);
@@ -129,9 +129,7 @@ class SwooleServer extends Command{
                 $messages = $validator->messages();
                 if(count($messages) != 0){
                     $result = [];
-                    $result['error'] = ['code'=>'FORM_VALIDATE_FAIL','message'=>$messages->toArray()];
-                    $result['result'] = [];
-                    $swooleResponse->sendJson($result);
+                    $swooleResponse->sendJson($result,['code'=>'FORM.VALIDATE','data'=>$messages->toArray()]);
                     return;
                 }
             }
@@ -155,10 +153,7 @@ class SwooleServer extends Command{
                     $messages = $validator->messages();
                     if($failed) {
                         $result = [];
-                        $result['code'] = 400;
-                        $result['message'] = $messages->toArray();
-                        $result['result'] = [];
-                        $swooleResponse->sendJson($result);
+                        $swooleResponse->sendJson($result,$messages->toArray());
                         return;
                     }
                 }
@@ -175,10 +170,7 @@ class SwooleServer extends Command{
                 $controller->setParams($params);
                 $_result = $controller->$actionName($request);
                 if($_result !== false){
-                    $result = [];
-                    $result['code'] = 200;
-                    $result['message'] = [];
-                    $result['result'] = $_result;
+                    $result = $_result;
                     $swooleResponse->sendJson($result);
                 }
                 return;
@@ -210,24 +202,26 @@ class SwooleServer extends Command{
             $cli->set([ 'timeout' => 10]);
             #$cli->get("/Manager/role/role_add?loginName=2&password=232");
 
-            $params = [
-          #      'apply_id' => 667,
-                'client_id' => '1',
-                'apply_number' => 10,
+            $openAccountParams = [
+                'apply_id' => 1177,
+                'client_id' => '34',
+                'user_id' => '1000016',
+                'apply_number' => 2,
                 'business_license' => 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=310278820,3623369202&fm=26&gp=0.png',
                 'business_code' => '99999',
                 'address_cn' => '上海市',
                 'address_en' => 'Shanghai',
-                'business_name_cn' => '上海市昆玉网络有限公司',
+                'business_name_cn' => '上海市昆1玉网络有限公司',
 //                'business_name_en' => '上海市昆玉网络有限公司',
                 'city' => 'Shanghai',
                 'state' => 'Shanghai',
                 'zip_code' => '000000',
                 'contact_email' => 'test@test.com',
                 'contact_name' => '测试联系人',
-                'timezone_id' => 42,
+                'timezone_ids' => [42,42],
 //                'website' => 'http://www.sinoclick.com',
 //                'mobile' => 'http://www.sinoclick.com',
+                'mobile' => 13588887777,
                 'promotable_urls' => ['http://www.sinoclick.com'],
                 'promotable_app_ids' => ['123123','4444'],
                 'bind_bm_id' => '111',
@@ -236,9 +230,9 @@ class SwooleServer extends Command{
             ];
             #$cli->post("/Channel/Facebook/openAccount",$params);
             $auditParams = [
-                'apply_id' => 5,
-                'status' => 'internal_changes_requested',
-                #'reason' => '修改建议',
+                'apply_id' => 1177,
+                'status' => 'internal_approved',
+                'reason' => 'jjjj',
                 'sub_vertical' => 'MOBILE_AND_SOCIAL',
             ];
 //            $params = [
@@ -247,10 +241,15 @@ class SwooleServer extends Command{
 //                'client_type' => 1,
 //            ];
 //            //同步数据
-//            $cli->post("/Channel/Facebook/getOpenaccountList",$params);
+            $getOeLinkParams = [
+                'user_id' => 1000015,
+                'client_id' => 1,
+            ];
+            #$cli->post("/Channel/Facebook/getOeLink",$getOeLinkParams);
+            #$cli->post("/Channel/Facebook/getOpenaccountList",$params);
             $cli->post("/Channel/Facebook/openAccountAudit",$auditParams);
-            #$cli->post("/Channel/Facebook/syncOpenAccount",$params);
-            #$cli->post("/Channel/Facebook/openAccount",$params);
+            #$cli->post("/Channel/Facebook/syncOpenAccount",[]);
+            #$cli->post("/Channel/Facebook/openAccount",$openAccountParams);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

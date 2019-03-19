@@ -33,12 +33,6 @@ class Menu extends Controller {
    	// 	return $this->model->where('id',$params['id'])->update(['status'=>0]);
    	// }
 
-    //分配权限
-    public function allocation() {
-        $params = $this->getParams();
-        $access = new \App\Models\Access();
-        $access->addAll($params);
-    }
 
 
 }

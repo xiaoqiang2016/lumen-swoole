@@ -8,7 +8,7 @@ class SwooleServer extends Command{
     protected $description = 'Swoole Server.';
     private $cache;
     private $serverConf = [
-    	'httpPort' => 9506,
+    	'httpPort' => 9509,
     ];
     private $app = false;
     private $httpServer;
@@ -73,9 +73,10 @@ class SwooleServer extends Command{
             $pathData = [];
             if($_pathData) foreach($_pathData as $v) $pathData[] = $v;
 
-            $groupName = $pathData[0]??false;
+            $groupName = $pathData[0]??false; 
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
+
 
             //数据验证
             $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
@@ -161,7 +162,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->post("/Manager/role/list",[['name'=>'代理商','memo'=>'备注']]);
+            $cli->post("/Manager/user/userAdd",[['name'=>'代理商','memo'=>'备注']]);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

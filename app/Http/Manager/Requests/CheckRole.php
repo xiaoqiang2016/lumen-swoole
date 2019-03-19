@@ -6,10 +6,9 @@ class CheckRole{
 	public function rules(){
 
 		//获取拥有的权限集合
-		$rules = new \App\Manager\Services\Rules();
+		$rules = new \App\Http\Manager\Services\Rules();
 		$hasRules = $rules->getRules(['manager_id'=>1],true);
 		$hasRules = $hasRules . ',list'; 
-		
 		return [
             'permission' => "in:".$hasRules,
 		];

@@ -22,13 +22,16 @@ class User extends Controller {
     //添加用户
     public function userAdd() {
         $params = $this->getParams();
-        $this->model->userAdd($params);
+        return $this->model->userAdd($params);
     }
 
     //给用户分配角色
-    public function roleEdit() {
+    public function userAllocation() {
         $params = $this->getParams();
-        return $this->model->where('id',$params['id'])->update(['name'=>$params['name']]);
+        $params['manager_id'] = 1;
+        $params['type'] = 'Admin';
+        $service = new \App\Http\Manager\Services\Manager();
+        $service->userAllocation($params);
     }
 
     //删除用户

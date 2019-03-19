@@ -16,6 +16,7 @@ class Menu extends Controller {
    	public function list() {
    		//登录
        	$params['manager_id'] = 1;
+        $params['type'] = 'Admin';
         $permission = new \App\Manager\Services\Rules();
         return $permission->getRules($params);
    	}

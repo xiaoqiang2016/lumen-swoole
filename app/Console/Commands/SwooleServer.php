@@ -248,8 +248,8 @@ class SwooleServer extends Command{
 //            ];
 //            //同步数据
 //            $cli->post("/Channel/Facebook/getOpenaccountList",$params);
-            #$cli->post("/Channel/Facebook/openAccountAudit",$auditParams);
-            $cli->post("/Channel/Facebook/syncOpenAccount",$params);
+            $cli->post("/Channel/Facebook/openAccountAudit",$auditParams);
+            #$cli->post("/Channel/Facebook/syncOpenAccount",$params);
             #$cli->post("/Channel/Facebook/openAccount",$params);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;

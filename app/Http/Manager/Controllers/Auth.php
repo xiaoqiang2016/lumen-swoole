@@ -2,34 +2,35 @@
 
 namespace App\Http\Manager\Controllers;
 use Illuminate\Http\Request;
+use App\Http\Manager\Services as Services;
 class Auth extends Controller
 {
-//    public function __construct(Services\Manager $ServicesManager)
-//    {
-//        $this->servicesManager = $ServicesManager;
-//    }
+    public function __construct(Services\Manager $ServicesManager)
+    {
+        $this->servicesManager = $ServicesManager;
+    }
     //注册
-    //public function register(Request $request)
     public function register()
     {
         //$params = $request->all();
-        //注册需要
-//        $params['eamil'] = '15151654876@qq.com';
         $params['phone'] = '15151654876';
         $data['pwd'] = '123456';
-        $data['repwd'] = '1234565';
-        $params['reg_code'] = 'abcd';//渠道码 可以为空 根据验证吗取id
+        $data['repwd'] = '123456';
+        //根据渠道码查推荐人id
+        $params['reg_id'] = 1;
+
         //手机发送验证码
 
         //验证输入的密码
         if($data['pwd'] !== $data['repwd'])  return $this->errorMsg=array('code'=>400,'msg'=>'两次密码不一致');
         //加密密码
         $params['pwd'] = md5(md5($data['pwd']).'sinoclick');
+        $params['type']= 'Agent';
+        $params['use_status'] = '未审核';
         unset($data);
-        print_r($params);
-       // $this->register($params);
-//        var_export($params['pwd']);
-
+        $res = $this->servicesManager->register($params);
+        if(!$res) return $this->errorMsg=array('code'=>400,'msg'=>'网络异常，请联系管理员');
+        return $this->errorMsg=array('code'=>200,'msg'=>'注册成功，欢迎使用sinoclick代理商管理平台');
 
     }
 }

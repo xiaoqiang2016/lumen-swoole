@@ -30,7 +30,8 @@ class Auth extends Controller
         unset($data);
         $res = $this->servicesManager->register($params);
         if(!$res) return $this->errorMsg=array('code'=>400,'msg'=>'网络异常，请联系管理员');
-        return $this->errorMsg=array('code'=>200,'msg'=>'注册成功，欢迎使用sinoclick代理商管理平台');
+        $this->login($params);
+        //return $this->errorMsg=array('code'=>200,'msg'=>'注册成功，欢迎使用sinoclick代理商管理平台','token'=>11);
 
     }
 }

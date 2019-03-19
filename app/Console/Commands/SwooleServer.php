@@ -28,8 +28,8 @@ class SwooleServer extends Command{
                     $this->httpStart();
                 }
                 if($workerId == 1){
-                    #$this->execTask();
-                    sleep(10);
+                    $this->execTask();
+                    sleep(1);
                 }
             });
             $pool->on("WorkerStop", function ($pool, $workerId) {
@@ -47,7 +47,7 @@ class SwooleServer extends Command{
         $index = 0;
         $result = [];
         foreach($tasks as $task){
-            go(function() use ($task,$c,$chan,&$index,&$result){
+            #go(function() use ($task,$c,$chan,&$index,&$result){
                 $index++;
                 $params = json_decode($task->params,true);
                 $action = $task->action;
@@ -64,7 +64,7 @@ class SwooleServer extends Command{
                 $task->retry++;
                 $task->exec_at = date("Y-m-d H:i:s",$exec_at);
                 $task->save();
-            });
+            #});
         }
     }
     public function httpStart(){

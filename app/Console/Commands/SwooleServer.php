@@ -78,8 +78,8 @@ class SwooleServer extends Command{
             $actionName = $pathData[2]??false;
 
             //数据验证
-            $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
-            $checkRoleClassName = "App\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
+            $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
+            $checkRoleClassName = "App\\Http\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
             if(class_exists($checkRoleClassName) && $actionName){ 
                 //基础权限验证
                 $params['permission'] = $actionName;
@@ -109,7 +109,7 @@ class SwooleServer extends Command{
             }
             
             //Result
-            $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
+            $controllerName = 'App\\Http\\'.$groupName.'\\Controllers\\'.$controllerName;
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
                 #$request =  Request::capture();

@@ -3,7 +3,8 @@
 namespace App\Http\Manager\Controllers;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Controller as BaseController;
-
+use Illuminate\Support\Facades\Redis as Redis;
+use App\Models;
 class Controller extends BaseController
 {
     /**
@@ -72,14 +73,24 @@ class Controller extends BaseController
         }
         return $result;
     }
-    public function getClient(){
-        $client = new Client();
-        $client->id = 1;
-        return $client;
+    public function login ($params)
+    {
+        //查询id
+        $model = new Models\Manager();
+        $ret = $model->where('phone', '=', $params['phone'])->first()->toArray();
+        //验证密码
+        if( md5(md5($params['pwd']).'sinoclick') !== $ret['pwd']) return $this->errorMsg=array('code'=>400,'msg'=>'账号/密码不正确');
+        if($ret['use_status'] == 99) return $this->errorMsg=array('code'=>400,'msg'=>'账号被禁用，请联系客服');
+//        print_r($ret);
+//        $data = array('user_id'=>$userId);
+        return $this->setLoginUser(array('user_id'=>$ret['id']));
+        //return $user;
     }
-    public function getLoginUser(){
-        $user = new User();
-        $user->id = 1006631;
-        return $user;
+    //
+    public function setLoginUser($params)
+    {
+        $token = md5(microtime(true,rand(1000,999999)));
+        Redis::set("accessToken:{$token}",array('user_id'=>$params['user_id']));
+        return $token;
     }
 }

@@ -108,6 +108,7 @@ class SwooleServer extends Command{
             }
             $path_info = $request->server['path_info'];
             $swooleResponse = new \App\Common\SwooleResponse($response);
+            echo $path_info;
             if($swooleResponse->sendFile($path_info)) return;
             //解析传参
             $params = [];

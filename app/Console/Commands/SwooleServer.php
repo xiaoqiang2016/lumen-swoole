@@ -20,7 +20,7 @@ class SwooleServer extends Command{
     {
         $action = $this->argument('action');
         if($action == 'start'){
-            system("pkill -f php");
+            #system("pkill -f php");
             $workerNum = 3;
             $pool = new Swoole\Process\Pool($workerNum);
             $pool->on("WorkerStart", function ($pool, $workerId) {

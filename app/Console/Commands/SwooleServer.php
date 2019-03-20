@@ -1,6 +1,7 @@
 <?php
 namespace App\Console\Commands;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Redis as Redis;
 use Co;
 use Swoole;
 class SwooleServer extends Command{
@@ -108,9 +109,12 @@ class SwooleServer extends Command{
             $path_info = $request->server['path_info'];
             $swooleResponse = new \App\Common\SwooleResponse($response);
             if($swooleResponse->sendFile($path_info)) return;
+            //取token
+            //$token = $_SERVER['HTTP_TOKEN'];
+            //$user = Redis::get('accessToken:'.$token)??0;
             //解析传参
             $params = [];
-            $request->server['request_method'] == 'POST' && $requestData = $request->post;
+            $request->server['request_method'] == 'POST' && $params = $request->post;
             if($request->server['request_method'] == 'GET'){
                 if($quertString = $request->server['query_string']??false){
                     parse_str($quertString,$params);
@@ -126,34 +130,50 @@ class SwooleServer extends Command{
             print_r($_pathData);
             return;
             //数据验证
-            $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
-            if(class_exists($valideClassName) && $actionName){
-                $valide = new $valideClassName();
-                $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
-                $failed = $validator->failed();
-                $messages = $validator->messages();
-                if(count($messages) != 0){
-                    $result = [];
-                    $result['error'] = ['code'=>'FORM_VALIDATE_FAIL','message'=>$messages->toArray()];
-                    $result['result'] = [];
-                    $swooleResponse->sendJson($result);
-                    return;
+            $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
+            $checkRoleClassName = "App\\Http\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
+            if(class_exists($checkRoleClassName) && $actionName){
+                //基础权限验证
+                $params['permission'] = $actionName;
+                for($i = 1; $i <= 2; $i++) {
+                    switch ($i) {
+                        case 1:
+                            $valide = new $checkRoleClassName();
+                            break;
+                        default:
+                            $valide = new $valideClassName();
+                            break;
+                    }
+                    $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
+                    $failed = $validator->fails();
+                    $messages = $validator->messages();
+                    if($failed) {
+                        $result = [];
+                        $result['code'] = 400;
+                        $result['message'] = $messages->toArray();
+                        $result['result'] = [];
+                        $swooleResponse->sendJson($result);
+                        return;
+                    }
+                    if(!class_exists($valideClassName)) break;
                 }
+                unset($params['permission']);
             }
-            //Result
 
-            $controllerName = 'App\\'.$groupName.'\\Controllers\\'.$controllerName;
+            //Result
+            $controllerName = 'App\\Http\\'.$groupName.'\\Controllers\\'.$controllerName;
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
                 #$request =  Request::capture();
                 $controller = app()->make($controllerName);
                 $controller->setResponse($swooleResponse);
                 $controller->setParams($params);
+                //$controller->setUserInfo();
                 $_result = $controller->$actionName($request);
-
                 if($_result !== false){
                     $result = [];
-                    $result['error'] = [];
+                    $result['code'] = 200;
+                    $result['message'] = [];
                     $result['result'] = $_result;
                     $swooleResponse->sendJson($result);
                 }
@@ -170,16 +190,33 @@ class SwooleServer extends Command{
             //$this->test();
         });
         $httpServer->start();
+<<<<<<< HEAD
         
+=======
+        $this->httpServer = $httpServer;
+    }
+    private function sendTask(){
+        if($this->cache['task_push_lock']) return;
+        $this->cache['task_push_lock'] = true;
+        $tasks = \App\Models\Task::where("status","wait")->orderby("id","ASC")->limit(10)->get();
+        //$this->httpServer->task($tasks);
+        #echo $this->httpServer->test;
+>>>>>>> 972953ec416f8500361ff165e8fa78f764e4f569
     }
     private function test(){
         $startTime = microtime(true);
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
+<<<<<<< HEAD
             $cli->get("/task");
 
 
+=======
+            //$cli->post("/Manager/menu/list",[['name'=>'代理商','memo'=>'备注']]);
+//            $cli->post("/Manager/Auth/register?",[['name'=>'代理商','memo'=>'备注']]);
+            $cli->get("/Manager/Auth/register?phone='15151654876'");
+>>>>>>> 972953ec416f8500361ff165e8fa78f764e4f569
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

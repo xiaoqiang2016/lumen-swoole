@@ -8,6 +8,7 @@ class CheckRole{
 		//获取拥有的权限集合
 		$rules = new \App\Http\Manager\Services\Rules();
 		$hasRules = $rules->getRules(['manager_id'=>1],true);
+
 		$hasRules = $hasRules . ',list,register';
 
 		return [

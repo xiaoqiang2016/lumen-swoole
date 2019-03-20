@@ -16,6 +16,7 @@ class Menu extends Controller {
    	public function list() {
    		//登录
        	$params['manager_id'] = 1;
+        $params['type'] = 'Admin';
         $permission = new \App\Manager\Services\Rules();
         return $permission->getRules($params);
    	}
@@ -33,12 +34,6 @@ class Menu extends Controller {
    	// 	return $this->model->where('id',$params['id'])->update(['status'=>0]);
    	// }
 
-    //分配权限
-    public function allocation() {
-        $params = $this->getParams();
-        $access = new \App\Models\Access();
-        $access->addAll($params);
-    }
 
 
 }

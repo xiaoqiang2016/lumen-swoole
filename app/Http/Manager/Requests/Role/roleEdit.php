@@ -6,17 +6,17 @@ class roleEdit{
 	public function rules(){
 		
 		return [
-			'guid' => 'required'
+			'id' => 'required'
 		];
 	}
 	public function messages(){
 		return [
-			'guid.required' => '标识必填'
+			'id.required' => '标识必填'
 		];
 	}
 	public function attributes(){
 		return [
-            'guid' => 'ID',
+            'id' => 'ID',
 		];
 	}
 }

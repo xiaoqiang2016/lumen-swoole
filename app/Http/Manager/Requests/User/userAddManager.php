@@ -1,6 +1,6 @@
 <?php
 namespace App\Http\Manager\Requests\User;
-class userAdd{
+class userAddManager{
 	public function rules(){
 		return [
             'name' => 'required',

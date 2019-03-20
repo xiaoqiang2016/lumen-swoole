@@ -37,7 +37,7 @@ class User extends Controller {
         return $this->model->userAdd($params,'BD');
     }
 
-    ////添加OP
+    //添加OP
     public function userAddOP() {
         $params = $this->getParams();
         return $this->model->userAdd($params,'OP');
@@ -47,15 +47,17 @@ class User extends Controller {
     public function userAllocation() {
         $params = $this->getParams();
         $params['manager_id'] = 1;
-        $params['type'] = 'Admin';
         $service = new \App\Http\Manager\Services\Manager();
         $service->userAllocation($params);
     }
 
     //删除用户
-    public function roleDel() {
+    public function userDel() {
         $params = $this->getParams();
-        return $this->model->where('id',$params['id'])->update(['status'=>0]);
+        $params['manager_id'] = 1;
+        $service = new \App\Http\Manager\Services\Manager();
+        $service->userDel($params);
     }
+
 
 }

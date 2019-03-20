@@ -81,7 +81,6 @@ class SwooleServer extends Command{
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
 
-
             //数据验证
             $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             $checkRoleClassName = "App\\Http\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
@@ -167,7 +166,7 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-            $cli->post("/Manager/auth/login",['user_id'=>2,'role_id'=>4]);
+            $cli->post("/Manager/User/list",['user_id'=>2]);
 
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;

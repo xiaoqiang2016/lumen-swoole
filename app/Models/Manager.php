@@ -5,10 +5,11 @@ class Manager extends Model
 {
     protected $connection = 'facetool';
     protected $table = 't_manager';
+    public $timestamps = false;
 
     //查找子级用户
     public function findChildManager($id,$flag=false) {
-    	$data = $this->getDB()->select("SELECT id,name,parent_id FROM `t_manager` WHERE (FIND_IN_SET({$id},parent_ids) OR id = {$id}) AND use_status = 1");
+    	$data = $this->getDB()->select("SELECT id,name,parent_id,type FROM `t_manager` WHERE (FIND_IN_SET({$id},parent_ids) OR id = {$id}) AND use_status = 1");
 
         if($flag) {
             $tree = array_column($data, 'id');
@@ -58,9 +59,6 @@ class Manager extends Model
    	public function findParentIds($id) {
    		return $this->select('parent_ids','level')->where('id',$id)->get()->toArray();
    	}
-
-
-
 
 
 }

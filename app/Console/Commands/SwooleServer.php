@@ -216,8 +216,7 @@ class SwooleServer extends Command{
             $cli->close();
         });
     }
-    private function test(){
-        return;
+    private function test(){ 
         $startTime = microtime(true);
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
@@ -270,8 +269,9 @@ class SwooleServer extends Command{
             #$cli->post("/Channel/Facebook/getOeLink",$getOeLinkParams);
             #$cli->post("/Channel/Facebook/getOpenaccountList",$params);
             #$cli->post("/Channel/Facebook/openAccountAudit",$auditParams);
-            $cli->post("/Channel/Facebook/syncOpenAccount",[]);
+            #$cli->post("/Channel/Facebook/syncOpenAccount",[]);
             #$cli->post("/Channel/Facebook/openAccount",$openAccountParams);
+            $cli->post("/Channel/Facebook/syncAllUser",[]);
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

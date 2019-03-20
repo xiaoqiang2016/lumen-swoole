@@ -118,19 +118,12 @@ class SwooleServer extends Command{
                     parse_str($quertString,$params);
                 }
             }
-            if($request->header['content-type'] == 'application/json'){
-                $json = $request->rawContent();
-                print_r($json);
+            $contentType = $request->header['content-type'] ?? '';
+            if($contentType == 'application/json'){
+                $json = $request->rawContent(); 
                 
                 if($json) $params = json_decode($json,true);
-                $params = $params ? $params : [];
-                print_r($params);
-                echo 444;
-                echo PHP_EOL;
-                echo PHP_EOL;
-                echo PHP_EOL;
-                echo PHP_EOL;
-                echo PHP_EOL;
+                $params = $params ? $params : []; 
             }
             $_pathData = array_filter(explode("/",$path_info));
             $pathData = [];

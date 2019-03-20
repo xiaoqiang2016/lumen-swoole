@@ -11,7 +11,10 @@
   }, {
     "url" : "http://127.0.0.1:9506/Channel/",
     "description" : "本地测试"
-  } ],
+  } ,{
+    "url" : "http://local-channel.meetsocial.cn/",
+    "description" : "本地测试"
+  }],
   "tags" : [ {
     "name" : "Facebook",
     "description" : "Facebook API"

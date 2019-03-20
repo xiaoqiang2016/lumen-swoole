@@ -11,6 +11,7 @@
         "googleads/googleads-php-lib": "^39.0",
         "illuminate/redis": "^5.7",
         "laravel/lumen-framework": "5.7.*",
+        "overtrue/laravel-pinyin": "~3.0",
         "predis/predis": "~1.0",
         "swlib/saber": "^1.0",
         "vlucas/phpdotenv": "~2.2"

@@ -97,6 +97,7 @@ $app->singleton(
 */
 $app->register(\SwaggerLume\ServiceProvider::class);
 $app->register(\Abram\Odbc\ODBCServiceProvider::class);//ODBC驱动
+$app->register(Overtrue\LaravelPinyin\ServiceProvider::class);//拼音
 $app->withFacades();
 $app->withEloquent();
 

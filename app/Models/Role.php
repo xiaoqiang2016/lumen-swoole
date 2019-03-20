@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 //角色model
 class Role extends Model{
-	protected $connection = 'facetool';
+	protected $connection = 'sinoclick';
     protected $table = 't_role';
     public $timestamps = false;
     //获取所有有效角色

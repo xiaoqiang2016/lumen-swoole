@@ -18,6 +18,7 @@ class CreateTAdDiagnoseLogTable extends Migration
             $table->string('count',50)->nullable(false)->comment("总数。");
             $table->string('point',50)->nullable(false)->comment("得分。");
             $table->integer('fail')->nullable(false)->comment("失败数量。");
+            $table->decimal('math_point',10,2)->nullable(false)->comment("失败数量。");
             $table->timestamps();
         });
     }

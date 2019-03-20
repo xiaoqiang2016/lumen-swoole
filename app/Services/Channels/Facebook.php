@@ -183,11 +183,6 @@ class Facebook extends Channel{
            # $taskCount = 3;
             foreach($adAccounts as $adAccount){
                 if($i >= $taskCount) break;
-//                $r[] = $adAccount->account_id;
-//
-//                $requests[] = ['uri' => 'https://graph.facebook.com/v3.2/'.$adAccount->account_id.'?fields=ads.limit(999999)%7Bname%2Cdaily_budget%2Ccreated_time%2Ceffective_status%2Cid%2Ccampaign_id%2Cadset_id%7D&access_token=EAAHE0mTSloIBAIjVmFt3NEbmLz1GvIYE5MUhdQqPaK1QJeRvu8whGPJp8DJWTDjTuWuw3gsZAZCBc1zZARE8KPeFfATHopP299Tm31J1aLmHZCJneShLqRgok6TxMG8rUh2lkB9red2RdmWqX6bPNCgJ52ndNlDHnsZCUgoWRnQZDZD'];
-//
-//                continue;
                 go(function() use ($adAccount,&$tokens,$i,$chan){
                     $starttime = microtime(true);
                     $sdk = $this->getSdk($tokens[$adAccount->token_id??0]);
@@ -418,16 +413,18 @@ class Facebook extends Channel{
         }
         return $params;
     }
-    public static function syncOeRequest(){
-        $sdk = (new self())->getSdk();
+    public function syncOeRequest(){
+        $sdk = $this->getSdk();
         $_oeList = $sdk->getOeRequestList();
+         
         $oeList = [];
+        $facebookVertical = new \App\Models\FacebookVertical();
         if($_oeList){
             foreach($_oeList as $oe){
                 $r = [];
                 $advertiser_data = $oe['advertiser_data'];
                 $r['oe_id'] = $oe['id'];
-                $r['remote_status'] = 'oe_'.$oe['status'];
+                $r['remote_status'] = "oe_".strtolower($oe['status']);
                 $r['apply_number'] = $advertiser_data['ad_account_number'] ?? 0;
                 $r['bind_bm_id'] = $advertiser_data['business_manager_id'];
                 $r['business_license'] = $advertiser_data['business_registration'];
@@ -445,23 +442,35 @@ class Facebook extends Channel{
                 $r['timezone_id'] = $advertiser_data['time_zone'];
                 $r['facebook_user_id'] = $advertiser_data['user_id'] ?? 0;
                 $r['zip_code'] = $advertiser_data['zip_code'] ?? '';
-                $r['oe_remote_created'] = date("Y-m-d H:i:s",strtotime($oe['time_created']));
-                $r['oe_remote_updated'] = date("Y-m-d H:i:s",strtotime($oe['time_updated']));
-                $r['vertical'] = $advertiser_data['vertical'];
-                $r['subvertical'] = $oe['subvertical'] ?? '';
-                $r['oe_token_id'] = isset($oe['token']) ? $oe['token']['id'] : '';
-                $r['oe_change_reasons'] = isset($oe['request_changes_reason']) ? $oe['request_changes_reason'] : '';
+                $r['remote_created'] = date("Y-m-d H:i:s",strtotime($oe['time_created']));
+                $r['remote_updated'] = date("Y-m-d H:i:s",strtotime($oe['time_updated']));
+                if($r['remote_created'] < "2019-03-19 20:00:00"){
+                    continue;
+                }
+                $r['vertical'] = $facebookVertical->getKeyByNameEN($advertiser_data['vertical'] ?? '');
+                $r['sub_vertical'] = $facebookVertical->getKeyByNameEN($oe['sub_vertical'] ?? '');
+                $r['oe_token_id'] = isset($oe['token']) ? $oe['token']['id'] : 0;
+                $r['change_reasons'] = isset($oe['request_changes_reason']) ? $oe['request_changes_reason'] : '';
                 $r['request_id'] = isset($oe['ad_account_creation_request_id']) ? $oe['ad_account_creation_request_id']['id'] : '';
-                //格式化
-                $r['promotable_urls'] = json_encode($r['promotable_urls']);
-                $r['promotable_page_ids'] = json_encode($r['promotable_page_ids']);
-                $r['promotable_app_ids'] = json_encode($r['promotable_app_ids']);
+                $r['timezone_ids'] = [];
+                for($i=0;$i<$r['apply_number'];$i++){
+                    $r['timezone_ids'][] = 42;
+                }
+                if($r['oe_token_id'] > 0){
+                    $token = \App\Models\FacebookOeToken::where('token_id','=',$r['oe_token_id'])->first(['client_id','user_id']);
+       
+                    if($token !== null){
+                        $r['client_id'] = $token->client_id;
+                        $r['user_id'] = $token->user_id;
+                    }
+                }
                 $oeList[] = $r;
             }
         }
         $oeRemoteList = array_column($oeList,null,'oe_id');
-        $of = new \App\Models\OpenaccountFacebook();
-        $existsData = $of->get(['id','oe_id','oe_remote_updated']);
+        $of = new \App\Models\FacebookOpenAccount();
+        $existsData = $of->get(['id','oe_id','remote_updated','status_triger_count']);
+
         if(!$existsData->isEmpty()){
             #$existsData = array_column($existsData->toArray(),null,'oe_id');
         }
@@ -476,11 +485,13 @@ class Facebook extends Channel{
                 }
                 //新增
                 if(!$oe){
-                    $oe = new \App\Models\OpenaccountFacebook();
+                    $oe = new \App\Models\FacebookOpenAccount();
+                    #$oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
                     $oe->fill($oeRemoteData)->notifySave();
                 }else{
                     //更新
-                    if($oeRemoteData['oe_remote_updated'] > $oe->oe_remote_updated){
+                    #$oeRemoteData['business_license'] = $this->uploadLicense($oeRemoteData['business_license']);
+                    if(strtotime($oeRemoteData['remote_updated']) > strtotime($oe->remote_updated) + 10){
                         $oe->fill($oeRemoteData)->notifySave();
                     }
                 }
@@ -488,21 +499,39 @@ class Facebook extends Channel{
             }
         }
     }
+    public function getOeLinkByClientID($client_id,$user_id=0){
+        $sdk = $this->getSdk();
+        $oeToken = $sdk->getOeToken();
+        $params = [];
+        $user_id = 0;
+        if(!$user_id){
+            $r = \App\Models\User::where('client_id','=',$client_id)->first(['id']);
+            if($r !== null){
+                $user_id = $r->id;
+            }
+        }
+        $params['client_id'] = $client_id;
+        $data = ['token_id'=>$oeToken['id'],'link'=>$oeToken['link_with_id'],'user_id'=>$user_id,'client_id'=>$params['client_id'],'params'=>json_encode($params)];
+        \App\Models\FacebookOeToken::create($data);
+        return ['link'=>$data['link']];
+    }
+    public function syncOeRequestDetail(){
+
+    }
     //同步Request数据
-    public static function syncFbRequest(){ 
-        $sdk = (new self())->getSdk();
-        $listen_data = ['oe_pending','pending','oe_approved'];
-        #$requestList = \App\Models\OpenaccountFacebook::whereIn('status',$listen_data)->get(['status','oe_id','id','request_id','remote_status']);
-        $requestList = \App\Models\OpenaccountFacebook::get(['status','oe_id','id','request_id','remote_status']);
- 
+    public function syncFbRequest(){
+        $sdk = $this->getSdk();
+        
+        $listen_data = ['pending','internal_approved','approved'];
+        $requestList = \App\Models\FacebookOpenAccount::whereIn('status',$listen_data)->get(['status','oe_id','id','request_id','remote_status']);
+        #$requestList = \App\Models\FacebookOpenAccount::get(['status','oe_id','id','request_id','remote_status']); 
         if(!$requestList->isEmpty()){
             foreach($requestList as $request){
                 if(!$request->request_id) continue;
                 $remote_data = $sdk->getOpenaccountRequestDetail($request->request_id);
-                
                 if(!$remote_data) continue;
+                 
                 if(true || $request['remote_status'] != $remote_data['status']){
-           
                     $request->sync_updated = date("Y-m-d H:i:s",time());
                     $request->remote_status = $remote_data['status'];
                     $request->apply_number = count($remote_data['ad_accounts_info']);
@@ -524,21 +553,128 @@ class Facebook extends Channel{
                     $request->website = $remote_data['official_website_url'];
                     #$request->mobile = $remote_data['official_website_url'];
                     #$request->mobile_id = $remote_data['official_website_url'];
-                    $request->promotable_urls = json_encode($remote_data['promotable_urls'] ?? [],JSON_UNESCAPED_UNICODE);
-                    $request->promotable_page_ids = json_encode($remote_data['promotable_page_ids'] ?? [],JSON_UNESCAPED_UNICODE);
-                    $request->promotable_app_ids = json_encode($remote_data['promotable_app_ids'] ?? [],JSON_UNESCAPED_UNICODE);
+                    $request->promotable_urls = $remote_data['promotable_urls'] ?? '';
+                    $request->promotable_page_ids = $remote_data['promotable_page_ids'] ?? '';
+                    $request->promotable_app_ids = $remote_data['promotable_app_ids'] ?? '';
 
                     //$request->timezone_id = 
                     $request->zip_code = $address_in_english['zip']??'';
-                    $request->fb_remote_created = date("Y-m-d H:i:s",strtotime($remote_data['time_created']));
+                    $request->facebook_remote_created = date("Y-m-d H:i:s",strtotime($remote_data['time_created']));
                     $request->vertical = $remote_data['vertical'];
-                    $request->subvertical = $remote_data['subvertical'];
-                    $request->request_change_reasons = json_encode($remote_data['request_change_reasons']??[],JSON_UNESCAPED_UNICODE);
+                    $request->sub_vertical = $remote_data['subvertical'];
+                    $request->facebook_change_reasons = json_encode($remote_data['request_change_reasons']??[],JSON_UNESCAPED_UNICODE);
+
+                    $adaccounts = $remote_data['adaccounts'] ?? [];
+                    if($adaccounts){
+                        $data = $adaccounts['data'] ?? [];
+                        if($data){
+                            $account_ids = [];
+                            $account_names = [];
+                            $timezone_ids = [];
+                            foreach($data as $adaccount){
+                                $account_ids[] = $adaccount['id'];
+                                $account_names[] = $adaccount['name'];
+                                $timezone_ids[] = $adaccount['timezone_id'];
+                            }
+                            $request->account_ids = $account_ids;
+                            $request->account_names = $account_names;
+                            $request->timezone_ids = $timezone_ids;
+                        }
+                    } 
                     $request->notifySave();
                 }
                 $requestData = [];  
             }
         }
         echo 'syncFbRequest';
+    }
+    public static function openAccount($params){
+        if($params['apply_id'] ?? 0 > 0){
+            unset($params['user_id']);
+            unset($params['client_id']);
+            $openAccount = \App\Models\FacebookOpenAccount::find($params['apply_id']);
+            unset($params['apply_id']);
+            
+        }else{
+            unset($params['apply_id']);
+            $openAccount = new \App\Models\FacebookOpenAccount();
+        }
+        $params['remote_status'] = 'internal_pending';
+        $openAccount->fill($params)->notifySave();
+    }
+    //开户审核
+    public static function openAccountAudit($params){
+        $openAccount = \App\Models\FacebookOpenAccount::find($params['apply_id']);
+        //oe 审核
+        if($openAccount->oe_id){
+            $sdk = new \App\Models\Sdk\Facebook();
+            $openAccount->change_reasons = $params['status'] == 'internal_approved' ? '' : ($params['reason'] ?? '');
+            $openAccount->setSubVertical($params['sub_vertical']);
+            $status = str_replace("internal_","",$params['status']);
+            $status = strtoupper($status);
+            $auditParams = [
+                'oe_id' => $openAccount->oe_id,
+                'status' => $status,
+                'vertical' => $openAccount->vertical,
+                'sub_vertical' => $openAccount->sub_vertical,
+                'agent_bm_id' => $openAccount->agent_bm_id,
+                'business_name_en' => $openAccount->business_name_en,
+                'reason' => $openAccount->change_reasons,
+            ]; 
+            $result = $sdk->openAccountAudit($auditParams);
+            #$result['request_id'] = 407325013388640;
+            if($result['request_id'] ?? 0 > 0){
+                $openAccount->request_id = $result['request_id'];
+                $openAccount->remote_status = $params['status'];
+                $openAccount->notifySave();
+            }else{
+
+            }
+        }else{
+            $openAccount->remote_status = 'fail';
+            $openAccount->notifySave();
+        }
+
+    }
+    private function uploadLicense($url){
+        $dirpath  = '/tmp/'.md5($url);
+        $curl = curl_init();
+        $ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36';
+        //设置抓取的url
+        curl_setopt($curl, CURLOPT_URL, $url);
+        //设置头文件的信息作为数据流输出
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        //设置获取的信息以文件流的形式返回，而不是直接输出。
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_USERAGENT, $ua);
+        //执行命令
+        $data = curl_exec($curl);
+        //关闭URL请求
+        //print_r($data);
+        curl_close($curl);
+        //exit;
+        file_put_contents($dirpath, $data);
+
+        $post_data = array(
+            'file' => new \CURLFile(realpath($dirpath)),
+            'type' => 'jpeg',
+        );
+
+        $host = 'http://shark.facetool.cn/';
+        $ret = \App\Common\RemoteClient::create()
+            ->withHeaders(
+                ['service-key:CB83AF06BCA7D3A4C724EDC8DBBC5169']
+            )
+            ->withHost($host)
+            ->remoteService('Upload.upload')
+            ->setParams($post_data)->request();
+
+        if ($ret->getRet() == 200) {
+            $data = $ret->getData();
+            return $data['url'];
+
+        }else{
+            #Log::record('================>webhook回调营业执照图片处理失败');
+        }
     }
 }

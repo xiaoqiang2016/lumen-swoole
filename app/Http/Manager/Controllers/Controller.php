@@ -64,6 +64,12 @@ class Controller extends BaseController
     public function getParams(){
         return $this->params;
     }
+    public function setUserInfo($userInfo){
+        $this->userInfo = $userInfo;
+    }
+    public function getUserInfo(){
+        return $this->userInfo;
+    }
     public function result($result=[]){
         if(is_array($result)){
             $result = json_encode($result);
@@ -73,7 +79,7 @@ class Controller extends BaseController
         }
         return $result;
     }
-    public function login ($params)
+    public function checkLogin ($params)
     {
         //查询id
         $model = new Models\Manager();

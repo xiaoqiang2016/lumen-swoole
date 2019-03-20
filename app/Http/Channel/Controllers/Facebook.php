@@ -44,12 +44,12 @@ class Facebook extends Controller
     public function getOpenaccountList(){
         $model = new \App\Models\FacebookOpenAccount();
         $params = $this->getParams();
-        $page = $params['page'] ?: 1;
-        $page_length = $params['page_length'] ?: 10;
-        $client_type = $params['client_type'] ?: 0;
-        $fields = $params['fields'] ?: '';
+        $page = $params['page'] ?? 1;
+        $page_length = $params['page_length'] ?? 10;
+        $client_type = $params['client_type'] ?? 0;
+        $fields = $params['fields'] ?? '';
         $client_id = $params['client_id'];
-        $status = $params['status'] ?: ''; 
+        $status = $params['status'] ?? ''; 
         $map = [];
         $mainFields = ["id as apply_id",'client_id','status','apply_number','bind_bm_id','agent_bm_id','business_license','business_code','address_cn','address_en','business_name_cn','business_name_en','city','state','zip_code','contact_email',
             'contact_name','website','mobile','promotable_urls','promotable_page_ids','promotable_app_ids','timezone_ids','vertical','sub_vertical','change_reasons','facebook_change_reasons'];

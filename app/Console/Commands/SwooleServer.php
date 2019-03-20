@@ -108,7 +108,6 @@ class SwooleServer extends Command{
             }
             $path_info = $request->server['path_info'];
             $swooleResponse = new \App\Common\SwooleResponse($response);
-            echo $path_info;
             if($swooleResponse->sendFile($path_info)) return;
             //解析传参
             $params = [];
@@ -117,15 +116,15 @@ class SwooleServer extends Command{
             if($request->server['request_method'] == 'GET'){
                 if($quertString = $request->server['query_string']??false){
                     parse_str($quertString,$params);
-                }
+                } 
             }
             $contentType = $request->header['content-type'] ?? '';
             if($contentType == 'application/json'){
-                $json = $request->rawContent(); 
-                
+                $json = $request->rawContent();
                 if($json) $params = json_decode($json,true);
-                $params = $params ? $params : []; 
+                
             }
+            
             $_pathData = array_filter(explode("/",$path_info));
             $pathData = [];
             if($_pathData) foreach($_pathData as $v) $pathData[] = $v;
@@ -134,8 +133,9 @@ class SwooleServer extends Command{
             $actionName = $pathData[2]??false;
             //数据验证
             
-            $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
-            if(class_exists($valideClassName) && $actionName){
+            $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}"; 
+            if(class_exists($valideClassName) && $actionName){ 
+                 
                 $valide = new $valideClassName($params);
                 $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
                 $failed = $validator->failed();

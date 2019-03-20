@@ -39,11 +39,11 @@
         }
       }
     },
-    "/Facebook/getOpenaccountList" : {
+    "/Facebook/getOpenAccountList" : {
       "post" : {
         "tags" : [ "Facebook" ],
         "summary" : "获取开户记录列表",
-        "operationId" : "Facebook.getOpenaccountList",
+        "operationId" : "Facebook.getOpenAccountList",
         "requestBody" : {
           "content" : {
             "application/x-www-form-urlencoded" : {

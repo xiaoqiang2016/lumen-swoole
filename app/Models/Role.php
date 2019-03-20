@@ -22,7 +22,6 @@ class Role extends Model{
             $agentInfo = $this->where(['id'=>$userInfo['parent_id'],'type'=>'Agent'])->first()->toArray();
         }
 
-
        	app('db')->connection("{$this->connection}")->select("SELECT id,name FROM `t_role` WHERE (id IN (SELECT `role_id` FROM `t_manager` WHERE FIND_IN_SET('{$params['manager_id']}',parent_ids)) OR create_manager_id = {$params['manager_id']}) AND status = 1 ");
   	}
 

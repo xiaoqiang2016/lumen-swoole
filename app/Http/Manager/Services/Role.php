@@ -10,12 +10,12 @@ class Role
 
         $userInfo = (new ManagerModel())->where('id','=',$params['manager_id'])->first()->toArray();
         if($userInfo['type'] == 'Agent') {
-            $agentInfo = $usreInfo;
+            $agentInfo = $userInfo;
         }else{
         	$agentInfo = (new ManagerModel)->where(['id'=>$userInfo['parent_id'],'type'=>'Agent'])->first()->toArray();
         }
 
-        return  app('db')->connection("{$this->connection}")->select("SELECT id,name FROM `t_role` WHERE (id IN (SELECT `role_id` FROM `t_manager` WHERE FIND_IN_SET('{$userInfo['manager_id']}',parent_ids)) OR create_manager_id = {$agentInfo['manager_id']}) AND status = 1 ");
+        return  app('db')->connection("sinoclick")->select("SELECT id,name FROM `t_role` WHERE (id IN (SELECT `role_id` FROM `t_manager` WHERE FIND_IN_SET('{$agentInfo['id']}',parent_ids)) OR create_manager_id = {$agentInfo['id']}) AND status = 1 ");
     }
 
     public function roleAdd($params) {

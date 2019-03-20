@@ -121,4 +121,7 @@ class Facebook extends Controller
         $params = $this->getParams();
         FacebookService::openAccountAudit($params);
     }
+    public function syncAllUser(){
+        echo 'syncAllUser';
+    }
 }

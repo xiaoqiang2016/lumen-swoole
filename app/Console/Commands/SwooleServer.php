@@ -21,7 +21,6 @@ class SwooleServer extends Command{
     {
         $action = $this->argument('action');
         if($action == 'start'){
-            #system("pkill -f php");
             $workerNum = 3;
             $pool = new Swoole\Process\Pool($workerNum);
             $pool->on("WorkerStart", function ($pool, $workerId) {
@@ -115,10 +114,6 @@ class SwooleServer extends Command{
             //$user = Redis::get('accessToken:'.$token)??0;
             //解析传参
             $params = [];
-<<<<<<< HEAD
-=======
-            #echo $request->server['request_method'];
->>>>>>> oe
             $request->server['request_method'] == 'POST' && $params = $request->post;
             if($request->server['request_method'] == 'GET'){
                 if($quertString = $request->server['query_string']??false){
@@ -139,11 +134,6 @@ class SwooleServer extends Command{
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
             //数据验证
-<<<<<<< HEAD
-            $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
-            $checkRoleClassName = "App\\Http\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
-            if(class_exists($checkRoleClassName) && $actionName){
-=======
             
             $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}"; 
             if(class_exists($valideClassName) && $actionName){ 
@@ -162,7 +152,6 @@ class SwooleServer extends Command{
             $valideClassName = "App\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             $checkRoleClassName = "App\\{$groupName}\\Requests\\CheckRole";    //基础接口角色验证
             if(class_exists($valideClassName) && $actionName){ 
->>>>>>> oe
                 //基础权限验证
                 $params['permission'] = $actionName;
                 for($i = 1; $i <= 2; $i++) {
@@ -188,11 +177,7 @@ class SwooleServer extends Command{
             }
 
             //Result
-<<<<<<< HEAD
-            $controllerName = 'App\\Http\\'.$groupName.'\\Controllers\\'.$controllerName;
-=======
             $controllerName = "App\\Http\\{$groupName}\\Controllers\\{$controllerName}";
->>>>>>> oe
             #var_export($controllerName);exit;
             if(class_exists($controllerName)){
                 #$request =  Request::capture();
@@ -218,12 +203,6 @@ class SwooleServer extends Command{
             $this->test();
         });
         $httpServer->start();
-<<<<<<< HEAD
-<<<<<<< HEAD
-        
-=======
-=======
->>>>>>> oe
         $this->httpServer = $httpServer;
     }
     private function sendTask(){
@@ -232,10 +211,6 @@ class SwooleServer extends Command{
         $tasks = \App\Models\Task::where("status","wait")->orderby("id","ASC")->limit(10)->get();
         //$this->httpServer->task($tasks);
         #echo $this->httpServer->test;
-<<<<<<< HEAD
->>>>>>> 972953ec416f8500361ff165e8fa78f764e4f569
-=======
->>>>>>> oe
     }
     private function syncAccount(){
         go(function(){
@@ -250,17 +225,6 @@ class SwooleServer extends Command{
         go(function() use ($startTime){
             $cli = new \Swoole\Coroutine\Http\Client('127.0.0.1', $this->serverConf['httpPort']);
             $cli->set([ 'timeout' => 10]);
-<<<<<<< HEAD
-<<<<<<< HEAD
-            $cli->get("/task");
-
-
-=======
-            //$cli->post("/Manager/menu/list",[['name'=>'代理商','memo'=>'备注']]);
-//            $cli->post("/Manager/Auth/register?",[['name'=>'代理商','memo'=>'备注']]);
-            $cli->get("/Manager/Auth/register?phone='15151654876'");
->>>>>>> 972953ec416f8500361ff165e8fa78f764e4f569
-=======
             #$cli->get("/Manager/role/role_add?loginName=2&password=232");
 
             $openAccountParams = [
@@ -312,7 +276,7 @@ class SwooleServer extends Command{
             #$cli->post("/Channel/Facebook/syncOpenAccount",[]);
             #$cli->post("/Channel/Facebook/openAccount",$openAccountParams);
             $cli->post("/Channel/Facebook/syncAllUser",[]);
->>>>>>> oe
+
             echo PHP_EOL.'Result:'.PHP_EOL;
             $result = $cli->body;
             print_r($result);

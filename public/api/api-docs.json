@@ -106,7 +106,7 @@
         "operationId" : "Facebook.openAccount",
         "requestBody" : {
           "content" : {
-            "application/x-www-form-urlencoded" : {
+            "application/json" : {
               "schema" : {
                 "$ref" : "#/components/schemas/body_3"
               }
@@ -377,9 +377,11 @@
             "description" : "开户申请id，如无为新增"
           },
           "client_id" : {
+            "type" : "integer",
             "description" : "客户id，如新增则必填"
           },
           "user_id" : {
+            "type" : "integer",
             "description" : "用户id，如新增则必填"
           },
           "apply_number" : {
@@ -419,7 +421,7 @@
           },
           "address_cn" : {
             "type" : "string",
-            "description" : "公司地址(中文)"
+            "description" : "公司地址(英文)"
           },
           "address_en" : {
             "type" : "string",
@@ -465,6 +467,10 @@
             "items" : {
               "type" : "integer"
             }
+          },
+          "sub_vertical" : {
+            "type" : "string",
+            "description" : "二级行业分类"
           }
         }
       }

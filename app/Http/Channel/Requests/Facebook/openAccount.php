@@ -40,7 +40,7 @@ class openAccount extends \App\Http\Requests\Base{
                 }
             ];
         }
-        $rules['apply_number'] = ['required'];
+        $rules['apply_number'] = ['required','between:1,10'];
         $rules['business_license'] = ['required','active_url'];
         $rules['business_code'] = ['required'];
         $rules['address_cn'] = ['required'];
@@ -54,7 +54,7 @@ class openAccount extends \App\Http\Requests\Base{
         $rules['promotable_page_ids'] = ['required_without:promotable_app_ids','array'];
         $rules['promotable_app_ids'] = ['required_without:promotable_page_ids','array'];
         #$rules['ad_account_names'] = ['required','array','size:'.$params['apply_number']];
-        $rules['timezone_ids'] = ['required','array','size:'.$params['apply_number']];
+        $rules['timezone_ids'] = ['required','array','size:'.($params['apply_number']??0)];
         $rules['promotable_urls.*'] = ['active_url','distinct'];
         $rules['promotable_page_ids.*'] = ['numeric','distinct'];
         $rules['promotable_app_ids.*'] = ['numeric','distinct'];

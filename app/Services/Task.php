@@ -18,7 +18,7 @@ class Task
     }
     public function openAccountAdAccountNotify($params){
         return ['status'=>'success','result'=>''];
-        $url = env('ISLAND_API')."/faceBook/openAccountFromOE.html";
+        $url = env('ISLAND_API')."/faceBook/pushAuid.html";
         $result = \App\Common\Curl::syncPost($url,$params);
         if(is_array($result) && $result['gcode'] == 200){
             return ['status'=>'success','result'=>$result];

@@ -118,6 +118,20 @@ class SwooleServer extends Command{
                     parse_str($quertString,$params);
                 }
             }
+            if($request->header['content-type'] == 'application/json'){
+                $json = $request->rawContent();
+                print_r($json);
+                
+                if($json) $params = json_decode($json,true);
+                $params = $params ? $params : [];
+                print_r($params);
+                echo 444;
+                echo PHP_EOL;
+                echo PHP_EOL;
+                echo PHP_EOL;
+                echo PHP_EOL;
+                echo PHP_EOL;
+            }
             $_pathData = array_filter(explode("/",$path_info));
             $pathData = [];
             if($_pathData) foreach($_pathData as $v) $pathData[] = $v;
@@ -125,6 +139,7 @@ class SwooleServer extends Command{
             $controllerName = $pathData[1]??false;
             $actionName = $pathData[2]??false;
             //数据验证
+            
             $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}";
             if(class_exists($valideClassName) && $actionName){
                 $valide = new $valideClassName($params);

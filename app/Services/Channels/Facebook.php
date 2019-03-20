@@ -596,6 +596,7 @@ class Facebook extends Channel{
             unset($params['apply_id']);
             
         }else{
+            unset($params['apply_id']);
             $openAccount = new \App\Models\FacebookOpenAccount();
         }
         $params['remote_status'] = 'internal_pending';

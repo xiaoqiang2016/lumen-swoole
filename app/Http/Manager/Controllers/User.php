@@ -19,10 +19,28 @@ class User extends Controller {
         return $roles;
     }
 
-    //添加用户
-    public function userAdd() {
+    //添加管理员
+    public function userAddManager() {
         $params = $this->getParams();
-        return $this->model->userAdd($params);
+        return $this->model->userAdd($params,'Admin');
+    }
+
+    //添加代理商
+    public function userAddAgent() {
+        $params = $this->getParams();
+        return $this->model->userAdd($params,'Agent');
+    }
+
+    //添加DB
+    public function userAddBD() {
+        $params = $this->getParams();
+        return $this->model->userAdd($params,'BD');
+    }
+
+    ////添加OP
+    public function userAddOP() {
+        $params = $this->getParams();
+        return $this->model->userAdd($params,'OP');
     }
 
     //给用户分配角色

@@ -1,6 +1,7 @@
 <?php
 namespace App\Console\Commands;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Redis as Redis;
 use Co;
 #use Swoole;
 class SwooleServer extends Command{

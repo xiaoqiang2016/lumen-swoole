@@ -32,16 +32,22 @@ class Manager extends Model
 		return $tree;
 	}
 
-    public function userAdd($params) {
+
+    //添加用户
+    public function userAdd($params,$type) {
     	$saveData['pwd'] = md5(md5($params['pwd']).'sinoclick');
-    	$saveData['name'] = $parmas['name'];
-    	$saveData['phone'] = $parmas['phone'];
-    	$saveData['type'] = $parmas['type'];
-    	$saveData['reg_id'] = !empty($parmas['reg_id']) ? $parmas['reg_id'] : '';
+    	$saveData['name'] = $params['name'];
+    	$saveData['phone'] = $params['phone'];
+    	$saveData['type'] = $type;
+    	$saveData['reg_id'] = !empty($params['reg_id']) ? $params['reg_id'] : '';
     	$saveData['parent_id'] = $params['parent_id'];
-    	$parentData = $this->findParentIds($parmas['parent_id']);
-    	$selfIDs = isset($parentData[0]['parent_ids'])?$parentData[0]['parent_ids'].",{$parmas['parent_id']}" : '';
-    	$selfLevel = isset($parentData[0]['level'])?(int)$parentData[0]['level'] + 1 : '';
+    	$parentData = $this->findParentIds($params['parent_id']);
+    	$selfIDs = isset($parentData[0]['parent_ids'])?$parentData[0]['parent_ids'].",{$params['parent_id']}" : $params['parent_id'];
+        if($type == 'Agent') {
+            $selfLevel = isset($parentData[0]['level'])?(int)$parentData[0]['level'] + 1 : '';
+        }else{
+            $selfLevel = isset($parentData[0]['level'])?(int)$parentData[0]['level'] : '';
+        }
     	$saveData['parent_ids'] = $selfIDs;
     	$saveData['level'] = $selfLevel;
     	return  $this->insert($saveData);

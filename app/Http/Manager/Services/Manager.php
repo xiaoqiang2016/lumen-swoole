@@ -13,9 +13,10 @@ class Manager
         return $ret;
     }
 
+
     //用户分配权限
     public function userAllocation($params) {
-    	if($params['type'] == 'Admin') {   //普通后台用户不分等级
+    	if($params['type'] == 'Admin') { 
     		if($params['user_id'] == 1) {
     			return false;
     		}
@@ -31,7 +32,7 @@ class Manager
         	$roleArray = array_column($roleArray, 'id');
         	if(!in_array($params['role_id'])) return false;
         }
-        
-        
+
+
     }
 }

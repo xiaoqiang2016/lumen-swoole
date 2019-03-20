@@ -135,7 +135,7 @@ class SwooleServer extends Command{
             
             $valideClassName = "App\\Http\\{$groupName}\\Requests\\{$controllerName}\\{$actionName}"; 
             if(class_exists($valideClassName) && $actionName){ 
-                 
+                $params = $params ?? [];
                 $valide = new $valideClassName($params);
                 $validator = \Illuminate\Support\Facades\Validator::make($params, $valide->rules(), $valide->messages(), $valide->attributes());
                 $failed = $validator->failed();

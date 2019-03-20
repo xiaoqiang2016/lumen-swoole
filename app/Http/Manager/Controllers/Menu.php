@@ -28,12 +28,5 @@ class Menu extends Controller {
    	}
 
 
-   	// //删除菜单
-   	// public function menuDel() {
-   	// 	$params = $this->getParams();
-   	// 	return $this->model->where('id',$params['id'])->update(['status'=>0]);
-   	// }
-
-
 
 }

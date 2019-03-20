@@ -8,8 +8,24 @@ class Manager extends Model
     public $timestamps = false;
 
     //查找子级用户
-    public function findChildManager($id,$flag=false) {
-    	$data = $this->getDB()->select("SELECT id,name,parent_id,type FROM `t_manager` WHERE (FIND_IN_SET({$id},parent_ids) OR id = {$id}) AND use_status = 1");
+    public function findChildManager($params,$flag=false) {
+
+        $userInfo = $this->where('id',$params['manager_id'])->first()->toArray();
+
+        $wh = '';
+        if(isset($params['listType']) && $params['listType'] == 'Agent') {
+            $wh = " AND type = 'Agent'";
+        }
+
+        //如果是代理商，查找自己所有下级
+        if($userInfo['type'] == 'Agent') {
+            $agentInfo = $userInfo;
+        }else{
+            //若为其他类型用户，查找直属代理商ID
+            $agentInfo = $this->where(['id'=>$userInfo['parent_id'],'type'=>'Agent'])->first()->toArray();
+        }
+
+        $data = $this->getDB()->select("SELECT id,name,parent_id,type FROM `t_manager` WHERE (FIND_IN_SET({$agentInfo['id']},parent_ids) OR id = {$agentInfo['id']}) AND use_status = 1 {$wh}");
 
         if($flag) {
             $tree = array_column($data, 'id');
@@ -36,18 +52,21 @@ class Manager extends Model
 
     //添加用户
     public function userAdd($params,$type) {
+        $userInfo = $this->where('id',$params['manager_id'])->first()->toArray();
     	$saveData['pwd'] = md5(md5($params['pwd']).'sinoclick');
     	$saveData['name'] = $params['name'];
     	$saveData['phone'] = $params['phone'];
     	$saveData['type'] = $type;
-    	$saveData['reg_id'] = !empty($params['reg_id']) ? $params['reg_id'] : '';
-    	$saveData['parent_id'] = $params['parent_id'];
-    	$parentData = $this->findParentIds($params['parent_id']);
-    	$selfIDs = isset($parentData[0]['parent_ids'])?$parentData[0]['parent_ids'].",{$params['parent_id']}" : $params['parent_id'];
+    	$parentData = $this->findParentIds($saveData['parent_id']);
+    	$selfIDs = isset($parentData['parent_ids'])?$parentData['parent_ids'].",{$params['parent_id']}" : $params['parent_id'];
+        //如果添加代理商
         if($type == 'Agent') {
-            $selfLevel = isset($parentData[0]['level'])?(int)$parentData[0]['level'] + 1 : '';
+            $saveData['parent_id'] = $params['parent_id'];
+            $saveData['reg_id'] = $params['reg_id'];
+            $selfLevel = isset($parentData['level'])?$parentData['level'] + 1 : '';
         }else{
-            $selfLevel = isset($parentData[0]['level'])?(int)$parentData[0]['level'] : '';
+            $saveData['parent_id'] = $userInfo['id'];
+            $selfLevel = isset($parentData['level'])?$parentData['level'] : '';
         }
     	$saveData['parent_ids'] = $selfIDs;
     	$saveData['level'] = $selfLevel;
@@ -57,7 +76,7 @@ class Manager extends Model
 
     //查找父类parent_ids
    	public function findParentIds($id) {
-   		return $this->select('parent_ids','level')->where('id',$id)->get()->toArray();
+   		return $this->select('parent_ids','level')->where('id',$id)->first()->toArray();
    	}
 
 

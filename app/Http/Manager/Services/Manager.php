@@ -18,7 +18,7 @@ class Manager
     public function userAllocation($params) {
     	if($params['user_id'] == $params['manager_id']) return false;
 
-        if(!in_array($params['user_id'],(new ManagerModel())->findChildManager($params['manager_id'],true))) {
+        if(!in_array($params['user_id'],(new ManagerModel())->findChildManager($params,true))) {
             return false;
         }
 
@@ -31,18 +31,5 @@ class Manager
     	return (new ManagerModel())->where('id',$params['user_id'])->update(['role_id'=>$params['role_id']]);
 
     }
-
-    //删除用户
-    public function userDel($params) {
-    	if($params['manager_id'] == $params['user_id']) {
-    		return false;
-    	}
-    	if(!in_array($params['user_id'],(new ManagerModel())->findChildManager($params['manager_id'],true))) {
-            return false;
-        }
-        return (new ManagerModel())->where('id',$params['user_id'])->update(['use_status'=>0]);
-    }
-
-
 
 }

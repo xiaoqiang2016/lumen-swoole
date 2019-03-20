@@ -15,7 +15,9 @@ class Role extends Controller {
     //角色列表
    	public function list() {
    		//登录
-   		$roles = $this->model->findChildRole(1);
+        $params['manager_id'] = 1;
+        $service = new \App\Http\Manager\Services\Role();
+   		$roles = $service->findChildRole($params);
    		return $roles;
    	}
 
@@ -23,7 +25,8 @@ class Role extends Controller {
    	public function roleAdd() {
    		$params = $this->getParams();
    		$params['create_manager_id'] = 1;    //登录用户manager_id
-   		return $this->model->insert($params);
+   		$service = new \App\Http\Manager\Services\Role();
+        $service->roleAdd($params);
    	}
 
    	//编辑角色

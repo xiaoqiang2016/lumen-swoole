@@ -14,8 +14,9 @@ class User extends Controller {
     //用户列表
     public function list() {
         //登录
+        $params = $this->getParams();
         $params['manager_id'] = 1;
-        $roles = $this->model->findChildManager($params['manager_id']);
+        $roles = $this->model->findChildManager($params);
         return $roles;
     }
 
@@ -50,14 +51,5 @@ class User extends Controller {
         $service = new \App\Http\Manager\Services\Manager();
         $service->userAllocation($params);
     }
-
-    //删除用户
-    public function userDel() {
-        $params = $this->getParams();
-        $params['manager_id'] = 1;
-        $service = new \App\Http\Manager\Services\Manager();
-        $service->userDel($params);
-    }
-
 
 }

@@ -20,7 +20,6 @@ class Auth extends Controller
         $params['reg_id'] = 1;
 
         //手机发送验证码
-
         //验证输入的密码
         if ($data['pwd'] !== $data['repwd']) return $this->errorMsg = array('code' => 400, 'msg' => '两次密码不一致');
         //加密密码
